@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { UnitCard } from '../components/home/UnitCard';
@@ -12,6 +15,18 @@ export function Home() {
 
   const totalLessons = getTotalLessons();
   const overallProgress = totalLessons > 0 ? Math.round((completedLessons.length / totalLessons) * 100) : 0;
+
+  const nextUp = useMemo(() => {
+    for (const unit of UNITS) {
+      if (unit.id === 'slang' && !unit12Unlocked) continue;
+      for (const lesson of unit.lessons) {
+        if (!completedLessons.includes(lesson.id)) {
+          return { unit, lesson };
+        }
+      }
+    }
+    return null;
+  }, [completedLessons, unit12Unlocked]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -66,6 +81,36 @@ export function Home() {
           </div>
         )}
       </motion.div>
+
+      {/* Resume shortcut */}
+      {nextUp && completedLessons.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <Link
+            to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`}
+            className="no-underline block"
+          >
+            <div
+              className="card card-lift p-4 flex items-center gap-4"
+              style={{ borderLeftWidth: 4, borderLeftColor: nextUp.unit.color }}
+            >
+              <span className="text-3xl flex-shrink-0">{nextUp.unit.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold uppercase tracking-wider text-[--text-muted] mb-0.5">
+                  Continue where you left off
+                </p>
+                <p className="font-semibold text-[--text-primary] truncate">{nextUp.lesson.title}</p>
+                <p className="text-xs text-[--text-muted] truncate">{nextUp.unit.title}</p>
+              </div>
+              <ArrowRight size={18} className="flex-shrink-0 text-[--text-muted]" />
+            </div>
+          </Link>
+        </motion.div>
+      )}
 
       {/* Unit Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

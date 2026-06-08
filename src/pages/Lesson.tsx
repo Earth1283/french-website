@@ -51,6 +51,14 @@ export function Lesson() {
     setPhase('complete');
   };
 
+  const handleReplay = () => {
+    setPhase('flashcards');
+    setCardIndex(0);
+    setExerciseIndex(0);
+    setCorrectCount(0);
+    setNewBadges([]);
+  };
+
   const totalSteps = lesson.vocab.length + lesson.exercises.length;
   const currentStep = phase === 'flashcards' ? cardIndex
     : phase === 'exercises' ? lesson.vocab.length + exerciseIndex
@@ -92,6 +100,7 @@ export function Lesson() {
           newBadges={newBadges}
           unitSlug={slug!}
           nextLessonId={nextLesson?.id}
+          onReplay={handleReplay}
         />
       </div>
     );

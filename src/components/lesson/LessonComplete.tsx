@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Trophy, ArrowRight, Home } from 'lucide-react';
+import { Trophy, ArrowRight, Home, RotateCcw } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { BADGES } from '../../stores/progressStore';
 
@@ -9,9 +9,10 @@ interface LessonCompleteProps {
   newBadges: string[];
   unitSlug: string;
   nextLessonId?: string;
+  onReplay: () => void;
 }
 
-export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId }: LessonCompleteProps) {
+export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, onReplay }: LessonCompleteProps) {
   return (
     <div className="w-full max-w-lg mx-auto text-center py-8 space-y-6">
       <motion.div
@@ -73,6 +74,9 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId }: 
             <Home size={16} /> Back to Unit
           </Button>
         </Link>
+        <Button variant="secondary" onClick={onReplay}>
+          <RotateCcw size={16} /> Replay
+        </Button>
         {nextLessonId && (
           <Link to={`/unit/${unitSlug}/lesson/${nextLessonId}`}>
             <Button variant="primary">
