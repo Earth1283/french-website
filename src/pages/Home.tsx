@@ -31,11 +31,12 @@ export function Home() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <OnboardingModal open={!onboardingDone} />
 
-      {/* Sticky-note resume widget */}
+      {/* Sticky-note resume widget — desktop only */}
       <AnimatePresence>
         {nextUp && onboardingDone && (
           <motion.div
             key="sticky-note"
+            className="hidden sm:block"
             initial={{ opacity: 0, rotate: -6, scale: 0.85, y: -8 }}
             animate={{ opacity: 1, rotate: -2, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}

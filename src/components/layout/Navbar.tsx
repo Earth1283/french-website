@@ -36,7 +36,7 @@ export function Navbar() {
             </div>
           )}
 
-          <nav className="flex items-center gap-1">
+          <nav className="hidden sm:flex items-center gap-1">
             {navItems.map(({ to, icon: Icon, label }) => {
               const isActive = location.pathname === to;
               return (
@@ -44,14 +44,12 @@ export function Navbar() {
                   key={to}
                   to={to}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium no-underline transition-colors ${
-                    isActive
-                      ? ''
-                      : 'text-[--text-secondary] hover:text-[--text-primary] hover:bg-[--bg-card-hover]'
+                    isActive ? '' : 'text-[--text-secondary] hover:text-[--text-primary] hover:bg-[--bg-card-hover]'
                   }`}
                   style={isActive ? { backgroundColor: 'var(--accent)', color: 'white' } : {}}
                 >
                   <Icon size={15} />
-                  <span className="hidden sm:inline">{label}</span>
+                  <span>{label}</span>
                 </Link>
               );
             })}

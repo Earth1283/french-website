@@ -402,7 +402,7 @@ export function Conversation() {
   const canShowHint = difficulty <= 2;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+    <div className="flex flex-col h-[calc(100vh-3.5rem-4rem)] sm:h-[calc(100vh-3.5rem)]">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-[--border] bg-[--bg]/80 backdrop-blur-sm flex-shrink-0">
         <button

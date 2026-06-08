@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useProgressStore } from './stores/progressStore';
 import { Navbar } from './components/layout/Navbar';
+import { BottomNav } from './components/layout/BottomNav';
 import { PageTransition } from './components/layout/PageTransition';
 import { Home } from './pages/Home';
 import { UnitDetail } from './pages/UnitDetail';
@@ -37,9 +38,10 @@ function AppContent() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       <Navbar />
-      <main>
+      <main className="pb-16 sm:pb-0">
         <AnimatedRoutes />
       </main>
+      <BottomNav />
     </div>
   );
 }
