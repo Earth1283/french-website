@@ -1,0 +1,123 @@
+import type { Lesson } from '../../types';
+
+export const emergencyLessons: Lesson[] = [
+  {
+    id: 'emergency-1',
+    title: 'The 5 Phrases That Could Save Your Life',
+    subtitle: 'You\'ve been teleported. These are your weapons.',
+    xpReward: 20,
+    vocab: [
+      {
+        french: 'Je ne parle pas français',
+        english: 'I don\'t speak French',
+        pronunciation: 'ʒə nə paʁl pa fʁɑ̃sɛ',
+        example: 'Excusez-moi, je ne parle pas français.',
+        exampleTranslation: 'Excuse me, I don\'t speak French.',
+        funnyNote: 'The most important sentence in this entire course. Master this first.',
+      },
+      {
+        french: 'Parlez-vous anglais ?',
+        english: 'Do you speak English?',
+        pronunciation: 'paʁle vu ɑ̃ɡlɛ',
+        example: 'Parlez-vous anglais ? S\'il vous plaît ?',
+        exampleTranslation: 'Do you speak English? Please?',
+        funnyNote: 'Delivered with maximum hopeful desperation. The French secretly respect the attempt.',
+      },
+      {
+        french: 'Au secours !',
+        english: 'Help!',
+        pronunciation: 'o skuʁ',
+        funnyNote: 'Not for mild inconveniences. Reserved for actual emergencies, like being lost or ordering the wrong wine.',
+      },
+      {
+        french: 'Appelez la police !',
+        english: 'Call the police!',
+        pronunciation: 'aple la pɔlis',
+        funnyNote: 'Hopefully you won\'t need this. But here it is.',
+      },
+      {
+        french: 'J\'ai besoin d\'aide',
+        english: 'I need help',
+        pronunciation: 'ʒɛ bəzwɛ̃ dɛd',
+        example: 'J\'ai besoin d\'aide, s\'il vous plaît.',
+        exampleTranslation: 'I need help, please.',
+        funnyNote: 'Less alarming than "Au secours!" — good for logistics emergencies like missing your train.',
+      },
+      {
+        french: 'Je suis perdu(e)',
+        english: 'I\'m lost',
+        pronunciation: 'ʒə sɥi pɛʁdy',
+        example: 'Excusez-moi, je suis perdu.',
+        exampleTranslation: 'Excuse me, I\'m lost.',
+        funnyNote: 'Add the -e at the end if you identify as feminine. French cares about this more than you do right now.',
+      },
+    ],
+    exercises: [
+      {
+        type: 'multiple-choice',
+        prompt: 'Someone asks you a question in rapid French. You don\'t understand. What do you say?',
+        answer: 'Je ne parle pas français',
+        options: ['Je suis fatigué', 'Je ne parle pas français', 'Au secours !', 'L\'addition, s\'il vous plaît'],
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you ask someone if they speak English?',
+        answer: 'Parlez-vous anglais ?',
+        options: ['Avez-vous anglais ?', 'Parlez-vous anglais ?', 'Vous parlez comment ?', 'Anglais, oui ?'],
+      },
+      {
+        type: 'translation',
+        prompt: 'Translate: "I need help"',
+        answer: "J'ai besoin d'aide",
+        hint: 'Think: "I have need of help"',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Complete: "Parlez-vous ___ ?" (do you speak English?)',
+        answer: 'anglais',
+        hint: 'The French word for English',
+      },
+    ],
+  },
+  {
+    id: 'emergency-2',
+    title: 'Numbers for Emergencies',
+    subtitle: 'When you need to call someone, tell them an address, or say your hotel room number.',
+    xpReward: 15,
+    vocab: [
+      { french: 'zéro', english: 'zero', pronunciation: 'zeʁo' },
+      { french: 'un / une', english: 'one', pronunciation: 'œ̃ / yn', funnyNote: 'Masculine vs feminine. Even numbers have a gender here.' },
+      { french: 'deux', english: 'two', pronunciation: 'dø' },
+      { french: 'trois', english: 'three', pronunciation: 'tʁwa' },
+      { french: 'quatre', english: 'four', pronunciation: 'katʁ' },
+      { french: 'cinq', english: 'five', pronunciation: 'sɛ̃k' },
+      { french: 'six', english: 'six', pronunciation: 'sis' },
+      { french: 'sept', english: 'seven', pronunciation: 'sɛt' },
+      { french: 'huit', english: 'eight', pronunciation: 'ɥit' },
+      { french: 'neuf', english: 'nine', pronunciation: 'nœf' },
+      { french: 'dix', english: 'ten', pronunciation: 'dis' },
+      { french: 'quinze', english: 'fifteen', pronunciation: 'kɛ̃z', funnyNote: 'Good for emergency hotlines — 15 is SAMU (medical emergency).' },
+      { french: 'dix-sept', english: 'seventeen', pronunciation: 'dis sɛt', funnyNote: '17 = Police. Very useful.' },
+      { french: 'dix-huit', english: 'eighteen', pronunciation: 'diz ɥit', funnyNote: '18 = Fire department. Also very useful.' },
+    ],
+    exercises: [
+      {
+        type: 'multiple-choice',
+        prompt: 'The French emergency number for police is 17. How do you say 17?',
+        answer: 'dix-sept',
+        options: ['seize', 'dix-sept', 'dix-huit', 'vingt'],
+      },
+      {
+        type: 'translation',
+        prompt: 'What number is "trois" ?',
+        answer: '3',
+        hint: 'It sounds like "tʁwa"',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Five in French is "___ "',
+        answer: 'cinq',
+      },
+    ],
+  },
+];
