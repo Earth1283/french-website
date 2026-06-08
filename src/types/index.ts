@@ -40,6 +40,31 @@ export interface Unit {
   isBeyondA1: boolean;
 }
 
+export interface ConversationTurn {
+  id: string;
+  npcFrench: string;
+  npcEnglish: string;
+  playerHint: string;
+  correctResponse: string;
+  options: string[]; // index 0 is always the correct answer
+  acceptedKeywords: string[];
+  missionComplete?: boolean;
+}
+
+export interface Scenario {
+  id: string;
+  title: string;
+  emoji: string;
+  setting: string;
+  mission: string;
+  npcName: string;
+  npcRole: string;
+  recommendedDifficulty: 1 | 2 | 3;
+  turns: ConversationTurn[];
+}
+
+export type Difficulty = 1 | 2 | 3;
+
 export interface ProgressState {
   completedLessons: string[];
   xp: number;

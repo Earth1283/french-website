@@ -9,6 +9,7 @@ import { UnitDetail } from './pages/UnitDetail';
 import { Lesson } from './pages/Lesson';
 import { Phrasebook } from './pages/Phrasebook';
 import { Profile } from './pages/Profile';
+import { Conversation } from './pages/Conversation';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -19,6 +20,7 @@ function AnimatedRoutes() {
         <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
         <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
         <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
+        <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
         <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
       </Routes>
     </AnimatePresence>

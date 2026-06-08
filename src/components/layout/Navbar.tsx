@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, BookOpen, Home, User } from 'lucide-react';
+import { Moon, Sun, BookOpen, Home, User, MessageSquare } from 'lucide-react';
 import { useProgressStore } from '../../stores/progressStore';
 
 export function Navbar() {
@@ -9,6 +9,7 @@ export function Navbar() {
   const navItems = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/phrasebook', icon: BookOpen, label: 'Phrases' },
+    { to: '/converse', icon: MessageSquare, label: 'Converse' },
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
