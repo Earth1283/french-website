@@ -76,4 +76,5 @@ export interface ProgressState {
   onboardingDone: boolean;
   accentColor: string;
   appleMode: boolean;
+  reducedGpu: boolean;
 }

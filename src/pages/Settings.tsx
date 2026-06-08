@@ -30,6 +30,7 @@ export function Settings() {
     darkMode, setDarkMode,
     accentColor, setAccentColor,
     appleMode, setAppleMode,
+    reducedGpu, setReducedGpu,
     unit12Mode, setUnit12Mode,
     xp, streak,
     setXP, setStreak,
@@ -124,10 +125,19 @@ export function Settings() {
         </div>
 
         {/* Apple-ify — mobile only */}
-        <div className="sm:hidden border-t border-[--border] pt-4">
+        <div className="sm:hidden border-t border-[--border] pt-4 space-y-4">
           <SettingRow label="🍎 Apple-ify" description="You didn't hear this from us.">
             <ToggleSwitch checked={appleMode} onChange={setAppleMode} />
           </SettingRow>
+
+          {appleMode && (
+            <SettingRow
+              label="⚡ Reduce GPU load"
+              description="Disables the liquid glass nav. Helps on older phones."
+            >
+              <ToggleSwitch checked={reducedGpu} onChange={setReducedGpu} />
+            </SettingRow>
+          )}
         </div>
       </motion.section>
 

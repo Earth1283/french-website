@@ -60,7 +60,7 @@ function AppContent() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       <Navbar />
-      <main className="pb-16 sm:pb-0">
+      <main className={appleMode ? 'pb-28 sm:pb-0' : 'pb-16 sm:pb-0'}>
         <AnimatedRoutes />
       </main>
       <BottomNav />

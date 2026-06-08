@@ -11,6 +11,7 @@ interface ProgressStore extends ProgressState {
   setOnboardingDone: () => void;
   setAccentColor: (color: string) => void;
   setAppleMode: (value: boolean) => void;
+  setReducedGpu: (value: boolean) => void;
   setXP: (value: number) => void;
   setStreak: (value: number) => void;
   resetProgress: () => void;
@@ -47,6 +48,7 @@ export const useProgressStore = create<ProgressStore>()(
       onboardingDone: false,
       accentColor: '#E63946',
       appleMode: false,
+      reducedGpu: false,
 
       completeLesson: (lessonId, xpEarned) => {
         const state = get();
@@ -103,6 +105,8 @@ export const useProgressStore = create<ProgressStore>()(
       setAccentColor: (color) => set({ accentColor: color }),
 
       setAppleMode: (value) => set({ appleMode: value }),
+
+      setReducedGpu: (value) => set({ reducedGpu: value }),
 
       setXP: (value) => set({ xp: value }),
 
