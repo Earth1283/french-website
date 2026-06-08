@@ -234,9 +234,10 @@ export function Conversation() {
                   onClick={() => setDifficulty(d)}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
                     difficulty === d
-                      ? 'bg-[--accent] text-white border-[--accent]'
+                      ? 'border-transparent'
                       : 'border-[--border] text-[--text-muted] hover:border-[--accent] hover:text-[--text-primary]'
                   }`}
+                  style={difficulty === d ? { backgroundColor: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' } : {}}
                 >
                   {d} · {DIFFICULTY_LABELS[d].name}
                 </button>
@@ -448,8 +449,9 @@ export function Conversation() {
                   className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                     msg.role === 'npc'
                       ? 'bg-[--bg-card] border border-[--border] text-[--text-primary] rounded-tl-sm'
-                      : 'bg-[--accent] text-white rounded-tr-sm'
+                      : 'rounded-tr-sm'
                   }`}
+                  style={msg.role === 'player' ? { backgroundColor: 'var(--accent)', color: 'white' } : {}}
                 >
                   <p style={{ fontFamily: msg.role === 'npc' ? "'Playfair Display', serif" : 'inherit' }}>
                     {msg.text}
@@ -563,7 +565,8 @@ export function Conversation() {
             <button
               onClick={handleSubmit}
               disabled={!playerInput.trim() || isLoading}
-              className="px-4 py-2.5 rounded-xl bg-[--accent] text-white disabled:opacity-40 hover:bg-[--accent-hover] transition-colors"
+              className="px-4 py-2.5 rounded-xl disabled:opacity-40 transition-colors"
+              style={{ backgroundColor: 'var(--accent)', color: 'white' }}
             >
               {isLoading ? <Zap size={16} className="animate-pulse" /> : <Send size={16} />}
             </button>
