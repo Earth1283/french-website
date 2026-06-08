@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { UnitCard } from '../components/home/UnitCard';
@@ -31,6 +30,51 @@ export function Home() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <OnboardingModal open={!onboardingDone} />
+
+      {/* Sticky-note resume widget */}
+      <AnimatePresence>
+        {nextUp && onboardingDone && (
+          <motion.div
+            key="sticky-note"
+            initial={{ opacity: 0, rotate: -6, scale: 0.85, y: -8 }}
+            animate={{ opacity: 1, rotate: -2, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: 'spring', damping: 18, stiffness: 260, delay: 0.35 }}
+            style={{ position: 'fixed', top: '4.25rem', right: '1rem', zIndex: 30 }}
+          >
+            <Link
+              to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`}
+              className="no-underline block"
+              title={`Continue: ${nextUp.lesson.title}`}
+            >
+              <div
+                style={{
+                  backgroundColor: '#fef08a',
+                  color: '#4a3000',
+                  padding: '0.9rem 1.1rem 1rem',
+                  borderRadius: '2px',
+                  boxShadow: '3px 5px 14px rgba(0,0,0,0.25)',
+                  width: '14rem',
+                  fontFamily: "'Caveat', cursive",
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  borderTop: '3px solid #fbbf24',
+                }}
+              >
+                <p style={{ fontSize: '1rem', fontWeight: 600, opacity: 0.55, marginBottom: '0.35rem', lineHeight: 1.2 }}>
+                  todo:
+                </p>
+                <p style={{ fontSize: '1.2rem', fontWeight: 700, lineHeight: 1.35 }}>
+                  finish "{nextUp.lesson.title}"
+                </p>
+                <p style={{ fontSize: '1.05rem', fontWeight: 500, marginTop: '0.4rem', opacity: 0.65 }}>
+                  {nextUp.unit.emoji} {nextUp.unit.tagline} →
+                </p>
+              </div>
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <A1Banner />
 
@@ -81,36 +125,6 @@ export function Home() {
           </div>
         )}
       </motion.div>
-
-      {/* Resume shortcut */}
-      {nextUp && completedLessons.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-8"
-        >
-          <Link
-            to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`}
-            className="no-underline block"
-          >
-            <div
-              className="card card-lift p-4 flex items-center gap-4"
-              style={{ borderLeftWidth: 4, borderLeftColor: nextUp.unit.color }}
-            >
-              <span className="text-3xl flex-shrink-0">{nextUp.unit.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold uppercase tracking-wider text-[--text-muted] mb-0.5">
-                  Continue where you left off
-                </p>
-                <p className="font-semibold text-[--text-primary] truncate">{nextUp.lesson.title}</p>
-                <p className="text-xs text-[--text-muted] truncate">{nextUp.unit.title}</p>
-              </div>
-              <ArrowRight size={18} className="flex-shrink-0 text-[--text-muted]" />
-            </div>
-          </Link>
-        </motion.div>
-      )}
 
       {/* Unit Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
