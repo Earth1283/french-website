@@ -37,20 +37,24 @@ export function Navbar() {
           )}
 
           <nav className="flex items-center gap-1">
-            {navItems.map(({ to, icon: Icon, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium no-underline transition-colors ${
-                  location.pathname === to
-                    ? 'bg-[--accent] text-white'
-                    : 'text-[--text-secondary] hover:text-[--text-primary] hover:bg-[--bg-card-hover]'
-                }`}
-              >
-                <Icon size={15} />
-                <span className="hidden sm:inline">{label}</span>
-              </Link>
-            ))}
+            {navItems.map(({ to, icon: Icon, label }) => {
+              const isActive = location.pathname === to;
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium no-underline transition-colors ${
+                    isActive
+                      ? ''
+                      : 'text-[--text-secondary] hover:text-[--text-primary] hover:bg-[--bg-card-hover]'
+                  }`}
+                  style={isActive ? { backgroundColor: 'var(--accent)', color: 'white' } : {}}
+                >
+                  <Icon size={15} />
+                  <span className="hidden sm:inline">{label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <button
