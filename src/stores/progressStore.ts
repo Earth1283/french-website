@@ -9,7 +9,12 @@ interface ProgressStore extends ProgressState {
   setDarkMode: (value: boolean) => void;
   setUnit12Mode: (mode: 'full-freedom' | 'earned-reward') => void;
   setOnboardingDone: () => void;
+  setAccentColor: (color: string) => void;
+  setAppleMode: (value: boolean) => void;
+  setXP: (value: number) => void;
+  setStreak: (value: number) => void;
   resetProgress: () => void;
+  resetOnboarding: () => void;
   getLessonProgress: (unitSlug: string) => number;
   isUnit12Unlocked: () => boolean;
   isA1Complete: () => boolean;
@@ -40,6 +45,8 @@ export const useProgressStore = create<ProgressStore>()(
       darkMode: false,
       unit12Mode: null,
       onboardingDone: false,
+      accentColor: '#E63946',
+      appleMode: false,
 
       completeLesson: (lessonId, xpEarned) => {
         const state = get();
@@ -92,6 +99,16 @@ export const useProgressStore = create<ProgressStore>()(
       setUnit12Mode: (mode) => set({ unit12Mode: mode }),
 
       setOnboardingDone: () => set({ onboardingDone: true }),
+
+      setAccentColor: (color) => set({ accentColor: color }),
+
+      setAppleMode: (value) => set({ appleMode: value }),
+
+      setXP: (value) => set({ xp: value }),
+
+      setStreak: (value) => set({ streak: value }),
+
+      resetOnboarding: () => set({ onboardingDone: false }),
 
       resetProgress: () => set({
         completedLessons: [],

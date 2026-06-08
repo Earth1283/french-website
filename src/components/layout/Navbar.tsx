@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, BookOpen, Home, User, MessageSquare } from 'lucide-react';
+import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings } from 'lucide-react';
 import { useProgressStore } from '../../stores/progressStore';
 
 export function Navbar() {
@@ -54,6 +54,15 @@ export function Navbar() {
               );
             })}
           </nav>
+
+          <Link
+            to="/settings"
+            className="p-2 rounded-lg transition-colors no-underline"
+            style={location.pathname === '/settings' ? { color: 'var(--accent)' } : { color: 'var(--text-muted)' }}
+            aria-label="Settings"
+          >
+            <Settings size={16} />
+          </Link>
 
           <button
             onClick={() => setDarkMode(!darkMode)}

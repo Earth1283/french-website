@@ -74,4 +74,6 @@ export interface ProgressState {
   darkMode: boolean;
   unit12Mode: 'full-freedom' | 'earned-reward' | null;
   onboardingDone: boolean;
+  accentColor: string;
+  appleMode: boolean;
 }
