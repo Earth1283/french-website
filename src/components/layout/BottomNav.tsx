@@ -11,11 +11,22 @@ const NAV_ITEMS = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const TAP_SPRING = { type: 'spring', damping: 20, stiffness: 500 } as const;
+const POP_SPRING = { type: 'spring', damping: 12, stiffness: 420 } as const;
+
 export function BottomNav() {
   const { pathname } = useLocation();
   const appleMode = useProgressStore(s => s.appleMode);
   const reducedGpu = useProgressStore(s => s.reducedGpu);
   const darkMode = useProgressStore(s => s.darkMode);
+  const accentColor = useProgressStore(s => s.accentColor);
 
   const isActive = (to: string) =>
     to === '/' ? pathname === '/' : pathname.startsWith(to);
@@ -24,10 +35,9 @@ export function BottomNav() {
     const glassBase = darkMode ? 'rgba(28, 28, 30, 0.80)' : 'rgba(255, 255, 255, 0.76)';
     const glassBorder = darkMode ? 'rgba(255, 255, 255, 0.10)' : 'rgba(255, 255, 255, 0.65)';
     const inactiveTint = darkMode ? 'rgba(235, 235, 245, 0.50)' : 'rgba(60, 60, 67, 0.50)';
-    const activeBubble = darkMode ? 'rgba(10, 132, 255, 0.18)' : 'rgba(0, 122, 255, 0.10)';
+    const activeBubble = hexToRgba(accentColor, darkMode ? 0.22 : 0.13);
 
     return (
-      // Outer wrapper: full-width, handles centering without interfering with framer transforms
       <AnimatePresence>
         <div
           key="apple-nav-shell"
@@ -57,42 +67,51 @@ export function BottomNav() {
             {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
               const active = isActive(to);
               return (
-                <Link
+                <motion.div
                   key={to}
-                  to={to}
-                  aria-label={label}
-                  className="no-underline"
-                  style={{
-                    position: 'relative',
-                    borderRadius: '9999px',
-                    padding: '0.5rem 1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minWidth: '2.75rem',
-                    color: active ? '#007AFF' : inactiveTint,
-                    transition: 'color 0.18s',
-                  }}
+                  whileTap={{ scale: 0.80 }}
+                  transition={TAP_SPRING}
                 >
-                  {/* Sliding active bubble — animates between tabs via layoutId */}
-                  {active && (
+                  <Link
+                    to={to}
+                    aria-label={label}
+                    className="no-underline"
+                    style={{
+                      position: 'relative',
+                      borderRadius: '9999px',
+                      padding: '0.5rem 1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '2.75rem',
+                      color: active ? accentColor : inactiveTint,
+                      transition: 'color 0.18s',
+                    }}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="apple-active-bubble"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          borderRadius: '9999px',
+                          backgroundColor: activeBubble,
+                        }}
+                        transition={{ type: 'spring', damping: 22, stiffness: 380 }}
+                      />
+                    )}
+                    {/* Icon pops in when tab becomes active */}
                     <motion.span
-                      layoutId="apple-active-bubble"
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        borderRadius: '9999px',
-                        backgroundColor: activeBubble,
-                      }}
-                      transition={{ type: 'spring', damping: 22, stiffness: 380 }}
-                    />
-                  )}
-                  <Icon
-                    size={22}
-                    strokeWidth={active ? 2.2 : 1.5}
-                    style={{ position: 'relative', zIndex: 1 }}
-                  />
-                </Link>
+                      key={`${to}-${active}`}
+                      initial={{ scale: active ? 0.68 : 1 }}
+                      animate={{ scale: 1 }}
+                      transition={POP_SPRING}
+                      style={{ position: 'relative', zIndex: 1, display: 'flex' }}
+                    >
+                      <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
+                    </motion.span>
+                  </Link>
+                </motion.div>
               );
             })}
           </motion.nav>
@@ -101,7 +120,7 @@ export function BottomNav() {
     );
   }
 
-  // Default nav
+  // Default nav (also handles apple mode + reducedGpu — iOS colors still apply via .apple-mode CSS)
   return (
     <nav
       className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[--border] bg-[--bg]/95 backdrop-blur-md"
@@ -111,21 +130,45 @@ export function BottomNav() {
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
           const active = isActive(to);
           return (
-            <Link
+            <motion.div
               key={to}
-              to={to}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full no-underline transition-colors relative"
-              style={{ color: active ? 'var(--accent)' : 'var(--text-muted)' }}
+              whileTap={{ scale: 0.84 }}
+              transition={TAP_SPRING}
+              className="flex-1 h-full"
             >
-              {active && (
-                <span
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                />
-              )}
-              <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
-              <span className="text-xs font-medium">{label}</span>
-            </Link>
+              <Link
+                to={to}
+                className="flex flex-col items-center justify-center gap-0.5 w-full h-full no-underline transition-colors relative"
+                style={{ color: active ? 'var(--accent)' : 'var(--text-muted)' }}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="regular-active-indicator"
+                    className="absolute top-0 w-8 h-0.5 rounded-full"
+                    style={{
+                      backgroundColor: 'var(--accent)',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                    }}
+                    transition={{ type: 'spring', damping: 22, stiffness: 380 }}
+                  />
+                )}
+                {/* Icon pops in when tab becomes active — behind reducedGpu */}
+                {!reducedGpu ? (
+                  <motion.span
+                    key={`${to}-${active}`}
+                    initial={{ scale: active ? 0.72 : 1 }}
+                    animate={{ scale: 1 }}
+                    transition={POP_SPRING}
+                  >
+                    <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+                  </motion.span>
+                ) : (
+                  <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+                )}
+                <span className="text-xs font-medium">{label}</span>
+              </Link>
+            </motion.div>
           );
         })}
       </div>
