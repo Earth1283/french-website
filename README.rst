@@ -23,19 +23,26 @@ Features
 
 *   **Interactive Lessons:** Flashcards, multiple choice, and translation challenges that actually matter.
 *   **Unit-Based Learning:** From A1 basics to "Unlocked: The Good Stuff" (slang).
+*   **Spaced Repetition Review:** SM-2 algorithm schedules vocab reviews at the optimal moment — 1 day, then 3, then a week, then longer. A review banner on the home screen tells you when cards are due.
+*   **Audio Pronunciation:** Tap any 🔊 button to hear French spoken aloud. Available on flashcards, phrasebook, and on answer reveals in exercises. Uses the Web Speech API — no API key, works offline.
+*   **Lesson Bookmarks:** Save any lesson for later with the bookmark icon in the lesson header. Bookmarked lessons appear as quick-links on the home screen.
+*   **Keyboard Shortcuts:** In lessons — ``←`` / ``→`` navigate flashcards, ``Space`` / ``F`` flips a card, ``1``–``4`` selects a multiple-choice option.
 *   **Phrasebook:** Your digital survival kit for when your brain freezes.
-*   **Dark Mode:** For those late-night sessions where you're desperately trying to figure out why *une table* is feminine.
+*   **Conversation AI:** Practice real scenarios with a Gemini-powered NPC (bring your own API key).
+*   **Dark Mode & Accent Colours:** Six accent presets; preferences persist across sessions.
 *   **Smooth Transitions:** Powered by Framer Motion, because learning a language is hard enough without jerky UI.
+*   **Fast Loads:** Route-based code splitting + vendor chunk caching keeps the initial bundle small. A themed loading screen (matching your stored dark/accent preference) appears instantly before any JS runs.
 
 The Tech Stack (The "Ingrédients")
 ==================================
 
-*   **Vite & React:** The fast-moving base.
+*   **Vite & React 18:** The fast-moving base.
 *   **TypeScript:** To prevent us from making *un petit* mistake.
-*   **Tailwind CSS:** For that *ooh-la-la* aesthetic.
+*   **Tailwind CSS v4:** For that *ooh-la-la* aesthetic.
 *   **Framer Motion:** Smooth animations for smooth brains.
 *   **Zustand:** Keeping track of your progress so you don't have to.
 *   **Lucide React:** Pretty icons for pretty people.
+*   **Web Speech API:** Pronunciation audio — free, no key required.
 
 Getting Started
 ===============
