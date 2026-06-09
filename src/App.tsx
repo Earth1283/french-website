@@ -1,17 +1,18 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useProgressStore } from './stores/progressStore';
 import { Navbar } from './components/layout/Navbar';
 import { BottomNav } from './components/layout/BottomNav';
 import { PageTransition } from './components/layout/PageTransition';
-import { Home } from './pages/Home';
-import { UnitDetail } from './pages/UnitDetail';
-import { Lesson } from './pages/Lesson';
-import { Phrasebook } from './pages/Phrasebook';
-import { Profile } from './pages/Profile';
-import { Conversation } from './pages/Conversation';
-import { Settings } from './pages/Settings';
+
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
+const UnitDetail = lazy(() => import('./pages/UnitDetail').then(m => ({ default: m.UnitDetail })));
+const Lesson = lazy(() => import('./pages/Lesson').then(m => ({ default: m.Lesson })));
+const Phrasebook = lazy(() => import('./pages/Phrasebook').then(m => ({ default: m.Phrasebook })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const Conversation = lazy(() => import('./pages/Conversation').then(m => ({ default: m.Conversation })));
+const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
 
 const ACCENT_HOVER: Record<string, string> = {
   '#E63946': '#cc2f3b',
@@ -25,17 +26,19 @@ const ACCENT_HOVER: Record<string, string> = {
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageTransition keyProp="/"><Home /></PageTransition>} />
-        <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
-        <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
-        <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
-        <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
-        <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
-        <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
+    <Suspense fallback={null}>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<PageTransition keyProp="/"><Home /></PageTransition>} />
+          <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
+          <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
+          <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
+          <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
+          <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
+        </Routes>
+      </AnimatePresence>
+    </Suspense>
   );
 }
 
