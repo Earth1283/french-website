@@ -27,13 +27,39 @@ export function Home() {
     return null;
   }, [completedLessons, unit12Unlocked]);
 
+  // Sticky note: up to 3 items — in-progress units first, then next unstarted unit.
+  // Only shown after the user has done at least one lesson.
+  const todoItems = useMemo(() => {
+    if (completedLessons.length === 0) return [];
+    type Item = { unit: (typeof UNITS)[0]; lesson: (typeof UNITS)[0]['lessons'][0]; verb: string };
+    const items: Item[] = [];
+
+    for (const unit of UNITS) {
+      if (unit.id === 'slang' && !unit12Unlocked) continue;
+      const doneCount = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
+      if (doneCount > 0 && doneCount < unit.lessons.length) {
+        const next = unit.lessons.find(l => !completedLessons.includes(l.id));
+        if (next) items.push({ unit, lesson: next, verb: 'finish' });
+      }
+      if (items.length >= 3) break;
+    }
+
+    // Pad with the next fully-unstarted unit if we have room
+    if (items.length < 3 && nextUp) {
+      const alreadyListed = items.some(i => i.lesson.id === nextUp.lesson.id);
+      if (!alreadyListed) items.push({ unit: nextUp.unit, lesson: nextUp.lesson, verb: 'start' });
+    }
+
+    return items.slice(0, 3);
+  }, [completedLessons, unit12Unlocked, nextUp]);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <OnboardingModal open={!onboardingDone} />
 
-      {/* Sticky-note resume widget — desktop only */}
+      {/* Sticky-note resume widget — desktop only, only after user has started */}
       <AnimatePresence>
-        {nextUp && onboardingDone && (
+        {todoItems.length > 0 && onboardingDone && (
           <motion.div
             key="sticky-note"
             className="hidden sm:block"
@@ -43,36 +69,38 @@ export function Home() {
             transition={{ type: 'spring', damping: 18, stiffness: 260, delay: 0.35 }}
             style={{ position: 'fixed', top: '4.25rem', right: '1rem', zIndex: 30 }}
           >
-            <Link
-              to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`}
-              className="no-underline block"
-              title={`Continue: ${nextUp.lesson.title}`}
+            <div
+              style={{
+                backgroundColor: '#fef08a',
+                color: '#4a3000',
+                padding: '0.9rem 1.1rem 1rem',
+                borderRadius: '2px',
+                boxShadow: '3px 5px 14px rgba(0,0,0,0.25)',
+                width: '15rem',
+                fontFamily: "'Caveat', cursive",
+                userSelect: 'none',
+                borderTop: '3px solid #fbbf24',
+              }}
             >
-              <div
-                style={{
-                  backgroundColor: '#fef08a',
-                  color: '#4a3000',
-                  padding: '0.9rem 1.1rem 1rem',
-                  borderRadius: '2px',
-                  boxShadow: '3px 5px 14px rgba(0,0,0,0.25)',
-                  width: '14rem',
-                  fontFamily: "'Caveat', cursive",
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                  borderTop: '3px solid #fbbf24',
-                }}
-              >
-                <p style={{ fontSize: '1rem', fontWeight: 600, opacity: 0.55, marginBottom: '0.35rem', lineHeight: 1.2 }}>
-                  todo:
-                </p>
-                <p style={{ fontSize: '1.2rem', fontWeight: 700, lineHeight: 1.35 }}>
-                  finish "{nextUp.lesson.title}"
-                </p>
-                <p style={{ fontSize: '1.05rem', fontWeight: 500, marginTop: '0.4rem', opacity: 0.65 }}>
-                  {nextUp.unit.emoji} {nextUp.unit.tagline} →
-                </p>
+              <p style={{ fontSize: '1rem', fontWeight: 600, opacity: 0.55, marginBottom: '0.5rem', lineHeight: 1.2 }}>
+                todo:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {todoItems.map(({ unit, lesson, verb }) => (
+                  <Link
+                    key={lesson.id}
+                    to={`/unit/${unit.slug}/lesson/${lesson.id}`}
+                    className="no-underline"
+                    style={{ color: '#4a3000', display: 'flex', alignItems: 'flex-start', gap: '0.3rem' }}
+                  >
+                    <span style={{ opacity: 0.5, flexShrink: 0, fontSize: '1.1rem' }}>☐</span>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 700, lineHeight: 1.3 }}>
+                      {verb} "{lesson.title}"
+                    </span>
+                  </Link>
+                ))}
               </div>
-            </Link>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

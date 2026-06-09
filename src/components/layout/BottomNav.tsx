@@ -142,15 +142,12 @@ export function BottomNav() {
                 style={{ color: active ? 'var(--accent)' : 'var(--text-muted)' }}
               >
                 {active && (
-                  <motion.span
-                    layoutId="regular-active-indicator"
+                  <span
                     className="absolute top-0 w-8 h-0.5 rounded-full"
                     style={{
                       backgroundColor: 'var(--accent)',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
+                      left: 'calc(50% - 1rem)',
                     }}
-                    transition={{ type: 'spring', damping: 22, stiffness: 380 }}
                   />
                 )}
                 {/* Icon pops in when tab becomes active — behind reducedGpu */}
