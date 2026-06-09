@@ -1,15 +1,17 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Bookmark, RotateCcw } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { UnitCard } from '../components/home/UnitCard';
 import { OnboardingModal } from '../components/home/OnboardingModal';
 import { A1Banner } from '../components/home/A1Banner';
 import { ProgressBar } from '../components/layout/ProgressBar';
+import { vocabKey, defaultCard, isDue } from '../utils/srs';
 
 export function Home() {
-  const { completedLessons, onboardingDone, isUnit12Unlocked, streak, xp } = useProgressStore();
+  const { completedLessons, onboardingDone, isUnit12Unlocked, streak, xp, bookmarkedLessons, srsData } = useProgressStore();
   const unit12Unlocked = isUnit12Unlocked();
 
   const totalLessons = getTotalLessons();
@@ -27,8 +29,6 @@ export function Home() {
     return null;
   }, [completedLessons, unit12Unlocked]);
 
-  // Sticky note: up to 3 items — in-progress units first, then next unstarted unit.
-  // Only shown after the user has done at least one lesson.
   const todoItems = useMemo(() => {
     if (completedLessons.length === 0) return [];
     type Item = { unit: (typeof UNITS)[0]; lesson: (typeof UNITS)[0]['lessons'][0]; verb: string };
@@ -44,7 +44,6 @@ export function Home() {
       if (items.length >= 3) break;
     }
 
-    // Pad with the next fully-unstarted unit if we have room
     if (items.length < 3 && nextUp) {
       const alreadyListed = items.some(i => i.lesson.id === nextUp.lesson.id);
       if (!alreadyListed) items.push({ unit: nextUp.unit, lesson: nextUp.lesson, verb: 'start' });
@@ -53,11 +52,36 @@ export function Home() {
     return items.slice(0, 3);
   }, [completedLessons, unit12Unlocked, nextUp]);
 
+  const dueCount = useMemo(() => {
+    if (completedLessons.length === 0) return 0;
+    let count = 0;
+    for (const unit of UNITS) {
+      for (const lesson of unit.lessons) {
+        if (!completedLessons.includes(lesson.id)) continue;
+        lesson.vocab.forEach((_, idx) => {
+          const card = srsData[vocabKey(lesson.id, idx)] ?? defaultCard();
+          if (isDue(card)) count++;
+        });
+      }
+    }
+    return count;
+  }, [completedLessons, srsData]);
+
+  const bookmarkDetails = useMemo(() => {
+    return bookmarkedLessons.flatMap(lessonId => {
+      for (const unit of UNITS) {
+        const lesson = unit.lessons.find(l => l.id === lessonId);
+        if (lesson) return [{ unit, lesson }];
+      }
+      return [];
+    });
+  }, [bookmarkedLessons]);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <OnboardingModal open={!onboardingDone} />
 
-      {/* Sticky-note resume widget — desktop only, only after user has started */}
+      {/* Sticky-note resume widget — desktop only */}
       <AnimatePresence>
         {todoItems.length > 0 && onboardingDone && (
           <motion.div
@@ -107,12 +131,12 @@ export function Home() {
 
       <A1Banner />
 
-      {/* Streak + XP row when user has progress */}
+      {/* Streak + XP row */}
       {(streak > 0 || xp > 0) && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center gap-3 mb-6 flex-wrap"
+          className="flex items-center gap-3 mb-4 flex-wrap"
         >
           {streak > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm font-bold">
@@ -125,6 +149,34 @@ export function Home() {
             </div>
           )}
           <p className="text-xs text-[--text-muted]">Keep it up!</p>
+        </motion.div>
+      )}
+
+      {/* Review banner */}
+      {dueCount > 0 && (
+        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <Link to="/review" className="no-underline block">
+            <div
+              className="card p-4 flex items-center justify-between gap-3 border-2 transition-opacity hover:opacity-90"
+              style={{ borderColor: 'var(--accent)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
+                >
+                  <RotateCcw size={16} />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-[--text-primary]">
+                    {dueCount} card{dueCount !== 1 ? 's' : ''} due for review
+                  </p>
+                  <p className="text-xs text-[--text-muted]">Spaced repetition — keep your French sharp</p>
+                </div>
+              </div>
+              <span className="text-[--accent] font-bold text-lg">→</span>
+            </div>
+          </Link>
         </motion.div>
       )}
 
@@ -155,6 +207,33 @@ export function Home() {
         )}
       </motion.div>
 
+      {/* Bookmarked lessons */}
+      {bookmarkDetails.length > 0 && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <Bookmark size={13} style={{ color: 'var(--accent)', fill: 'var(--accent)' }} />
+            <h2 className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">Saved for later</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {bookmarkDetails.map(({ unit, lesson }) => (
+              <Link
+                key={lesson.id}
+                to={`/unit/${unit.slug}/lesson/${lesson.id}`}
+                className="no-underline flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <span>{unit.emoji}</span>
+                <span>{lesson.title}</span>
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Unit Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {UNITS.map((unit, i) => {
@@ -174,7 +253,6 @@ export function Home() {
         })}
       </div>
 
-      {/* Footer note */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Volume2 } from 'lucide-react';
 import type { Exercise } from '../../types';
 import { Button } from '../ui/Button';
+import { speak } from '../../utils/speech';
 
 interface TranslationChallengeProps {
   exercise: Exercise;
@@ -78,8 +79,19 @@ export function TranslationChallenge({ exercise, onCorrect, onWrong }: Translati
 
         {status === 'wrong' && (
           <div className="p-3 rounded-xl bg-[--bg] border border-[--border]">
-            <p className="text-xs text-[--text-muted] mb-1">Correct answer:</p>
-            <p className="text-sm font-semibold text-[--text-primary]">{exercise.answer}</p>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs text-[--text-muted] mb-0.5">Correct answer:</p>
+                <p className="text-sm font-semibold text-[--text-primary]">{exercise.answer}</p>
+              </div>
+              <button
+                onClick={() => speak(exercise.answer)}
+                className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--accent] hover:bg-[--bg-card-hover] transition-colors flex-shrink-0"
+                aria-label="Hear correct answer"
+              >
+                <Volume2 size={16} />
+              </button>
+            </div>
           </div>
         )}
 

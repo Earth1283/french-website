@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ProgressState } from '../types';
 import { UNITS, A1_UNIT_IDS } from '../data/units';
+import { vocabKey, defaultCard, isDue, updateCard } from '../utils/srs';
 
 interface ProgressStore extends ProgressState {
   completeLesson: (lessonId: string, xpEarned: number) => void;
@@ -16,6 +17,9 @@ interface ProgressStore extends ProgressState {
   setStreak: (value: number) => void;
   resetProgress: () => void;
   resetOnboarding: () => void;
+  toggleBookmark: (lessonId: string) => void;
+  updateSRS: (key: string, correct: boolean) => void;
+  getDueReviewCount: () => number;
   getLessonProgress: (unitSlug: string) => number;
   isUnit12Unlocked: () => boolean;
   isA1Complete: () => boolean;
@@ -49,6 +53,8 @@ export const useProgressStore = create<ProgressStore>()(
       accentColor: '#E63946',
       appleMode: false,
       reducedGpu: false,
+      bookmarkedLessons: [],
+      srsData: {},
 
       completeLesson: (lessonId, xpEarned) => {
         const state = get();
@@ -120,7 +126,35 @@ export const useProgressStore = create<ProgressStore>()(
         streak: 0,
         lastStudiedDate: '',
         earnedBadges: [],
+        srsData: {},
       }),
+
+      toggleBookmark: (lessonId) => set(s => ({
+        bookmarkedLessons: s.bookmarkedLessons.includes(lessonId)
+          ? s.bookmarkedLessons.filter(id => id !== lessonId)
+          : [...s.bookmarkedLessons, lessonId],
+      })),
+
+      updateSRS: (key, correct) => {
+        const s = get();
+        const existing = s.srsData[key] ?? defaultCard();
+        set({ srsData: { ...s.srsData, [key]: updateCard(existing, correct) } });
+      },
+
+      getDueReviewCount: () => {
+        const s = get();
+        let count = 0;
+        for (const unit of UNITS) {
+          for (const lesson of unit.lessons) {
+            if (!s.completedLessons.includes(lesson.id)) continue;
+            lesson.vocab.forEach((_, idx) => {
+              const card = s.srsData[vocabKey(lesson.id, idx)] ?? defaultCard();
+              if (isDue(card)) count++;
+            });
+          }
+        }
+        return count;
+      },
 
       getLessonProgress: (unitSlug) => {
         const state = get();

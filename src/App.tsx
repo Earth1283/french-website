@@ -13,6 +13,7 @@ const Phrasebook = lazy(() => import('./pages/Phrasebook').then(m => ({ default:
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const Conversation = lazy(() => import('./pages/Conversation').then(m => ({ default: m.Conversation })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const Review = lazy(() => import('./pages/Review').then(m => ({ default: m.Review })));
 
 const ACCENT_HOVER: Record<string, string> = {
   '#E63946': '#cc2f3b',
@@ -36,6 +37,7 @@ function AnimatedRoutes() {
           <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
           <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
           <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
+          <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
         </Routes>
       </AnimatePresence>
     </Suspense>

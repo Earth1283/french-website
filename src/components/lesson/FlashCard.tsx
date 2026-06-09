@@ -1,26 +1,16 @@
-import { useState } from 'react';
 import { Volume2 } from 'lucide-react';
 import type { VocabItem } from '../../types';
+import { speak } from '../../utils/speech';
 
 interface FlashCardProps {
   item: VocabItem;
   index: number;
   total: number;
+  flipped: boolean;
+  onFlipToggle: () => void;
 }
 
-function speak(text: string) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'fr-FR';
-    utter.rate = 0.85;
-    window.speechSynthesis.speak(utter);
-  }
-}
-
-export function FlashCard({ item, index, total }: FlashCardProps) {
-  const [flipped, setFlipped] = useState(false);
-
+export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCardProps) {
   return (
     <div className="w-full max-w-lg mx-auto">
       <div className="text-center text-xs text-[--text-muted] mb-4">
@@ -30,7 +20,7 @@ export function FlashCard({ item, index, total }: FlashCardProps) {
       <div
         className="relative w-full cursor-pointer"
         style={{ perspective: '1000px', height: 280 }}
-        onClick={() => setFlipped(f => !f)}
+        onClick={onFlipToggle}
       >
         <div className={`flip-card-inner absolute inset-0 ${flipped ? 'flipped' : ''}`}>
           {/* Front */}

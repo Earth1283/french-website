@@ -1,16 +1,19 @@
-import { useState } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { CheckCircle2, XCircle, Volume2 } from 'lucide-react';
 import type { Exercise } from '../../types';
+import { speak } from '../../utils/speech';
 
 interface MultipleChoiceProps {
   exercise: Exercise;
   onCorrect: () => void;
   onWrong: () => void;
+  keyboardSelect?: number | null;
 }
 
-export function MultipleChoice({ exercise, onCorrect, onWrong }: MultipleChoiceProps) {
+export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const answered = selected !== null;
+  const prevKeyboardSelect = useRef<number | null>(null);
 
   const handleSelect = (option: string) => {
     if (answered) return;
@@ -20,6 +23,19 @@ export function MultipleChoice({ exercise, onCorrect, onWrong }: MultipleChoiceP
       else onWrong();
     }, 800);
   };
+
+  useEffect(() => {
+    if (keyboardSelect === null || keyboardSelect === undefined) {
+      prevKeyboardSelect.current = null;
+      return;
+    }
+    if (keyboardSelect !== prevKeyboardSelect.current) {
+      prevKeyboardSelect.current = keyboardSelect;
+      const option = exercise.options?.[keyboardSelect];
+      if (option) handleSelect(option);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyboardSelect]);
 
   return (
     <div className="w-full max-w-lg mx-auto space-y-4">
@@ -32,7 +48,7 @@ export function MultipleChoice({ exercise, onCorrect, onWrong }: MultipleChoiceP
       </div>
 
       <div className="grid gap-2.5">
-        {exercise.options?.map(option => {
+        {exercise.options?.map((option, i) => {
           const isCorrect = option === exercise.answer;
           const isSelected = option === selected;
 
@@ -46,15 +62,26 @@ export function MultipleChoice({ exercise, onCorrect, onWrong }: MultipleChoiceP
               key={option}
               onClick={() => handleSelect(option)}
               disabled={answered}
-              className={`w-full p-4 rounded-xl border-2 text-left text-sm font-medium text-[--text-primary] flex items-center justify-between gap-3 transition-all ${stateClass} ${answered ? 'cursor-default' : 'cursor-pointer'}`}
+              className={`w-full p-4 rounded-xl border-2 text-left text-sm font-medium text-[--text-primary] flex items-center gap-3 transition-all ${stateClass} ${answered ? 'cursor-default' : 'cursor-pointer'}`}
             >
-              <span>{option}</span>
+              <span className="text-xs text-[--text-muted] font-mono w-4 flex-shrink-0">{i + 1}</span>
+              <span className="flex-1">{option}</span>
+              <button
+                onClick={e => { e.stopPropagation(); speak(option); }}
+                className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
+                aria-label={`Hear ${option}`}
+                tabIndex={-1}
+              >
+                <Volume2 size={14} />
+              </button>
               {answered && isCorrect && <CheckCircle2 size={18} className="text-[--success] flex-shrink-0" />}
               {answered && isSelected && !isCorrect && <XCircle size={18} className="text-red-500 flex-shrink-0" />}
             </button>
           );
         })}
       </div>
+
+      <p className="text-center text-xs text-[--text-muted]">Press 1–{exercise.options?.length} to select</p>
     </div>
   );
 }

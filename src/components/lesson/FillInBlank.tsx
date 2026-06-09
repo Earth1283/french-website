@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Volume2 } from 'lucide-react';
 import type { Exercise } from '../../types';
 import { Button } from '../ui/Button';
+import { speak } from '../../utils/speech';
 
 interface FillInBlankProps {
   exercise: Exercise;
@@ -57,9 +58,18 @@ export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) 
         </div>
 
         {status === 'wrong' && (
-          <p className="text-sm text-[--text-muted]">
-            Correct answer: <strong className="text-[--text-primary]">{exercise.answer}</strong>
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-[--text-muted]">
+              Correct answer: <strong className="text-[--text-primary]">{exercise.answer}</strong>
+            </p>
+            <button
+              onClick={() => speak(exercise.answer)}
+              className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
+              aria-label="Hear correct answer"
+            >
+              <Volume2 size={15} />
+            </button>
+          </div>
         )}
 
         {status === 'idle' && (

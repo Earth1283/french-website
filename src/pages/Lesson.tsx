@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { FlashCard } from '../components/lesson/FlashCard';
@@ -19,16 +19,68 @@ export function Lesson() {
   const unit = UNITS.find(u => u.slug === slug);
   const lesson = unit?.lessons.find(l => l.id === lessonId);
 
-  const { earnedBadges: prevBadges, completedLessons } = useProgressStore();
+  const { earnedBadges: prevBadges, completedLessons, bookmarkedLessons } = useProgressStore();
   const completeAction = useProgressStore(s => s.completeLesson);
-  // Snapshot badges at mount so handleFinish can diff what's newly earned
+  const toggleBookmark = useProgressStore(s => s.toggleBookmark);
   const [earnedBadgesBefore] = useState(() => [...prevBadges]);
 
   const [phase, setPhase] = useState<Phase>('intro');
   const [cardIndex, setCardIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
   const [exerciseIndex, setExerciseIndex] = useState(0);
+  const [keyboardSelect, setKeyboardSelect] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [newBadges, setNewBadges] = useState<string[]>([]);
+
+  const isBookmarked = lesson ? bookmarkedLessons.includes(lesson.id) : false;
+
+  // Reset keyboard selection when exercise changes
+  useEffect(() => {
+    setKeyboardSelect(null);
+  }, [exerciseIndex]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (!lesson) return;
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (phase === 'flashcards') {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (cardIndex < lesson.vocab.length - 1) {
+            setFlipped(false);
+            setCardIndex(i => i + 1);
+          } else {
+            setFlipped(false);
+            setPhase('exercises');
+          }
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (cardIndex > 0) {
+            setFlipped(false);
+            setCardIndex(i => i - 1);
+          }
+        } else if (e.key === ' ' || e.key === 'f') {
+          e.preventDefault();
+          setFlipped(f => !f);
+        }
+      }
+
+      if (phase === 'exercises') {
+        const ex = lesson.exercises[exerciseIndex];
+        if (ex?.type === 'multiple-choice') {
+          const n = parseInt(e.key);
+          if (!isNaN(n) && n >= 1 && n <= (ex.options?.length ?? 0)) {
+            setKeyboardSelect(n - 1);
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [phase, cardIndex, exerciseIndex, lesson]);
 
   if (!unit || !lesson) {
     return (
@@ -54,6 +106,7 @@ export function Lesson() {
   const handleReplay = () => {
     setPhase('flashcards');
     setCardIndex(0);
+    setFlipped(false);
     setExerciseIndex(0);
     setCorrectCount(0);
     setNewBadges([]);
@@ -126,6 +179,20 @@ export function Lesson() {
         <span className="text-xs text-[--text-muted] whitespace-nowrap">
           {currentStep}/{totalSteps}
         </span>
+        <button
+          onClick={() => toggleBookmark(lesson.id)}
+          className="p-2 rounded-lg transition-colors hover:bg-[--bg-card-hover]"
+          aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark lesson'}
+          title={isBookmarked ? 'Remove bookmark' : 'Save for later'}
+        >
+          <Bookmark
+            size={16}
+            style={{
+              fill: isBookmarked ? 'var(--accent)' : 'none',
+              color: isBookmarked ? 'var(--accent)' : 'var(--text-muted)',
+            }}
+          />
+        </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -141,27 +208,30 @@ export function Lesson() {
               item={lesson.vocab[cardIndex]}
               index={cardIndex}
               total={lesson.vocab.length}
+              flipped={flipped}
+              onFlipToggle={() => setFlipped(f => !f)}
             />
 
             <div className="flex items-center justify-between mt-6">
               <Button
                 variant="secondary"
-                onClick={() => setCardIndex(i => i - 1)}
+                onClick={() => { setFlipped(false); setCardIndex(i => i - 1); }}
                 disabled={cardIndex === 0}
               >
                 <ChevronLeft size={16} /> Prev
               </Button>
 
               {cardIndex < lesson.vocab.length - 1 ? (
-                <Button onClick={() => setCardIndex(i => i + 1)}>
+                <Button onClick={() => { setFlipped(false); setCardIndex(i => i + 1); }}>
                   Next <ChevronRight size={16} />
                 </Button>
               ) : (
-                <Button onClick={() => setPhase('exercises')}>
+                <Button onClick={() => { setFlipped(false); setPhase('exercises'); }}>
                   Start Exercises <ArrowRight size={16} />
                 </Button>
               )}
             </div>
+            <p className="text-center text-xs text-[--text-muted] mt-3">← → to navigate · Space to flip</p>
           </motion.div>
         )}
 
@@ -195,6 +265,7 @@ export function Lesson() {
                     exercise={ex}
                     onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
                     onWrong={() => setTimeout(advance, 1000)}
+                    keyboardSelect={keyboardSelect}
                   />
                 );
               }

@@ -1,5 +1,12 @@
 export type ExerciseType = 'multiple-choice' | 'fill-blank' | 'translation';
 
+export interface SRSCard {
+  interval: number;
+  ease: number;
+  nextReview: string; // YYYY-MM-DD
+  reps: number;
+}
+
 export interface VocabItem {
   french: string;
   english: string;
@@ -77,4 +84,6 @@ export interface ProgressState {
   accentColor: string;
   appleMode: boolean;
   reducedGpu: boolean;
+  bookmarkedLessons: string[];
+  srsData: Record<string, SRSCard>;
 }
