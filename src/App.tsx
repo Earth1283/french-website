@@ -47,6 +47,11 @@ function AppContent() {
   const accentColor = useProgressStore(s => s.accentColor);
   const appleMode = useProgressStore(s => s.appleMode);
 
+  // Dismiss the HTML loading screen once the app shell is mounted
+  useEffect(() => {
+    (window as unknown as { __bootReady?: () => void }).__bootReady?.();
+  }, []);
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
