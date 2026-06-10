@@ -11,6 +11,9 @@ import { smalltalkLessons } from './lessons/smalltalk';
 import { falseFriendsLessons } from './lessons/false-friends';
 import { grammarLessons } from './lessons/grammar-survival';
 import { slangLessons } from './lessons/slang';
+import { trainsLessons } from './lessons/trains';
+import { cultureLessons } from './lessons/culture';
+import { cinemaLessons } from './lessons/cinema';
 
 export const UNITS: Unit[] = [
   {
@@ -166,6 +169,45 @@ export const UNITS: Unit[] = [
     color: '#6A4C93',
     accentColor: '#8a6cb3',
     lessons: slangLessons,
+    isA1: false,
+    isBeyondA1: true,
+  },
+  {
+    id: 'trains',
+    slug: 'trains',
+    title: 'The Train Will Leave Without You',
+    emoji: '🚆',
+    tagline: 'SNCF & Rail Travel',
+    funnyDescription: 'The platform is announced 12 minutes before departure. You must stamp your ticket or pay a fine. Your carriage is at the far end. Welcome to French rail.',
+    color: '#E9C46A',
+    accentColor: '#f0d080',
+    lessons: trainsLessons,
+    isA1: false,
+    isBeyondA1: true,
+  },
+  {
+    id: 'culture',
+    slug: 'culture',
+    title: 'How Not to Be That Tourist',
+    emoji: '🫣',
+    tagline: 'Culture & Etiquette',
+    funnyDescription: 'Sunday closures. Two-hour lunch breaks. Mandatory bonjours. The bisou rules. Tipping norms. France has unwritten laws and you\'re about to learn them.',
+    color: '#8338EC',
+    accentColor: '#9a50ff',
+    lessons: cultureLessons,
+    isA1: false,
+    isBeyondA1: true,
+  },
+  {
+    id: 'cinema',
+    slug: 'cinema',
+    title: 'Culture Vulture',
+    emoji: '🎬',
+    tagline: 'Cinema, Museums & Leisure',
+    funnyDescription: 'VO vs VF. The Louvre queue. Audioguides. Temporary exhibitions. Free first Sundays. France is relentlessly cultural and you might as well lean into it.',
+    color: '#FB5607',
+    accentColor: '#ff6f1f',
+    lessons: cinemaLessons,
     isA1: false,
     isBeyondA1: true,
   },
