@@ -14,6 +14,16 @@ import { Button } from '../components/ui/Button';
 
 type Phase = 'intro' | 'flashcards' | 'exercises' | 'complete';
 
+function loadSavedProgress(lessonId: string | undefined): { phase: Phase; cardIndex: number; exerciseIndex: number } | null {
+  if (!lessonId) return null;
+  try {
+    const raw = sessionStorage.getItem(`lesson-progress-${lessonId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Lesson() {
   const { slug, lessonId } = useParams<{ slug: string; lessonId: string }>();
   const unit = UNITS.find(u => u.slug === slug);
@@ -24,13 +34,24 @@ export function Lesson() {
   const toggleBookmark = useProgressStore(s => s.toggleBookmark);
   const [earnedBadgesBefore] = useState(() => [...prevBadges]);
 
-  const [phase, setPhase] = useState<Phase>('intro');
-  const [cardIndex, setCardIndex] = useState(0);
+  const saved = loadSavedProgress(lessonId);
+  const [phase, setPhase] = useState<Phase>(() => saved?.phase ?? 'intro');
+  const [cardIndex, setCardIndex] = useState(() => saved?.cardIndex ?? 0);
   const [flipped, setFlipped] = useState(false);
-  const [exerciseIndex, setExerciseIndex] = useState(0);
+  const [exerciseIndex, setExerciseIndex] = useState(() => saved?.exerciseIndex ?? 0);
   const [keyboardSelect, setKeyboardSelect] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [newBadges, setNewBadges] = useState<string[]>([]);
+  const [missedExercises, setMissedExercises] = useState<Array<{ prompt: string; answer: string }>>([]);
+
+  // Persist progress to sessionStorage so back-navigate can resume
+  useEffect(() => {
+    if (!lessonId || phase === 'intro' || phase === 'complete') {
+      sessionStorage.removeItem(`lesson-progress-${lessonId}`);
+      return;
+    }
+    sessionStorage.setItem(`lesson-progress-${lessonId}`, JSON.stringify({ phase, cardIndex, exerciseIndex }));
+  }, [lessonId, phase, cardIndex, exerciseIndex]);
 
   const isBookmarked = lesson ? bookmarkedLessons.includes(lesson.id) : false;
 
@@ -95,6 +116,7 @@ export function Lesson() {
   const nextLesson = nextLessonIndex < unit.lessons.length ? unit.lessons[nextLessonIndex] : undefined;
 
   const handleFinish = () => {
+    sessionStorage.removeItem(`lesson-progress-${lesson.id}`);
     if (!completedLessons.includes(lesson.id)) {
       completeAction(lesson.id, lesson.xpReward);
       const { earnedBadges: newAllBadges } = useProgressStore.getState();
@@ -104,12 +126,14 @@ export function Lesson() {
   };
 
   const handleReplay = () => {
+    sessionStorage.removeItem(`lesson-progress-${lesson!.id}`);
     setPhase('flashcards');
     setCardIndex(0);
     setFlipped(false);
     setExerciseIndex(0);
     setCorrectCount(0);
     setNewBadges([]);
+    setMissedExercises([]);
   };
 
   const totalSteps = lesson.vocab.length + lesson.exercises.length;
@@ -154,6 +178,7 @@ export function Lesson() {
           unitSlug={slug!}
           nextLessonId={nextLesson?.id}
           onReplay={handleReplay}
+          missedItems={missedExercises}
         />
       </div>
     );
@@ -258,13 +283,18 @@ export function Lesson() {
                 }
               };
 
+              const captureWrong = () => {
+                setMissedExercises(prev => [...prev, { prompt: ex.prompt, answer: ex.answer }]);
+                setTimeout(advance, 1400);
+              };
+
               if (ex.type === 'multiple-choice') {
                 return (
                   <MultipleChoice
                     key={exerciseIndex}
                     exercise={ex}
                     onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
-                    onWrong={() => setTimeout(advance, 1000)}
+                    onWrong={captureWrong}
                     keyboardSelect={keyboardSelect}
                   />
                 );
@@ -275,7 +305,7 @@ export function Lesson() {
                     key={exerciseIndex}
                     exercise={ex}
                     onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
-                    onWrong={() => setTimeout(advance, 1000)}
+                    onWrong={captureWrong}
                   />
                 );
               }
@@ -285,7 +315,7 @@ export function Lesson() {
                     key={exerciseIndex}
                     exercise={ex}
                     onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
-                    onWrong={() => setTimeout(advance, 1000)}
+                    onWrong={captureWrong}
                   />
                 );
               }

@@ -1,8 +1,13 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Trophy, ArrowRight, Home, RotateCcw } from 'lucide-react';
+import { Trophy, ArrowRight, Home, RotateCcw, XCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { BADGES } from '../../stores/progressStore';
+
+interface MissedItem {
+  prompt: string;
+  answer: string;
+}
 
 interface LessonCompleteProps {
   xpEarned: number;
@@ -10,9 +15,10 @@ interface LessonCompleteProps {
   unitSlug: string;
   nextLessonId?: string;
   onReplay: () => void;
+  missedItems?: MissedItem[];
 }
 
-export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, onReplay }: LessonCompleteProps) {
+export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, onReplay, missedItems }: LessonCompleteProps) {
   return (
     <div className="w-full max-w-lg mx-auto text-center py-8 space-y-6">
       <motion.div
@@ -60,6 +66,30 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
               </div>
             );
           })}
+        </motion.div>
+      )}
+
+      {missedItems && missedItems.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="text-left w-full"
+        >
+          <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-2">
+            Review your mistakes ({missedItems.length})
+          </p>
+          <div className="space-y-2">
+            {missedItems.map((item, i) => (
+              <div key={i} className="card p-3 flex items-start gap-3">
+                <XCircle size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs text-[--text-muted] truncate">{item.prompt}</p>
+                  <p className="text-sm font-semibold text-[--text-primary]">{item.answer}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       )}
 

@@ -81,6 +81,21 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
         })}
       </div>
 
+      {answered && selected !== exercise.answer && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <p className="text-sm text-[--text-muted] flex-1">
+            Correct answer: <strong className="text-[--text-primary]">{exercise.answer}</strong>
+          </p>
+          <button
+            onClick={() => speak(exercise.answer)}
+            className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
+            aria-label="Hear correct answer"
+          >
+            <Volume2 size={15} />
+          </button>
+        </div>
+      )}
+
       <p className="text-center text-xs text-[--text-muted]">Press 1–{exercise.options?.length} to select</p>
     </div>
   );

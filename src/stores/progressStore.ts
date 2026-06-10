@@ -13,6 +13,7 @@ interface ProgressStore extends ProgressState {
   setAccentColor: (color: string) => void;
   setAppleMode: (value: boolean) => void;
   setReducedGpu: (value: boolean) => void;
+  addXP: (amount: number) => void;
   setXP: (value: number) => void;
   setStreak: (value: number) => void;
   resetProgress: () => void;
@@ -113,6 +114,16 @@ export const useProgressStore = create<ProgressStore>()(
       setAppleMode: (value) => set({ appleMode: value }),
 
       setReducedGpu: (value) => set({ reducedGpu: value }),
+
+      addXP: (amount) => {
+        const s = get();
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        const newStreak = s.lastStudiedDate === yesterday ? s.streak + 1
+          : s.lastStudiedDate === today ? s.streak
+          : 1;
+        set({ xp: s.xp + amount, streak: newStreak, lastStudiedDate: today });
+      },
 
       setXP: (value) => set({ xp: value }),
 

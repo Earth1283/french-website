@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Volume2 } from 'lucide-react';
 import type { VocabItem } from '../../types';
 import { speak } from '../../utils/speech';
@@ -11,6 +12,12 @@ interface FlashCardProps {
 }
 
 export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCardProps) {
+  // Auto-play French audio when card first appears and when flipping back to front
+  useEffect(() => {
+    if (!flipped) speak(item.french);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.french, flipped]);
+
   return (
     <div className="w-full max-w-lg mx-auto">
       <div className="text-center text-xs text-[--text-muted] mb-4">

@@ -19,6 +19,7 @@ export function Review() {
   const completedLessons = useProgressStore(s => s.completedLessons);
   const srsData = useProgressStore(s => s.srsData);
   const updateSRS = useProgressStore(s => s.updateSRS);
+  const addXP = useProgressStore(s => s.addXP);
 
   const dueCards = useMemo<ReviewCard[]>(() => {
     const cards: ReviewCard[] = [];
@@ -47,6 +48,7 @@ export function Review() {
   const [idx, setIdx] = useState(0);
   const [showing, setShowing] = useState<'front' | 'back'>('front');
   const [tally, setTally] = useState({ correct: 0, wrong: 0 });
+  const [sessionXP, setSessionXP] = useState(0);
 
   const handleReveal = () => {
     setShowing('back');
@@ -57,6 +59,10 @@ export function Review() {
     if (idx >= dueCards.length) return;
     updateSRS(dueCards[idx].key, correct);
     setTally(t => correct ? { ...t, correct: t.correct + 1 } : { ...t, wrong: t.wrong + 1 });
+    if (correct) {
+      addXP(2);
+      setSessionXP(x => x + 2);
+    }
     setIdx(i => i + 1);
     setShowing('front');
   };
@@ -113,6 +119,11 @@ export function Review() {
           <p className="text-[--text-secondary]">
             {tally.correct} correct out of {total} · {pct}%
           </p>
+          {sessionXP > 0 && (
+            <div className="inline-flex items-center gap-1.5 xp-badge text-sm px-3 py-1.5">
+              ⚡ +{sessionXP} XP earned
+            </div>
+          )}
           <div className="mt-6">
             <Link to="/"><Button variant="secondary">← Back to Home</Button></Link>
           </div>

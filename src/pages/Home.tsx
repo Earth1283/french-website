@@ -52,19 +52,25 @@ export function Home() {
     return items.slice(0, 3);
   }, [completedLessons, unit12Unlocked, nextUp]);
 
-  const dueCount = useMemo(() => {
-    if (completedLessons.length === 0) return 0;
+  const { dueCount, nextReviewDate } = useMemo(() => {
+    if (completedLessons.length === 0) return { dueCount: 0, nextReviewDate: null };
     let count = 0;
+    let earliest: string | null = null;
+    const today = new Date().toISOString().slice(0, 10);
     for (const unit of UNITS) {
       for (const lesson of unit.lessons) {
         if (!completedLessons.includes(lesson.id)) continue;
         lesson.vocab.forEach((_, idx) => {
           const card = srsData[vocabKey(lesson.id, idx)] ?? defaultCard();
-          if (isDue(card)) count++;
+          if (isDue(card)) {
+            count++;
+          } else if (card.nextReview > today) {
+            if (!earliest || card.nextReview < earliest) earliest = card.nextReview;
+          }
         });
       }
     }
-    return count;
+    return { dueCount: count, nextReviewDate: earliest };
   }, [completedLessons, srsData]);
 
   const bookmarkDetails = useMemo(() => {
@@ -80,6 +86,37 @@ export function Home() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <OnboardingModal open={!onboardingDone} />
+
+      {/* Continue CTA — mobile only */}
+      {nextUp && onboardingDone && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sm:hidden mb-5"
+        >
+          <Link to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`} className="no-underline block">
+            <div
+              className="card p-4 flex items-center justify-between gap-3 border-2 transition-opacity hover:opacity-90"
+              style={{ borderColor: 'var(--accent)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl"
+                  style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
+                >
+                  {nextUp.unit.emoji}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">Continue</p>
+                  <p className="font-semibold text-sm text-[--text-primary]">{nextUp.lesson.title}</p>
+                  <p className="text-xs text-[--text-muted]">{nextUp.unit.title}</p>
+                </div>
+              </div>
+              <span className="text-[--accent] font-bold text-xl flex-shrink-0">→</span>
+            </div>
+          </Link>
+        </motion.div>
+      )}
 
       {/* Sticky-note resume widget — desktop only */}
       <AnimatePresence>
@@ -153,7 +190,7 @@ export function Home() {
       )}
 
       {/* Review banner */}
-      {dueCount > 0 && (
+      {dueCount > 0 ? (
         <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
           <Link to="/review" className="no-underline block">
             <div
@@ -178,7 +215,19 @@ export function Home() {
             </div>
           </Link>
         </motion.div>
-      )}
+      ) : nextReviewDate && completedLessons.length > 0 ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
+          <div className="card p-3 flex items-center gap-3 opacity-70">
+            <RotateCcw size={14} className="text-[--text-muted] flex-shrink-0" />
+            <p className="text-xs text-[--text-muted]">
+              All caught up! Next review due{' '}
+              <span className="font-semibold text-[--text-primary]">
+                {new Date(nextReviewDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+              </span>
+            </p>
+          </div>
+        </motion.div>
+      ) : null}
 
       {/* Hero */}
       <motion.div
