@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette, BookOpen, MessageSquare, Database, AlertTriangle,
-  ChevronDown, ChevronUp, Key, Download, RotateCcw, RefreshCw,
+  ChevronDown, ChevronUp, Key, Download, Upload, RotateCcw, RefreshCw,
   type LucideIcon,
 } from 'lucide-react';
 import { useProgressStore } from '../stores/progressStore';
@@ -45,6 +45,7 @@ export function Settings() {
   const [xpDraft, setXpDraft] = useState(String(xp));
   const [streakDraft, setStreakDraft] = useState(String(streak));
   const [keyDraft, setKeyDraft] = useState('');
+  const [importStatus, setImportStatus] = useState<'idle' | 'ok' | 'error'>('idle');
 
   useEffect(() => { setXpDraft(String(xp)); }, [xp]);
   useEffect(() => { setStreakDraft(String(streak)); }, [streak]);
@@ -55,7 +56,10 @@ export function Settings() {
       completedLessons: state.completedLessons,
       xp: state.xp,
       streak: state.streak,
+      lastStudiedDate: state.lastStudiedDate,
       earnedBadges: state.earnedBadges,
+      bookmarkedLessons: state.bookmarkedLessons,
+      srsData: state.srsData,
       unit12Mode: state.unit12Mode,
       accentColor: state.accentColor,
       exportedAt: new Date().toISOString(),
@@ -67,6 +71,41 @@ export function Settings() {
     a.download = 'bonjour-survival-progress.json';
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const raw = ev.target?.result as string;
+        const data = JSON.parse(raw);
+        const store = useProgressStore.getState();
+        // Only restore fields we recognise; ignore unknown keys
+        if (Array.isArray(data.completedLessons)) store.resetProgress();
+        if (Array.isArray(data.completedLessons)) {
+          useProgressStore.setState({
+            completedLessons: data.completedLessons ?? [],
+            xp: typeof data.xp === 'number' ? data.xp : 0,
+            streak: typeof data.streak === 'number' ? data.streak : 0,
+            lastStudiedDate: data.lastStudiedDate ?? '',
+            earnedBadges: Array.isArray(data.earnedBadges) ? data.earnedBadges : [],
+            bookmarkedLessons: Array.isArray(data.bookmarkedLessons) ? data.bookmarkedLessons : [],
+            srsData: data.srsData && typeof data.srsData === 'object' ? data.srsData : {},
+            ...(data.unit12Mode ? { unit12Mode: data.unit12Mode } : {}),
+            ...(data.accentColor ? { accentColor: data.accentColor } : {}),
+          });
+        }
+        setImportStatus('ok');
+        setTimeout(() => setImportStatus('idle'), 3000);
+      } catch {
+        setImportStatus('error');
+        setTimeout(() => setImportStatus('idle'), 3000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   }
 
   function applyXP() {
@@ -275,6 +314,25 @@ export function Settings() {
           <Button variant="secondary" size="sm" onClick={handleExport}>
             <Download size={14} /> Export
           </Button>
+        </div>
+
+        <div className="flex items-start justify-between gap-4 border-t border-[--border] pt-4">
+          <div>
+            <p className="text-sm font-semibold text-[--text-primary]">Import Progress</p>
+            <p className="text-xs text-[--text-muted] mt-0.5">Restore from a previously exported JSON file.</p>
+            {importStatus === 'ok' && (
+              <p className="text-xs font-semibold mt-1" style={{ color: 'var(--success)' }}>✓ Progress restored successfully.</p>
+            )}
+            {importStatus === 'error' && (
+              <p className="text-xs font-semibold mt-1 text-red-500">Invalid file — could not import.</p>
+            )}
+          </div>
+          <label className="cursor-pointer flex-shrink-0">
+            <input type="file" accept=".json" className="sr-only" onChange={handleImport} />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold border border-[--border] text-[--text-primary] hover:bg-[--bg-card-hover] transition-colors">
+              <Upload size={14} /> Import
+            </span>
+          </label>
         </div>
 
         <div className="border-t border-[--border] pt-4 space-y-1">

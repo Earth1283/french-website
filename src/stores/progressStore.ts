@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { ProgressState } from '../types';
 import { UNITS, A1_UNIT_IDS } from '../data/units';
 import { vocabKey, defaultCard, isDue, updateCard } from '../utils/srs';
+import { computeNewStreak, todayString } from '../utils/streak';
 
 interface ProgressStore extends ProgressState {
   completeLesson: (lessonId: string, xpEarned: number) => void;
@@ -61,11 +62,8 @@ export const useProgressStore = create<ProgressStore>()(
         const state = get();
         if (state.completedLessons.includes(lessonId)) return;
 
-        const today = new Date().toISOString().slice(0, 10);
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        const newStreak = state.lastStudiedDate === yesterday ? state.streak + 1
-          : state.lastStudiedDate === today ? state.streak
-          : 1;
+        const today = todayString();
+        const newStreak = computeNewStreak(state.lastStudiedDate, state.streak);
 
         const newCompleted = [...state.completedLessons, lessonId];
         const newXP = state.xp + xpEarned;
@@ -117,12 +115,11 @@ export const useProgressStore = create<ProgressStore>()(
 
       addXP: (amount) => {
         const s = get();
-        const today = new Date().toISOString().slice(0, 10);
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        const newStreak = s.lastStudiedDate === yesterday ? s.streak + 1
-          : s.lastStudiedDate === today ? s.streak
-          : 1;
-        set({ xp: s.xp + amount, streak: newStreak, lastStudiedDate: today });
+        set({
+          xp: s.xp + amount,
+          streak: computeNewStreak(s.lastStudiedDate, s.streak),
+          lastStudiedDate: todayString(),
+        });
       },
 
       setXP: (value) => set({ xp: value }),

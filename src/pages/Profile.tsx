@@ -5,6 +5,7 @@ import { useProgressStore, BADGES } from '../stores/progressStore';
 import { UNITS, A1_UNIT_IDS } from '../data/units';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { getLevelProgress, MAX_LEVEL } from '../utils/levels';
 
 const A1_COMPETENCIES = [
   { label: 'Emergency phrases & help-seeking', units: ['emergency'] },
@@ -32,6 +33,7 @@ export function Profile() {
 
   const totalLessons = UNITS.reduce((s, u) => s + u.lessons.length, 0);
   const overallPct = Math.round((completedLessons.length / totalLessons) * 100);
+  const levelInfo = getLevelProgress(xp);
 
   const isUnitComplete = (unitId: string) => {
     const unit = UNITS.find(u => u.id === unitId);
@@ -59,6 +61,42 @@ export function Profile() {
           </div>
         ))}
       </div>
+
+      {/* Level card */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-0.5">Level {levelInfo.level}</p>
+              <p className="text-xl font-bold text-[--text-primary]">{levelInfo.name}</p>
+            </div>
+            {levelInfo.isMaxLevel ? (
+              <span className="text-2xl">🏆</span>
+            ) : (
+              <span className="text-xs text-[--text-muted] text-right">
+                <span className="font-bold text-[--text-primary]">{levelInfo.currentLevelXP}</span>
+                {' / '}{levelInfo.levelSpan} XP<br />
+                <span className="opacity-70">to Level {levelInfo.level + 1}</span>
+              </span>
+            )}
+          </div>
+          {!levelInfo.isMaxLevel && (
+            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--border)' }}>
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: 'var(--accent)' }}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, (levelInfo.currentLevelXP / levelInfo.levelSpan) * 100)}%` }}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+              />
+            </div>
+          )}
+          {levelInfo.isMaxLevel && (
+            <p className="text-xs text-[--text-muted] italic">Maximum level reached. Félicitations !</p>
+          )}
+          <p className="text-xs text-[--text-muted] mt-2">Level {levelInfo.level} of {MAX_LEVEL}</p>
+        </div>
+      </motion.div>
 
       {/* Overall progress */}
       <div className="card p-5">
