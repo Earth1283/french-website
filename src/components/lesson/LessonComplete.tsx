@@ -60,27 +60,28 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
   return (
     <div className="w-full max-w-lg mx-auto text-center py-8 space-y-6">
       <div className="relative inline-block">
-      <motion.div
-        initial={{ scale: 0, rotate: -20 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', damping: 15, stiffness: 300 }}
-        className="text-6xl"
-      >
-        🎉
-      </motion.div>
-      <Confetti />
+        <motion.div
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+          className="text-6xl"
+        >
+          🎉
+        </motion.div>
+        <Confetti />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h2 className="text-3xl font-bold text-[--text-primary]">Lesson Complete!</h2>
-        <p className="text-[--text-secondary] mt-1">You absolute legend.</p>
+        <h2 className="text-3xl font-bold text-primary">Lesson Complete!</h2>
+        <p className="text-secondary mt-1">You absolute legend.</p>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4 }}
-        className="inline-flex items-center gap-2 bg-[--gold-light] text-yellow-700 dark:text-[--gold] px-6 py-3 rounded-xl font-bold text-xl"
+        transition={{ delay: 0.4, type: 'spring', damping: 16, stiffness: 320 }}
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xl"
+        style={{ backgroundColor: 'var(--gold-light)', color: '#b86a20', boxShadow: 'var(--shadow-1)' }}
       >
         <Trophy size={22} />
         +{xpEarned} XP
@@ -93,16 +94,21 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
           transition={{ delay: 0.6 }}
           className="space-y-2"
         >
-          <p className="text-sm font-semibold text-[--text-muted]">New badges earned:</p>
+          <p className="text-sm font-semibold text-muted">New badges earned:</p>
           {newBadges.map(id => {
             const badge = BADGES[id];
             if (!badge) return null;
             return (
               <div key={id} className="card p-3 flex items-center gap-3">
-                <span className="text-2xl">{badge.emoji}</span>
+                <span
+                  className="text-2xl w-11 h-11 flex items-center justify-center rounded-full flex-shrink-0"
+                  style={{ backgroundColor: 'var(--accent-tint)' }}
+                >
+                  {badge.emoji}
+                </span>
                 <div className="text-left">
-                  <p className="font-semibold text-sm">{badge.name}</p>
-                  <p className="text-xs text-[--text-muted]">{badge.description}</p>
+                  <p className="font-semibold text-sm text-primary">{badge.name}</p>
+                  <p className="text-xs text-muted">{badge.description}</p>
                 </div>
               </div>
             );
@@ -117,16 +123,20 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
           transition={{ delay: 0.7 }}
           className="text-left w-full"
         >
-          <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-2">
+          <p className="section-label" style={{ paddingLeft: 0 }}>
             Review your mistakes ({missedItems.length})
           </p>
-          <div className="space-y-2">
+          <div className="inset-group">
             {missedItems.map((item, i) => (
-              <div key={i} className="card p-3 flex items-start gap-3">
-                <XCircle size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
+              <div
+                key={i}
+                className="p-3 flex items-start gap-3"
+                style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
+              >
+                <XCircle size={14} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--danger)' }} />
                 <div className="min-w-0">
-                  <p className="text-xs text-[--text-muted] truncate">{item.prompt}</p>
-                  <p className="text-sm font-semibold text-[--text-primary]">{item.answer}</p>
+                  <p className="text-xs text-muted truncate">{item.prompt}</p>
+                  <p className="text-sm font-semibold text-primary">{item.answer}</p>
                 </div>
               </div>
             ))}
@@ -140,7 +150,7 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
         transition={{ delay: 0.8 }}
         className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center"
       >
-        <Link to={`/unit/${unitSlug}`}>
+        <Link to={`/unit/${unitSlug}`} className="flex flex-col">
           <Button variant="secondary">
             <Home size={16} /> Back to Unit
           </Button>
@@ -149,7 +159,7 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
           <RotateCcw size={16} /> Replay
         </Button>
         {nextLessonId && (
-          <Link to={`/unit/${unitSlug}/lesson/${nextLessonId}`}>
+          <Link to={`/unit/${unitSlug}/lesson/${nextLessonId}`} className="flex flex-col">
             <Button variant="primary">
               Next Lesson <ArrowRight size={16} />
             </Button>

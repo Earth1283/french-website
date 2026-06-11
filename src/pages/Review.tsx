@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Volume2, CheckCircle2, XCircle } from 'lucide-react';
+import { ChevronLeft, Volume2, CheckCircle2, XCircle } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { vocabKey, defaultCard, isDue } from '../utils/srs';
@@ -93,15 +93,15 @@ export function Review() {
   if (dueCards.length === 0) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 300 }} className="space-y-4">
           <div className="text-5xl">✅</div>
-          <h1 className="text-2xl font-bold text-[--text-primary]">All caught up!</h1>
-          <p className="text-[--text-secondary]">
+          <h1 className="text-2xl font-bold text-primary">All caught up!</h1>
+          <p className="text-secondary">
             No cards due right now. Complete more lessons to grow your review deck,
             or come back tomorrow.
           </p>
           <Link to="/" className="inline-block mt-4">
-            <Button variant="secondary">← Back to Home</Button>
+            <Button variant="tinted">Back to Home</Button>
           </Link>
         </motion.div>
       </div>
@@ -113,10 +113,10 @@ export function Review() {
     const pct = total > 0 ? Math.round((tally.correct / total) * 100) : 0;
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
+        <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', damping: 18, stiffness: 280 }} className="space-y-4">
           <div className="text-5xl">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
-          <h1 className="text-2xl font-bold text-[--text-primary]">Session complete!</h1>
-          <p className="text-[--text-secondary]">
+          <h1 className="text-2xl font-bold text-primary">Session complete!</h1>
+          <p className="text-secondary">
             {tally.correct} correct out of {total} · {pct}%
           </p>
           {sessionXP > 0 && (
@@ -125,7 +125,7 @@ export function Review() {
             </div>
           )}
           <div className="mt-6">
-            <Link to="/"><Button variant="secondary">← Back to Home</Button></Link>
+            <Link to="/"><Button variant="tinted">Back to Home</Button></Link>
           </div>
         </motion.div>
       </div>
@@ -140,21 +140,23 @@ export function Review() {
       <div className="flex items-center gap-3 mb-6">
         <Link
           to="/"
-          className="p-2 rounded-lg text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-card-hover] transition-colors"
+          aria-label="Back to home"
+          className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline"
+          style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
         >
-          <ArrowLeft size={18} />
+          <ChevronLeft size={20} strokeWidth={2.4} />
         </Link>
         <div className="flex-1">
-          <div className="flex items-center justify-between text-xs text-[--text-muted] mb-1">
+          <div className="flex items-center justify-between text-xs text-muted mb-1 font-medium">
             <span>Review session</span>
             <span>{idx + 1} / {dueCards.length}</span>
           </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--border)' }}>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
             <motion.div
               className="h-full rounded-full"
               style={{ backgroundColor: 'var(--accent)' }}
               animate={{ width: `${(idx / dueCards.length) * 100}%` }}
-              transition={{ duration: 0.3 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
             />
           </div>
         </div>
@@ -167,30 +169,29 @@ export function Review() {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
             className="space-y-4"
           >
             <motion.div
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', damping: 20, stiffness: 500 }}
-              className="card p-8 text-center min-h-[220px] flex flex-col items-center justify-center gap-3 cursor-pointer select-none"
+              className="card p-8 text-center min-h-[240px] flex flex-col items-center justify-center gap-3 cursor-pointer select-none"
+              style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
               onClick={handleReveal}
             >
-              <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider">
                 {card.unitEmoji} {card.lessonTitle}
               </p>
-              <p
-                className="text-3xl font-bold"
-                style={{ color: 'var(--accent)', fontFamily: 'Playfair Display, serif' }}
-              >
+              <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>
                 {card.french}
               </p>
               {card.pronunciation && (
-                <p className="text-sm text-[--text-muted] italic">/{card.pronunciation}/</p>
+                <p className="text-sm text-muted italic">/{card.pronunciation}/</p>
               )}
               <button
                 onClick={e => { e.stopPropagation(); speak(card.french); }}
-                className="mt-1 p-2 rounded-lg text-[--text-muted] hover:text-[--accent] hover:bg-[--bg-card-hover] transition-colors"
+                className="mt-1 w-10 h-10 flex items-center justify-center rounded-full ios-press cursor-pointer"
+                style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
                 aria-label="Play pronunciation"
               >
                 <Volume2 size={18} />
@@ -201,7 +202,8 @@ export function Review() {
               onClick={handleReveal}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', damping: 20, stiffness: 500 }}
-              className="w-full py-3 text-sm text-[--text-muted] border-2 border-dashed border-[--border] rounded-xl hover:border-[--accent] hover:text-[--accent] transition-colors"
+              className="w-full py-3.5 text-sm font-medium text-muted rounded-2xl cursor-pointer transition-colors hover:text-primary"
+              style={{ border: '1.5px dashed var(--border)', background: 'transparent' }}
             >
               Tap to reveal · Space / Enter
             </motion.button>
@@ -212,43 +214,59 @@ export function Review() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
             className="space-y-4"
           >
-            <div className="card p-8 min-h-[220px] flex flex-col items-center justify-center gap-3 text-center">
-              <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider">English</p>
-              <p className="text-2xl font-bold text-[--text-primary]">{card.english}</p>
+            <div
+              className="card p-8 min-h-[240px] flex flex-col items-center justify-center gap-3 text-center"
+              style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
+            >
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider">English</p>
+              <p className="text-2xl font-bold text-primary">{card.english}</p>
 
               {card.example && (
-                <div className="mt-2 p-3 rounded-xl bg-[--bg] text-left w-full">
-                  <p className="text-sm italic font-medium" style={{ color: 'var(--accent)' }}>{card.example}</p>
-                  <p className="text-xs text-[--text-muted] mt-0.5">{card.exampleTranslation}</p>
+                <div className="mt-2 p-3 text-left w-full" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
+                  <p className="text-sm italic font-medium font-display" style={{ color: 'var(--accent)' }}>{card.example}</p>
+                  <p className="text-xs text-muted mt-0.5">{card.exampleTranslation}</p>
                 </div>
               )}
 
               {card.funnyNote && (
-                <p className="text-xs text-[--text-secondary] italic border-t border-[--border] pt-2">
+                <p className="text-xs text-secondary italic pt-2" style={{ borderTop: '0.5px solid var(--hairline)' }}>
                   💬 {card.funnyNote}
                 </p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 500 }}
                 onClick={() => handleRate(false)}
-                className="flex items-center justify-center gap-2 py-4 rounded-xl border-2 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+                  color: 'var(--danger)',
+                  border: 'none',
+                }}
               >
                 <XCircle size={20} /> Not quite
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 500 }}
                 onClick={() => handleRate(true)}
-                className="flex items-center justify-center gap-2 py-4 rounded-xl border-2 font-semibold transition-colors hover:opacity-90"
-                style={{ borderColor: 'var(--success)', color: 'var(--success)' }}
+                className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--success-light)',
+                  color: 'var(--success)',
+                  border: 'none',
+                }}
               >
                 <CheckCircle2 size={20} /> Got it
-              </button>
+              </motion.button>
             </div>
-            <p className="text-center text-xs text-[--text-muted]">← Not quite · Got it →</p>
+            <p className="text-center text-xs text-muted">← Not quite · Got it →</p>
           </motion.div>
         )}
       </AnimatePresence>

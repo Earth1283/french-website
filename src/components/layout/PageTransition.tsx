@@ -7,18 +7,19 @@ interface PageTransitionProps {
   keyProp: string;
 }
 
+// iOS push/pop: forward navigations slide in from the right with a spring,
+// back navigations from the left; the outgoing page recedes slightly.
 export function PageTransition({ children, keyProp }: PageTransitionProps) {
   const navType = useNavigationType();
-  // POP = back button; everything else (PUSH/REPLACE) = forward
-  const x = navType === 'POP' ? -24 : 24;
+  const x = navType === 'POP' ? -32 : 32;
 
   return (
     <motion.div
       key={keyProp}
       initial={{ opacity: 0, x }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -x }}
-      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+      exit={{ opacity: 0, x: -x / 2, scale: 0.99 }}
+      transition={{ type: 'spring', damping: 26, stiffness: 280, mass: 0.9 }}
     >
       {children}
     </motion.div>

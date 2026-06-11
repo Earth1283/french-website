@@ -13,14 +13,14 @@ export function ProgressBar({ value, max = 100, color, height = 6, showLabel = f
   return (
     <div className={`w-full ${className}`}>
       {showLabel && (
-        <div className="flex justify-between text-xs text-[--text-muted] mb-1">
+        <div className="flex justify-between text-xs text-muted mb-1">
           <span>Progress</span>
           <span>{pct}%</span>
         </div>
       )}
       <div
         className="w-full rounded-full overflow-hidden"
-        style={{ height, backgroundColor: 'var(--border)' }}
+        style={{ height, backgroundColor: 'var(--bg-inset)', boxShadow: 'inset 0 0.5px 1.5px rgba(0,0,0,0.06)' }}
       >
         <div
           className="h-full rounded-full progress-bar-fill"

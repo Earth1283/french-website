@@ -11,6 +11,25 @@ interface FillInBlankProps {
   onWrong: () => void;
 }
 
+const STATUS_STYLES: Record<string, React.CSSProperties> = {
+  idle: {},
+  correct: {
+    borderColor: 'var(--success)',
+    backgroundColor: 'var(--success-light)',
+    boxShadow: '0 0 0 3.5px color-mix(in srgb, var(--success) 15%, transparent)',
+  },
+  typo: {
+    borderColor: '#f59e0b',
+    backgroundColor: 'color-mix(in srgb, #f59e0b 10%, var(--bg-card))',
+    boxShadow: '0 0 0 3.5px color-mix(in srgb, #f59e0b 15%, transparent)',
+  },
+  wrong: {
+    borderColor: 'var(--danger)',
+    backgroundColor: 'color-mix(in srgb, var(--danger) 8%, var(--bg-card))',
+    boxShadow: '0 0 0 3.5px color-mix(in srgb, var(--danger) 12%, transparent)',
+  },
+};
+
 export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<'idle' | 'correct' | 'typo' | 'wrong'>('idle');
@@ -29,10 +48,10 @@ export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) 
   return (
     <div className="w-full max-w-lg mx-auto space-y-4">
       <div className="card p-5">
-        <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-2">Fill in the Blank</p>
-        <p className="text-lg font-semibold text-[--text-primary] leading-snug">{exercise.prompt}</p>
+        <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Fill in the Blank</p>
+        <p className="text-lg font-semibold text-primary leading-snug">{exercise.prompt}</p>
         {exercise.hint && (
-          <p className="text-xs text-[--text-muted] italic mt-1">Hint: {exercise.hint}</p>
+          <p className="text-xs text-muted italic mt-1">Hint: {exercise.hint}</p>
         )}
       </div>
 
@@ -44,31 +63,34 @@ export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) 
             value={value}
             onChange={e => { if (status === 'idle') setValue(e.target.value); }}
             onKeyDown={e => { if (e.key === 'Enter') check(); }}
-            placeholder="Type your answer..."
+            placeholder="Type your answer"
             disabled={status !== 'idle'}
-            className={`w-full p-4 rounded-xl border-2 text-sm font-medium text-[--text-primary] bg-[--bg-card] outline-none transition-all pr-10 ${
-              status === 'correct' ? 'border-[--success] bg-green-50 dark:bg-green-900/20'
-              : status === 'typo' ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-              : status === 'wrong' ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-              : 'border-[--border] focus:border-[--accent]'
-            }`}
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            className="ios-input pr-10 text-sm font-medium"
+            style={{ padding: '1rem', ...STATUS_STYLES[status] }}
             autoFocus
           />
-          {status === 'correct' && <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-[--success]" />}
+          {status === 'correct' && <CheckCircle2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--success)' }} />}
           {status === 'typo' && <AlertCircle size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500" />}
-          {status === 'wrong' && <XCircle size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" />}
+          {status === 'wrong' && <XCircle size={18} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--danger)' }} />}
         </div>
 
         {status === 'typo' && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-            <p className="text-sm text-amber-800 dark:text-amber-300 flex-1">
+          <div
+            className="flex items-center gap-2 p-3"
+            style={{
+              backgroundColor: 'color-mix(in srgb, #f59e0b 10%, var(--bg-card))',
+              border: '1px solid color-mix(in srgb, #f59e0b 30%, transparent)',
+              borderRadius: 'var(--radius-sm)',
+            }}
+          >
+            <p className="text-sm flex-1" style={{ color: '#b45309' }}>
               Almost — watch the spelling:{' '}
-              <strong className="text-[--text-primary]">{exercise.answer}</strong>
+              <strong className="text-primary">{exercise.answer}</strong>
             </p>
             <button
               onClick={() => speak(exercise.answer)}
-              className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
+              className="w-7 h-7 flex items-center justify-center rounded-full ios-press cursor-pointer flex-shrink-0"
+              style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
               aria-label="Hear correct answer"
             >
               <Volume2 size={15} />
@@ -78,12 +100,13 @@ export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) 
 
         {status === 'wrong' && (
           <div className="flex items-center gap-2">
-            <p className="text-sm text-[--text-muted]">
-              Correct answer: <strong className="text-[--text-primary]">{exercise.answer}</strong>
+            <p className="text-sm text-muted">
+              Correct answer: <strong className="text-primary">{exercise.answer}</strong>
             </p>
             <button
               onClick={() => speak(exercise.answer)}
-              className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
+              className="w-7 h-7 flex items-center justify-center rounded-full ios-press cursor-pointer flex-shrink-0"
+              style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
               aria-label="Hear correct answer"
             >
               <Volume2 size={15} />

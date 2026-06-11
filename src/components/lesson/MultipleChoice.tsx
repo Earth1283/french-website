@@ -40,10 +40,10 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
   return (
     <div className="w-full max-w-lg mx-auto space-y-4">
       <div className="card p-5">
-        <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-2">Multiple Choice</p>
-        <p className="text-lg font-semibold text-[--text-primary] leading-snug">{exercise.prompt}</p>
+        <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Multiple Choice</p>
+        <p className="text-lg font-semibold text-primary leading-snug">{exercise.prompt}</p>
         {exercise.hint && (
-          <p className="text-xs text-[--text-muted] italic mt-1">Hint: {exercise.hint}</p>
+          <p className="text-xs text-muted italic mt-1">Hint: {exercise.hint}</p>
         )}
       </div>
 
@@ -52,43 +52,71 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
           const isCorrect = option === exercise.answer;
           const isSelected = option === selected;
 
-          let stateClass = 'border-[--border] hover:border-[--text-muted] hover:bg-[--bg-card-hover]';
-          if (answered && isSelected && isCorrect) stateClass = 'border-[--success] bg-green-50 dark:bg-green-900/20';
-          if (answered && isSelected && !isCorrect) stateClass = 'border-red-400 bg-red-50 dark:bg-red-900/20';
-          if (answered && !isSelected && isCorrect) stateClass = 'border-[--success] bg-green-50/50 dark:bg-green-900/10';
+          let stateStyle: React.CSSProperties = {
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--hairline)',
+            boxShadow: 'var(--shadow-1)',
+          };
+          if (answered && isCorrect) {
+            stateStyle = {
+              backgroundColor: 'var(--success-light)',
+              border: '1px solid color-mix(in srgb, var(--success) 40%, transparent)',
+            };
+          } else if (answered && isSelected && !isCorrect) {
+            stateStyle = {
+              backgroundColor: 'color-mix(in srgb, var(--danger) 10%, var(--bg-card))',
+              border: '1px solid color-mix(in srgb, var(--danger) 40%, transparent)',
+            };
+          }
 
           return (
             <button
               key={option}
               onClick={() => handleSelect(option)}
               disabled={answered}
-              className={`w-full p-4 rounded-xl border-2 text-left text-sm font-medium text-[--text-primary] flex items-center gap-3 transition-all ${stateClass} ${answered ? 'cursor-default' : 'cursor-pointer'}`}
+              className={`w-full p-4 text-left text-sm font-medium text-primary flex items-center gap-3 transition-all ios-press ${answered ? 'cursor-default' : 'cursor-pointer'}`}
+              style={{ ...stateStyle, borderRadius: 'var(--radius-sm)' }}
             >
-              <span className="text-xs text-[--text-muted] font-mono w-4 flex-shrink-0">{i + 1}</span>
+              <span
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[0.7rem] font-bold flex-shrink-0"
+                style={{ backgroundColor: 'var(--bg-inset)', color: 'var(--text-muted)' }}
+              >
+                {i + 1}
+              </span>
               <span className="flex-1">{option}</span>
-              <button
+              <span
                 onClick={e => { e.stopPropagation(); speak(option); }}
-                className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
-                aria-label={`Hear ${option}`}
+                role="button"
                 tabIndex={-1}
+                className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ios-press"
+                style={{ color: 'var(--text-muted)' }}
+                aria-label={`Hear ${option}`}
               >
                 <Volume2 size={14} />
-              </button>
-              {answered && isCorrect && <CheckCircle2 size={18} className="text-[--success] flex-shrink-0" />}
-              {answered && isSelected && !isCorrect && <XCircle size={18} className="text-red-500 flex-shrink-0" />}
+              </span>
+              {answered && isCorrect && <CheckCircle2 size={18} className="flex-shrink-0" style={{ color: 'var(--success)' }} />}
+              {answered && isSelected && !isCorrect && <XCircle size={18} className="flex-shrink-0" style={{ color: 'var(--danger)' }} />}
             </button>
           );
         })}
       </div>
 
       {answered && selected !== exercise.answer && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-          <p className="text-sm text-[--text-muted] flex-1">
-            Correct answer: <strong className="text-[--text-primary]">{exercise.answer}</strong>
+        <div
+          className="flex items-center gap-2 p-3"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--danger) 8%, var(--bg-card))',
+            border: '1px solid color-mix(in srgb, var(--danger) 25%, transparent)',
+            borderRadius: 'var(--radius-sm)',
+          }}
+        >
+          <p className="text-sm text-muted flex-1">
+            Correct answer: <strong className="text-primary">{exercise.answer}</strong>
           </p>
           <button
             onClick={() => speak(exercise.answer)}
-            className="p-1 rounded text-[--text-muted] hover:text-[--accent] transition-colors flex-shrink-0"
+            className="w-7 h-7 flex items-center justify-center rounded-full ios-press cursor-pointer flex-shrink-0"
+            style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
             aria-label="Hear correct answer"
           >
             <Volume2 size={15} />
@@ -96,7 +124,7 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
         </div>
       )}
 
-      <p className="text-center text-xs text-[--text-muted]">Press 1–{exercise.options?.length} to select</p>
+      <p className="text-center text-xs text-muted">Press 1–{exercise.options?.length} to select</p>
     </div>
   );
 }

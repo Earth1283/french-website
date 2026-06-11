@@ -44,47 +44,49 @@ export function Phrasebook() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold text-[--text-primary] mb-1">Phrasebook</h1>
-        <p className="text-[--text-secondary]">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <h1 className="text-3xl font-bold text-primary mb-1">Phrasebook</h1>
+        <p className="text-secondary">
           Every phrase from every lesson, searchable. {allVocab.length} phrases total.
         </p>
       </motion.div>
 
       {/* Search & filters */}
-      <div className="card p-4 mb-6 space-y-3">
+      <div className="mb-6 space-y-3">
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[--text-muted]" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search phrases, translations, or pronunciation..."
-            className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[--border] bg-[--bg] text-sm text-[--text-primary] outline-none focus:border-[--accent] transition-colors"
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            placeholder="Search phrases, translations, or pronunciation"
+            className="ios-input pl-10"
+            style={{ borderRadius: 99 }}
           />
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 500 }}
             onClick={() => setEmergencyOnly(v => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-              emergencyOnly
-                ? 'bg-red-500 text-white border-red-500'
-                : 'border-[--border] text-[--text-muted] hover:border-red-300'
-            }`}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors"
+            style={emergencyOnly
+              ? { backgroundColor: 'var(--danger)', color: '#fff', border: '1px solid transparent' }
+              : { backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--hairline)' }
+            }
           >
             <Zap size={12} /> I need this NOW
-          </button>
+          </motion.button>
 
           <div className="flex flex-wrap gap-1.5">
             <button
               onClick={() => setUnitFilter('all')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                unitFilter === 'all' && !emergencyOnly
-                  ? 'bg-[--accent] text-white'
-                  : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-card-hover]'
-              }`}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ios-press"
+              style={unitFilter === 'all' && !emergencyOnly
+                ? { backgroundColor: 'var(--accent)', color: '#fff', border: '1px solid transparent' }
+                : { backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--hairline)' }
+              }
             >
               All
             </button>
@@ -92,12 +94,11 @@ export function Phrasebook() {
               <button
                 key={u.id}
                 onClick={() => { setUnitFilter(u.id); setEmergencyOnly(false); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                  unitFilter === u.id && !emergencyOnly
-                    ? 'text-white'
-                    : 'text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-card-hover]'
-                }`}
-                style={unitFilter === u.id && !emergencyOnly ? { backgroundColor: u.color } : {}}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ios-press"
+                style={unitFilter === u.id && !emergencyOnly
+                  ? { backgroundColor: u.color, color: '#fff', border: '1px solid transparent' }
+                  : { backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--hairline)' }
+                }
               >
                 {u.emoji} {u.tagline.split(' ')[0]}
               </button>
@@ -107,9 +108,9 @@ export function Phrasebook() {
       </div>
 
       {/* Results */}
-      <div className="text-xs text-[--text-muted] mb-3">{filtered.length} phrases</div>
+      <p className="section-label">{filtered.length} phrases</p>
 
-      <div className="space-y-2">
+      {filtered.length > 0 && <div className="inset-group">
         {filtered.map((v, i) => {
           const id = `${v.unitId}-${v.lessonId}-${i}`;
           return (
@@ -117,47 +118,56 @@ export function Phrasebook() {
               key={id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: Math.min(i * 0.02, 0.3) }}
-              className="card p-4 flex items-start gap-4"
+              transition={{ delay: Math.min(i * 0.015, 0.25) }}
+              className="p-4 flex items-start gap-4"
+              style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
             >
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-[--accent]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <p className="font-bold font-display" style={{ color: 'var(--accent)' }}>
                   {v.french}
                 </p>
-                <p className="text-sm text-[--text-primary] mt-0.5">{v.english}</p>
+                <p className="text-sm text-primary mt-0.5">{v.english}</p>
                 {v.pronunciation && (
-                  <p className="text-xs text-[--text-muted] italic mt-0.5">/{v.pronunciation}/</p>
+                  <p className="text-xs text-muted italic mt-0.5">/{v.pronunciation}/</p>
                 )}
                 {v.funnyNote && (
-                  <p className="text-xs text-[--text-secondary] italic mt-1 line-clamp-2">
+                  <p className="text-xs text-secondary italic mt-1 line-clamp-2">
                     💬 {v.funnyNote}
                   </p>
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5 flex-shrink-0">
+              <div className="flex gap-1.5 flex-shrink-0">
                 <button
                   onClick={() => speak(v.french)}
-                  className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--accent] hover:bg-[--bg-card-hover] transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full ios-press cursor-pointer"
+                  style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
                   title="Play pronunciation"
+                  aria-label="Play pronunciation"
                 >
-                  <Volume2 size={15} />
+                  <Volume2 size={14} />
                 </button>
                 <button
                   onClick={() => copyPhrase(v.french, id)}
-                  className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--success] hover:bg-[--bg-card-hover] transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full ios-press cursor-pointer"
+                  style={{
+                    backgroundColor: copiedId === id ? 'var(--success-light)' : 'var(--bg-inset)',
+                    color: copiedId === id ? 'var(--success)' : 'var(--text-muted)',
+                    border: 'none',
+                  }}
                   title="Copy phrase"
+                  aria-label="Copy phrase"
                 >
-                  {copiedId === id ? <Check size={15} className="text-[--success]" /> : <Copy size={15} />}
+                  {copiedId === id ? <Check size={14} /> : <Copy size={13} />}
                 </button>
               </div>
             </motion.div>
           );
         })}
-      </div>
+      </div>}
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-[--text-muted]">
+        <div className="text-center py-16 text-muted">
           <p className="text-4xl mb-3">🔍</p>
           <p className="font-medium">No phrases found</p>
           <p className="text-sm mt-1">Try a different search term</p>

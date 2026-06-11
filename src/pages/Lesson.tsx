@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { FlashCard } from '../components/lesson/FlashCard';
@@ -106,8 +106,8 @@ export function Lesson() {
   if (!unit || !lesson) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-[--text-muted]">Lesson not found.</p>
-        <Link to="/" className="text-[--accent] text-sm mt-2 block">← Home</Link>
+        <p className="text-muted">Lesson not found.</p>
+        <Link to="/" className="text-sm mt-2 block" style={{ color: 'var(--accent)' }}>← Home</Link>
       </div>
     );
   }
@@ -143,26 +143,43 @@ export function Lesson() {
 
   if (phase === 'intro') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-12 text-center">
-        <Link to={`/unit/${slug}`} className="inline-flex items-center gap-1 text-sm text-[--text-muted] hover:text-[--text-primary] mb-8 transition-colors no-underline">
-          <ArrowLeft size={14} /> Back to {unit.title}
+      <div className="max-w-xl mx-auto px-4 py-10 text-center">
+        <Link
+          to={`/unit/${slug}`}
+          className="inline-flex items-center gap-0.5 text-[0.95rem] font-medium mb-8 no-underline ios-press"
+          style={{ color: 'var(--accent)' }}
+        >
+          <ChevronLeft size={20} strokeWidth={2.4} className="-ml-1.5" /> {unit.title}
         </Link>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-          <div className="text-5xl">{unit.emoji}</div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+          className="space-y-6"
+        >
+          <span
+            className="w-20 h-20 mx-auto rounded-[22px] flex items-center justify-center text-5xl"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${unit.color} 14%, transparent)`,
+              border: `0.5px solid color-mix(in srgb, ${unit.color} 22%, transparent)`,
+            }}
+          >
+            {unit.emoji}
+          </span>
           <div>
-            <h1 className="text-3xl font-bold text-[--text-primary]">{lesson.title}</h1>
-            <p className="text-[--text-secondary] mt-2">{lesson.subtitle}</p>
+            <h1 className="text-3xl font-bold text-primary">{lesson.title}</h1>
+            <p className="text-secondary mt-2">{lesson.subtitle}</p>
           </div>
 
-          <div className="flex items-center justify-center gap-4 text-sm text-[--text-muted]">
-            <span>📖 {lesson.vocab.length} vocab items</span>
-            <span>✏️ {lesson.exercises.length} exercises</span>
-            <span className="xp-badge">+{lesson.xpReward} XP</span>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="chip">📖 {lesson.vocab.length} vocab items</span>
+            <span className="chip">✏️ {lesson.exercises.length} exercises</span>
+            <span className="xp-badge text-sm px-3 py-1.5">+{lesson.xpReward} XP</span>
           </div>
 
           <Button size="lg" onClick={() => setPhase('flashcards')} className="w-full max-w-xs mx-auto">
-            Let's go! →
+            Let's go! <ArrowRight size={17} />
           </Button>
         </motion.div>
       </div>
@@ -190,9 +207,11 @@ export function Lesson() {
       <div className="flex items-center gap-3 mb-6">
         <Link
           to={`/unit/${slug}`}
-          className="p-2 rounded-lg text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-card-hover] transition-colors"
+          aria-label={`Back to ${unit.title}`}
+          className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
+          style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={20} strokeWidth={2.4} />
         </Link>
         <ProgressBar
           value={currentStep}
@@ -201,23 +220,30 @@ export function Lesson() {
           className="flex-1"
           color={unit.color}
         />
-        <span className="text-xs text-[--text-muted] whitespace-nowrap">
+        <span className="text-xs text-muted whitespace-nowrap font-medium">
           {currentStep}/{totalSteps}
         </span>
-        <button
+        <motion.button
+          whileTap={{ scale: 0.85 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 500 }}
           onClick={() => toggleBookmark(lesson.id)}
-          className="p-2 rounded-lg transition-colors hover:bg-[--bg-card-hover]"
+          className="w-9 h-9 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0"
+          style={{
+            backgroundColor: isBookmarked ? 'var(--accent-tint)' : 'var(--bg-card)',
+            border: '1px solid var(--hairline)',
+            boxShadow: 'var(--shadow-1)',
+          }}
           aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark lesson'}
           title={isBookmarked ? 'Remove bookmark' : 'Save for later'}
         >
           <Bookmark
-            size={16}
+            size={15}
             style={{
               fill: isBookmarked ? 'var(--accent)' : 'none',
               color: isBookmarked ? 'var(--accent)' : 'var(--text-muted)',
             }}
           />
-        </button>
+        </motion.button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -227,7 +253,7 @@ export function Lesson() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
           >
             <FlashCard
               item={lesson.vocab[cardIndex]}
@@ -256,7 +282,7 @@ export function Lesson() {
                 </Button>
               )}
             </div>
-            <p className="text-center text-xs text-[--text-muted] mt-3">← → to navigate · Space to flip</p>
+            <p className="text-center text-xs text-muted mt-3">← → to navigate · Space to flip</p>
           </motion.div>
         )}
 
@@ -266,10 +292,10 @@ export function Lesson() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
             className="space-y-4"
           >
-            <p className="text-xs text-center text-[--text-muted] font-semibold uppercase tracking-wider">
+            <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">
               Exercise {exerciseIndex + 1} of {lesson.exercises.length}
             </p>
 

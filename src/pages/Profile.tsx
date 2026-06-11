@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Flame, Zap, RotateCcw, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
 import { useProgressStore, BADGES } from '../stores/progressStore';
-import { UNITS, A1_UNIT_IDS } from '../data/units';
+import { UNITS } from '../data/units';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { getLevelProgress, MAX_LEVEL } from '../utils/levels';
@@ -41,10 +41,10 @@ export function Profile() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-7">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold text-[--text-primary]">Your Progress</h1>
-        <p className="text-[--text-secondary] text-sm mt-1">C'est magnifique!</p>
+        <h1 className="text-3xl font-bold text-primary">Your Progress</h1>
+        <p className="text-secondary text-sm mt-1 font-display italic">C'est magnifique!</p>
       </motion.div>
 
       {/* Stats row */}
@@ -53,12 +53,23 @@ export function Profile() {
           { icon: Zap, label: 'XP Earned', value: xp, color: '#F4A261' },
           { icon: Flame, label: 'Day Streak', value: streak, color: '#E63946' },
           { icon: Trophy, label: 'Units Done', value: `${completedUnits}/${UNITS.length}`, color: '#2A9D8F' },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} className="card p-4 text-center">
-            <Icon size={20} className="mx-auto mb-1.5" style={{ color }} />
-            <p className="text-xl font-bold text-[--text-primary]">{value}</p>
-            <p className="text-xs text-[--text-muted]">{label}</p>
-          </div>
+        ].map(({ icon: Icon, label, value, color }, i) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.06, type: 'spring', damping: 24, stiffness: 300 }}
+            className="card p-4 text-center"
+          >
+            <span
+              className="mx-auto mb-2 w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` }}
+            >
+              <Icon size={17} style={{ color }} />
+            </span>
+            <p className="text-xl font-bold text-primary">{value}</p>
+            <p className="text-xs text-muted">{label}</p>
+          </motion.div>
         ))}
       </div>
 
@@ -67,21 +78,21 @@ export function Profile() {
         <div className="card p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-0.5">Level {levelInfo.level}</p>
-              <p className="text-xl font-bold text-[--text-primary]">{levelInfo.name}</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-0.5">Level {levelInfo.level}</p>
+              <p className="text-xl font-bold text-primary">{levelInfo.name}</p>
             </div>
             {levelInfo.isMaxLevel ? (
               <span className="text-2xl">🏆</span>
             ) : (
-              <span className="text-xs text-[--text-muted] text-right">
-                <span className="font-bold text-[--text-primary]">{levelInfo.currentLevelXP}</span>
+              <span className="text-xs text-muted text-right">
+                <span className="font-bold text-primary">{levelInfo.currentLevelXP}</span>
                 {' / '}{levelInfo.levelSpan} XP<br />
                 <span className="opacity-70">to Level {levelInfo.level + 1}</span>
               </span>
             )}
           </div>
           {!levelInfo.isMaxLevel && (
-            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--border)' }}>
+            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: 'var(--accent)' }}
@@ -92,19 +103,19 @@ export function Profile() {
             </div>
           )}
           {levelInfo.isMaxLevel && (
-            <p className="text-xs text-[--text-muted] italic">Maximum level reached. Félicitations !</p>
+            <p className="text-xs text-muted italic">Maximum level reached. Félicitations !</p>
           )}
-          <p className="text-xs text-[--text-muted] mt-2">Level {levelInfo.level} of {MAX_LEVEL}</p>
+          <p className="text-xs text-muted mt-2">Level {levelInfo.level} of {MAX_LEVEL}</p>
         </div>
       </motion.div>
 
       {/* Overall progress */}
       <div className="card p-5">
         <div className="flex justify-between text-sm mb-2">
-          <span className="font-semibold text-[--text-primary]">Overall Progress</span>
-          <span className="text-[--text-muted]">{completedLessons.length}/{totalLessons} lessons</span>
+          <span className="font-semibold text-primary">Overall Progress</span>
+          <span className="text-muted">{completedLessons.length}/{totalLessons} lessons</span>
         </div>
-        <div className="w-full h-3 bg-[--border] rounded-full overflow-hidden">
+        <div className="w-full h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
           <motion.div
             className="h-full rounded-full"
             style={{ backgroundColor: 'var(--accent)' }}
@@ -113,35 +124,45 @@ export function Profile() {
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
-        <p className="text-right text-xs text-[--text-muted] mt-1">{overallPct}%</p>
+        <p className="text-right text-xs text-muted mt-1">{overallPct}%</p>
       </div>
 
       {/* A1 Roadmap */}
-      <div className="card overflow-hidden">
+      <div className="inset-group">
         <button
           onClick={() => setShowA1(v => !v)}
-          className="w-full p-5 flex items-center justify-between text-left"
+          className="w-full p-5 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-[var(--bg-card-hover)]"
+          style={{ background: 'transparent', border: 'none' }}
         >
           <div className="flex items-center gap-3">
-            <GraduationCap size={20} className="text-[--success]" />
+            <span
+              className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: 'var(--success-light)' }}
+            >
+              <GraduationCap size={19} style={{ color: 'var(--success)' }} />
+            </span>
             <div>
-              <p className="font-semibold text-[--text-primary]">A1 Roadmap</p>
-              <p className="text-xs text-[--text-muted]">
+              <p className="font-semibold text-primary">A1 Roadmap</p>
+              <p className="text-xs text-muted">
                 {a1Complete ? '🎓 A1 Complete! You\'re officially dangerous.' : 'Track your path to A1 certification'}
               </p>
             </div>
           </div>
-          {showA1 ? <ChevronUp size={16} className="text-[--text-muted]" /> : <ChevronDown size={16} className="text-[--text-muted]" />}
+          {showA1 ? <ChevronUp size={16} className="text-muted" /> : <ChevronDown size={16} className="text-muted" />}
         </button>
 
         {showA1 && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            className="border-t border-[--border] p-4 space-y-2"
+            className="p-4 space-y-2"
+            style={{ borderTop: '0.5px solid var(--hairline)' }}
           >
             {a1Complete && (
-              <div className="p-3 rounded-xl bg-[--success-light] text-[--success] text-sm font-semibold text-center mb-3">
+              <div
+                className="p-3 text-sm font-semibold text-center mb-3"
+                style={{ backgroundColor: 'var(--success-light)', color: 'var(--success)', borderRadius: 'var(--radius-sm)' }}
+              >
                 🎓 You've reached A1 level! Félicitations!
               </div>
             )}
@@ -152,7 +173,7 @@ export function Profile() {
                   <span className={`text-lg ${done ? 'opacity-100' : 'opacity-30 grayscale'}`}>
                     {done ? '✅' : '⬜'}
                   </span>
-                  <span className={`text-sm ${done ? 'text-[--text-primary]' : 'text-[--text-muted]'}`}>
+                  <span className={`text-sm ${done ? 'text-primary' : 'text-muted'}`}>
                     {label}
                   </span>
                 </div>
@@ -164,7 +185,7 @@ export function Profile() {
 
       {/* Badges */}
       <div>
-        <h2 className="text-lg font-bold text-[--text-primary] mb-3">Badges</h2>
+        <p className="section-label">Badges</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {Object.values(BADGES).map(badge => (
             <Badge
@@ -180,18 +201,27 @@ export function Profile() {
 
       {/* Unit breakdown */}
       <div>
-        <h2 className="text-lg font-bold text-[--text-primary] mb-3">Unit Breakdown</h2>
-        <div className="space-y-2">
-          {UNITS.map(unit => {
+        <p className="section-label">Unit Breakdown</p>
+        <div className="inset-group">
+          {UNITS.map((unit, i) => {
             const done = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
             const pct = Math.round((done / unit.lessons.length) * 100);
             return (
-              <div key={unit.id} className="card p-3 flex items-center gap-3">
-                <span className="text-lg">{unit.emoji}</span>
+              <div
+                key={unit.id}
+                className="p-3 flex items-center gap-3"
+                style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
+              >
+                <span
+                  className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
+                  style={{ backgroundColor: `color-mix(in srgb, ${unit.color} 12%, transparent)` }}
+                >
+                  {unit.emoji}
+                </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[--text-primary] truncate">{unit.title}</p>
+                  <p className="text-sm font-semibold text-primary truncate">{unit.title}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 bg-[--border] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
                       <motion.div
                         className="h-full rounded-full"
                         style={{ backgroundColor: unit.color }}
@@ -200,7 +230,7 @@ export function Profile() {
                         transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
                       />
                     </div>
-                    <span className="text-xs text-[--text-muted] whitespace-nowrap">{done}/{unit.lessons.length}</span>
+                    <span className="text-xs text-muted whitespace-nowrap">{done}/{unit.lessons.length}</span>
                   </div>
                 </div>
               </div>
@@ -210,22 +240,27 @@ export function Profile() {
       </div>
 
       {/* Reset */}
-      <div className="border-t border-[--border] pt-6">
+      <div className="pt-6" style={{ borderTop: '0.5px solid var(--hairline)' }}>
         {!confirmReset ? (
           <button
             onClick={() => setConfirmReset(true)}
-            className="flex items-center gap-2 text-sm text-[--text-muted] hover:text-red-500 transition-colors"
+            className="flex items-center gap-2 text-sm text-muted transition-colors cursor-pointer hover:text-[var(--danger)]"
+            style={{ background: 'transparent', border: 'none' }}
           >
             <RotateCcw size={14} /> Reset all progress
           </button>
         ) : (
-          <div className="card p-4 border-red-300 dark:border-red-700 space-y-3">
-            <p className="text-sm font-semibold text-[--text-primary]">Are you sure? This will wipe everything.</p>
+          <div
+            className="card p-4 space-y-3"
+            style={{ borderColor: 'color-mix(in srgb, var(--danger) 35%, transparent)' }}
+          >
+            <p className="text-sm font-semibold text-primary">Are you sure? This will wipe everything.</p>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={() => setConfirmReset(false)}>Cancel</Button>
               <button
                 onClick={() => { resetProgress(); setConfirmReset(false); }}
-                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors"
+                className="px-4 py-2 rounded-full text-white text-sm font-semibold transition-colors cursor-pointer ios-press"
+                style={{ backgroundColor: 'var(--danger)', border: 'none' }}
               >
                 Yes, reset
               </button>

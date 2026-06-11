@@ -2,9 +2,11 @@
 
 @layer base {
   :root {
+    /* ── Palette (Bonjour Survival cream / red) ── */
     --bg: #FAF7F0;
     --bg-card: #FFFFFF;
     --bg-card-hover: #F5F2EB;
+    --bg-inset: #F1EDE4;
     --text-primary: #1a1f3a;
     --text-secondary: #5a6072;
     --text-muted: #9aa0b2;
@@ -14,26 +16,61 @@
     --gold-light: #fde8d0;
     --success: #2A9D8F;
     --success-light: #d0f0ec;
+    --danger: #E03131;
+
+    /* ── Materials ── */
     --border: #E8E4DB;
-    --shadow: 0 2px 12px rgba(26, 31, 58, 0.08);
-    --shadow-hover: 0 8px 24px rgba(26, 31, 58, 0.14);
-    --radius: 14px;
-    --radius-sm: 8px;
-    --radius-lg: 20px;
+    --hairline: rgba(26, 31, 58, 0.10);
+    --glass: rgba(250, 247, 240, 0.78);
+    --glass-card: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.60);
+    --glass-highlight: rgba(255, 255, 255, 0.85);
+
+    /* ── Elevation ── */
+    --shadow-1: 0 1px 2px rgba(26, 31, 58, 0.04), 0 2px 8px rgba(26, 31, 58, 0.05);
+    --shadow-2: 0 2px 6px rgba(26, 31, 58, 0.05), 0 8px 24px rgba(26, 31, 58, 0.08);
+    --shadow-3: 0 4px 12px rgba(26, 31, 58, 0.08), 0 16px 48px rgba(26, 31, 58, 0.14);
+    --shadow: var(--shadow-1);
+    --shadow-hover: var(--shadow-2);
+
+    /* ── Geometry (continuous-corner feel) ── */
+    --radius-sm: 12px;
+    --radius: 18px;
+    --radius-lg: 26px;
+
+    /* ── Type ── */
+    --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+               'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+
+    /* ── Dynamic accent tints (iOS-style fills derived from --accent) ── */
+    --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
+    --accent-tint-strong: color-mix(in srgb, var(--accent) 18%, transparent);
+    --accent-soft-bg: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
   }
 
   .dark {
     --bg: #0f1117;
     --bg-card: #1a1f2e;
     --bg-card-hover: #232840;
+    --bg-inset: #141826;
     --text-primary: #eef0f7;
     --text-secondary: #a0a8c0;
     --text-muted: #6070a0;
     --border: #2a3050;
-    --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --hairline: rgba(238, 240, 247, 0.12);
+    --glass: rgba(15, 17, 23, 0.72);
+    --glass-card: rgba(26, 31, 46, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.45), 0 16px 48px rgba(0, 0, 0, 0.60);
     --gold-light: #3a2a10;
     --success-light: #0a2a28;
+    --accent-tint: color-mix(in srgb, var(--accent) 22%, transparent);
+    --accent-tint-strong: color-mix(in srgb, var(--accent) 30%, transparent);
+    --accent-soft-bg: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
   }
 
   * {
@@ -43,103 +80,194 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-ui);
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.5;
+    letter-spacing: -0.011em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     background-color: var(--bg);
     color: var(--text-primary);
     min-height: 100vh;
+    min-height: 100dvh;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  /* UI headings are sans with Apple-tight tracking; opt into serif with .font-display */
   h1, h2, h3, h4 {
-    font-family: 'Playfair Display', Georgia, serif;
-    line-height: 1.3;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+  }
+
+  input, textarea, button, select {
+    font-family: var(--font-ui);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
 @layer utilities {
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    transition: box-shadow 0.2s ease, transform 0.2s ease,
-                background-color 0.3s ease, border-color 0.3s ease;
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0;
   }
 
-  .card:hover {
-    box-shadow: var(--shadow-hover);
+  /* ── Surfaces ─────────────────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.3, 0.64, 1),
+                background-color 0.3s ease, border-color 0.3s ease;
   }
 
   .card-lift:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
+    box-shadow: var(--shadow-2);
   }
 
-  .text-primary {
-    color: var(--text-primary);
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 0.5px solid var(--glass-border);
   }
 
-  .text-secondary {
-    color: var(--text-secondary);
+  .glass-card {
+    background: var(--glass-card);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 0.5px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2), inset 0 0.5px 0 var(--glass-highlight);
   }
 
-  .text-muted {
-    color: var(--text-muted);
+  /* iOS press affordance — use on anything tappable */
+  .ios-press {
+    transition: transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.18s ease;
+  }
+  .ios-press:active {
+    transform: scale(0.97);
+    opacity: 0.85;
   }
 
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.65rem 1.4rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease;
-    font-family: 'Inter', sans-serif;
+  /* ── Grouped inset lists (Settings-style) ─────────────── */
+  .inset-group {
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
   }
 
-  .btn-primary:hover {
-    background: var(--accent-hover);
-    transform: translateY(-1px);
+  .inset-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+    min-height: 2.75rem;
   }
 
-  .btn-primary:active {
-    transform: translateY(0);
+  .inset-row + .inset-row,
+  .inset-divider {
+    border-top: 0.5px solid var(--hairline);
   }
 
-  .btn-secondary {
-    background: transparent;
-    color: var(--text-primary);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.65rem 1.4rem;
-    font-weight: 500;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-    font-family: 'Inter', sans-serif;
-  }
-
-  .btn-secondary:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--text-muted);
-  }
+  /* ── Text ─────────────────────────────────────────────── */
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted { color: var(--text-muted); }
 
   .french-word {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-display);
     font-style: italic;
     color: var(--accent);
   }
 
+  /* iOS section header: small caps over a group */
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding: 0 1rem;
+    margin-bottom: 0.45rem;
+  }
+
+  /* ── Buttons (iOS: filled / tinted / bordered / plain) ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 980px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    transition: background 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.18s ease;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+
+  .btn-tinted {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--accent-tint);
+    color: var(--accent);
+    border: none;
+    border-radius: 980px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    transition: background 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  .btn-tinted:hover { background: var(--accent-tint-strong); }
+  .btn-tinted:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--hairline);
+    border-radius: 980px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    box-shadow: var(--shadow-1);
+    transition: background 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  .btn-secondary:hover { background: var(--bg-card-hover); }
+  .btn-secondary:active { transform: scale(0.97); }
+
+  /* ── Badges & chips ───────────────────────────────────── */
   .xp-badge {
     display: inline-flex;
     align-items: center;
@@ -147,14 +275,13 @@
     background: var(--gold-light);
     color: #b86a20;
     border-radius: 99px;
-    padding: 0.15rem 0.6rem;
+    padding: 0.18rem 0.65rem;
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: -0.005em;
   }
 
-  .dark .xp-badge {
-    color: var(--gold);
-  }
+  .dark .xp-badge { color: var(--gold); }
 
   .a1-tag {
     display: inline-flex;
@@ -163,16 +290,73 @@
     background: var(--success-light);
     color: var(--success);
     border-radius: 99px;
-    padding: 0.15rem 0.55rem;
+    padding: 0.18rem 0.6rem;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.02em;
   }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 99px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    color: var(--text-secondary);
+  }
+
+  /* ── Inputs ───────────────────────────────────────────── */
+  .ios-input {
+    width: 100%;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--bg-inset);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    padding: 0.7rem 1rem;
+    outline: none;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  }
+  .ios-input:focus {
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 3.5px var(--accent-tint);
+  }
+  .ios-input::placeholder { color: var(--text-muted); }
+
+  /* ── Segmented control ────────────────────────────────── */
+  .seg-control {
+    display: flex;
+    background: var(--bg-inset);
+    border-radius: 12px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .seg-item {
+    flex: 1;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.18s ease;
+    position: relative;
+    font-family: var(--font-ui);
+  }
+  .seg-item[aria-pressed="true"] { color: var(--text-primary); }
 }
 
+/* ── Flip card (lesson flashcards) ── */
 .flip-card-inner {
   transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.5, 1);
 }
 
 .flip-card-inner.flipped {
@@ -217,35 +401,29 @@
   border-radius: 99px;
 }
 
-/* ── Apple-ify easter egg ── */
+/* ── Apple-ify easter egg — now a pure color skin (structure is iOS for everyone) ── */
 .apple-mode {
   --bg: #F2F2F7;
   --bg-card: #FFFFFF;
   --bg-card-hover: #E5E5EA;
+  --bg-inset: #E9E9EE;
   --accent: #007AFF;
   --accent-hover: #0062CC;
   --text-primary: #000000;
   --text-secondary: #3C3C43;
   --text-muted: #8E8E93;
   --border: #C6C6C8;
-  --radius: 10px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
+  --hairline: rgba(60, 60, 67, 0.16);
 }
 
 .apple-mode.dark {
   --bg: #000000;
   --bg-card: #1C1C1E;
   --bg-card-hover: #2C2C2E;
+  --bg-inset: #161618;
   --text-primary: #FFFFFF;
   --text-secondary: rgba(235, 235, 245, 0.6);
   --text-muted: #8E8E93;
   --border: #38383A;
-}
-
-.apple-mode,
-.apple-mode * {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
-               'Helvetica Neue', sans-serif !important;
-  letter-spacing: -0.01em;
+  --hairline: rgba(84, 84, 88, 0.5);
 }

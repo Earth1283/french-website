@@ -40,7 +40,7 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
             >
               <div className="text-center mb-5">
                 <div className="text-5xl mb-3">🕊️</div>
-                <h2 className="text-2xl font-bold text-[--text-primary] mb-2">
+                <h2 className="text-2xl font-bold text-primary mb-2 font-display">
                   We trust you.
                 </h2>
                 <p className="text-[--text-secondary] text-sm leading-relaxed">
@@ -48,7 +48,7 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
                 </p>
               </div>
 
-              <div className="space-y-3 mb-6 rounded-xl p-4" style={{ backgroundColor: 'var(--bg)' }}>
+              <div className="space-y-3 mb-6 p-4" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
                 {[
                   {
                     emoji: '🔕',
@@ -95,7 +95,7 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
             >
               <div className="text-center">
                 <div className="text-5xl mb-3">🇫🇷</div>
-                <h2 className="text-2xl font-bold text-[--text-primary] mb-2">
+                <h2 className="text-2xl font-bold text-primary mb-2 font-display">
                   Bienvenue!
                 </h2>
                 <p className="text-[--text-secondary] text-sm mb-6 leading-relaxed">
@@ -114,7 +114,12 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={() => choose('full-freedom')}
-                      className="w-full p-4 rounded-xl border-2 border-[--border] hover:border-[--accent] hover:bg-red-50 dark:hover:bg-red-900/10 text-left transition-all"
+                      className="w-full p-4 text-left transition-all cursor-pointer ios-press hover:bg-[var(--accent-tint)]"
+                      style={{
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1.5px solid var(--hairline)',
+                        backgroundColor: 'var(--bg-card)',
+                      }}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🚀</span>
@@ -127,7 +132,12 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
 
                     <button
                       onClick={() => choose('earned-reward')}
-                      className="w-full p-4 rounded-xl border-2 border-[--border] hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/10 text-left transition-all"
+                      className="w-full p-4 text-left transition-all cursor-pointer ios-press hover:bg-purple-50 dark:hover:bg-purple-900/10"
+                      style={{
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1.5px solid var(--hairline)',
+                        backgroundColor: 'var(--bg-card)',
+                      }}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">🔓</span>

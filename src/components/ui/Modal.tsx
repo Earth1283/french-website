@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -9,36 +10,61 @@ interface ModalProps {
   closeable?: boolean;
 }
 
+// Mobile: iOS sheet sliding up from the bottom with a grabber.
+// Desktop (sm+): centered card with a spring scale-in.
 export function Modal({ open, onClose, children, title, closeable = true }: ModalProps) {
+  useEffect(() => {
+    if (!open || !closeable || !onClose) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, closeable, onClose]);
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          role="dialog"
+          aria-modal="true"
         >
           <motion.div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40"
+            style={{ backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
             onClick={closeable ? onClose : undefined}
           />
           <motion.div
-            className="relative card p-6 w-full max-w-md z-10"
-            initial={{ scale: 0.9, y: 20, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.9, y: 20, opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="relative z-10 w-full sm:max-w-md max-h-[90dvh] overflow-y-auto p-6 sm:p-6 rounded-t-[26px] rounded-b-none sm:rounded-[26px]"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              boxShadow: 'var(--shadow-3)',
+              border: '0.5px solid var(--hairline)',
+              paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
+            }}
+            initial={{ y: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : 24, scale: 0.96, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : 24, scale: 0.96, opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           >
+            {/* Sheet grabber — mobile only */}
+            <div
+              className="sm:hidden mx-auto mb-4 rounded-full"
+              style={{ width: 36, height: 5, backgroundColor: 'var(--hairline)' }}
+            />
             {(title || closeable) && (
               <div className="flex items-center justify-between mb-4">
-                {title && <h2 className="text-xl font-bold text-[--text-primary]">{title}</h2>}
+                {title && <h2 className="text-xl font-bold text-primary">{title}</h2>}
                 {closeable && onClose && (
                   <button
                     onClick={onClose}
-                    className="ml-auto p-1 rounded-lg text-[--text-muted] hover:text-[--text-primary] hover:bg-[--bg-card-hover] transition-colors"
+                    aria-label="Close"
+                    className="ml-auto p-1.5 rounded-full ios-press cursor-pointer"
+                    style={{ color: 'var(--text-muted)', backgroundColor: 'var(--bg-inset)', border: 'none' }}
                   >
-                    <X size={18} />
+                    <X size={16} strokeWidth={2.5} />
                   </button>
                 )}
               </div>

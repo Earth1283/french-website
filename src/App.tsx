@@ -48,6 +48,7 @@ function AppContent() {
   const darkMode = useProgressStore(s => s.darkMode);
   const accentColor = useProgressStore(s => s.accentColor);
   const appleMode = useProgressStore(s => s.appleMode);
+  const reducedGpu = useProgressStore(s => s.reducedGpu);
 
   // Dismiss the HTML loading screen once the app shell is mounted
   useEffect(() => {
@@ -70,7 +71,7 @@ function AppContent() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       <Navbar />
-      <main className={appleMode ? 'pb-28 sm:pb-0' : 'pb-16 sm:pb-0'}>
+      <main className={reducedGpu ? 'pb-16 sm:pb-0' : 'pb-28 sm:pb-0'}>
         <AnimatedRoutes />
       </main>
       <BottomNav />
