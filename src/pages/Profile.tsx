@@ -192,9 +192,12 @@ export function Profile() {
                   <p className="text-sm font-semibold text-[--text-primary] truncate">{unit.title}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex-1 h-1.5 bg-[--border] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full progress-bar-fill"
-                        style={{ width: `${pct}%`, backgroundColor: unit.color }}
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ backgroundColor: unit.color }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
                       />
                     </div>
                     <span className="text-xs text-[--text-muted] whitespace-nowrap">{done}/{unit.lessons.length}</span>

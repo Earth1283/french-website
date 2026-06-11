@@ -170,7 +170,9 @@ export function Review() {
             transition={{ duration: 0.2 }}
             className="space-y-4"
           >
-            <div
+            <motion.div
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 500 }}
               className="card p-8 text-center min-h-[220px] flex flex-col items-center justify-center gap-3 cursor-pointer select-none"
               onClick={handleReveal}
             >
@@ -193,14 +195,16 @@ export function Review() {
               >
                 <Volume2 size={18} />
               </button>
-            </div>
+            </motion.div>
 
-            <button
+            <motion.button
               onClick={handleReveal}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 500 }}
               className="w-full py-3 text-sm text-[--text-muted] border-2 border-dashed border-[--border] rounded-xl hover:border-[--accent] hover:text-[--accent] transition-colors"
             >
               Tap to reveal · Space / Enter
-            </button>
+            </motion.button>
           </motion.div>
         ) : (
           <motion.div

@@ -98,7 +98,7 @@ export function UnitDetail() {
                   to={`/unit/${unit.slug}/lesson/${lesson.id}`}
                   className="no-underline block"
                 >
-                  <div className="card card-lift p-4 flex items-center gap-4">
+                  <motion.div whileTap={{ scale: 0.97 }} transition={{ type: 'spring', damping: 20, stiffness: 500 }} className="card card-lift p-4 flex items-center gap-4">
                     {done
                       ? <CheckCircle2 size={22} style={{ color: unit.color, flexShrink: 0 }} />
                       : <Circle size={22} className="text-[--border] flex-shrink-0" />
@@ -113,7 +113,7 @@ export function UnitDetail() {
                       <span className="xp-badge">+{lesson.xpReward} XP</span>
                       <ChevronRight size={16} className="text-[--text-muted]" />
                     </div>
-                  </div>
+                  </motion.div>
                 </Link>
               </motion.div>
             );

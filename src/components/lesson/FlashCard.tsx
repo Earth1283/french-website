@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
+import type { PanInfo } from 'framer-motion';
 import type { VocabItem } from '../../types';
 import { speak } from '../../utils/speech';
 
@@ -11,6 +13,8 @@ interface FlashCardProps {
   onFlipToggle: () => void;
 }
 
+const SWIPE_THRESHOLD = 50;
+
 export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCardProps) {
   // Auto-play French audio when card first appears and when flipping back to front
   useEffect(() => {
@@ -18,16 +22,28 @@ export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCa
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.french, flipped]);
 
+  function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    if (Math.abs(info.offset.x) > SWIPE_THRESHOLD) {
+      onFlipToggle();
+    }
+  }
+
   return (
     <div className="w-full max-w-lg mx-auto">
       <div className="text-center text-xs text-[--text-muted] mb-4">
-        Card {index + 1} of {total} — click to flip
+        Card {index + 1} of {total} — tap or swipe to flip
       </div>
 
-      <div
-        className="relative w-full cursor-pointer"
+      <motion.div
+        className="relative w-full cursor-grab active:cursor-grabbing"
         style={{ perspective: '1000px', height: 280 }}
+        drag="x"
+        dragSnapToOrigin
+        dragElastic={0.2}
+        dragConstraints={{ left: 0, right: 0 }}
+        onDragEnd={handleDragEnd}
         onClick={onFlipToggle}
+        whileTap={{ scale: 0.98 }}
       >
         <div className={`flip-card-inner absolute inset-0 ${flipped ? 'flipped' : ''}`}>
           {/* Front */}
@@ -49,7 +65,8 @@ export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCa
           </div>
 
           {/* Back */}
-          <div className="flip-card-back absolute inset-0 card flex flex-col items-center justify-center p-8 text-center gap-3"
+          <div
+            className="flip-card-back absolute inset-0 card flex flex-col items-center justify-center p-8 text-center gap-3"
             style={{ background: 'var(--bg-card)' }}
           >
             <div className="text-xs font-semibold text-[--text-muted] uppercase tracking-wider mb-2">English</div>
@@ -69,7 +86,7 @@ export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCa
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

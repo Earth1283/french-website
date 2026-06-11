@@ -19,6 +19,7 @@ export function UnitCard({ unit, progress, isLocked, index }: UnitCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      whileTap={isLocked ? {} : { scale: 0.97 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       className={`card card-lift p-5 flex flex-col gap-3 relative overflow-hidden cursor-pointer ${
         isLocked ? 'opacity-70' : ''

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Trophy, ArrowRight, Home, RotateCcw, XCircle } from 'lucide-react';
@@ -18,9 +19,47 @@ interface LessonCompleteProps {
   missedItems?: MissedItem[];
 }
 
+const CONFETTI_COLORS = ['#E63946', '#F4A261', '#2A9D8F', '#6A4C93', '#E9C46A', '#3B82F6', '#EC4899'];
+
+function Confetti() {
+  const particles = useMemo(() =>
+    Array.from({ length: 26 }, (_, i) => ({
+      id: i,
+      x: (Math.random() - 0.5) * 340,
+      y: -(Math.random() * 220 + 80),
+      rotate: Math.random() * 720 - 360,
+      scale: Math.random() * 0.6 + 0.5,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      delay: Math.random() * 0.15,
+    }))
+  , []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+      {particles.map(p => (
+        <motion.div
+          key={p.id}
+          initial={{ x: 0, y: 0, opacity: 1, scale: p.scale, rotate: 0 }}
+          animate={{ x: p.x, y: p.y, opacity: 0, scale: p.scale * 0.4, rotate: p.rotate }}
+          transition={{ duration: 0.9 + Math.random() * 0.4, delay: p.delay, ease: 'easeOut' }}
+          style={{
+            position: 'absolute',
+            width: p.shape === 'rect' ? 8 : 7,
+            height: p.shape === 'rect' ? 12 : 7,
+            borderRadius: p.shape === 'circle' ? '50%' : 2,
+            backgroundColor: p.color,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, onReplay, missedItems }: LessonCompleteProps) {
   return (
     <div className="w-full max-w-lg mx-auto text-center py-8 space-y-6">
+      <div className="relative inline-block">
       <motion.div
         initial={{ scale: 0, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
@@ -29,6 +68,8 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
       >
         🎉
       </motion.div>
+      <Confetti />
+      </div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <h2 className="text-3xl font-bold text-[--text-primary]">Lesson Complete!</h2>
@@ -97,7 +138,7 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="flex gap-3 justify-center flex-wrap"
+        className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center"
       >
         <Link to={`/unit/${unitSlug}`}>
           <Button variant="secondary">
