@@ -80,11 +80,66 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
                 Sounds good →
               </Button>
 
-              <StepDots total={2} current={0} />
+              <StepDots total={3} current={0} />
             </motion.div>
           )}
 
           {step === 1 && (
+            <motion.div
+              key="privacy"
+              variants={SLIDE}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={SLIDE_TRANSITION}
+            >
+              <div className="text-center mb-5">
+                <div className="text-5xl mb-3">🔒</div>
+                <h2 className="text-2xl font-bold text-primary mb-2 font-display">
+                  Your data stays yours.
+                </h2>
+                <p className="text-[--text-secondary] text-sm leading-relaxed">
+                  Here's exactly how we handle your info — and your wallet.
+                </p>
+              </div>
+
+              <div className="space-y-3 mb-6 p-4" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
+                {[
+                  {
+                    emoji: '📱',
+                    title: 'Nothing is ever sent to a server.',
+                    desc: 'Your progress, streak, XP, and settings live entirely in your browser. There is no account, no tracking, no analytics.',
+                  },
+                  {
+                    emoji: '🔑',
+                    title: 'Your Gemini API key stays local.',
+                    desc: 'If you add a key for Conversation mode, it is stored only on your device and sent only to Google — directly, to complete your API request. We never see it.',
+                  },
+                  {
+                    emoji: '💸',
+                    title: 'Free. Free forever.',
+                    desc: 'No subscription, no paywall, no "freemium" — there will never be a locked feature with a price tag on it.',
+                  },
+                ].map(({ emoji, title, desc }) => (
+                  <div key={title} className="flex gap-3 items-start">
+                    <span className="text-xl leading-none mt-0.5">{emoji}</span>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-[--text-primary]">{title}</p>
+                      <p className="text-xs text-[--text-muted] leading-relaxed mt-0.5">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button variant="primary" className="w-full" onClick={() => setStep(2)}>
+                Got it →
+              </Button>
+
+              <StepDots total={3} current={1} />
+            </motion.div>
+          )}
+
+          {step === 2 && (
             <motion.div
               key="unit12"
               variants={SLIDE}
@@ -154,7 +209,7 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
                   No prerequisites on anything else. Skip whatever you want.
                 </p>
 
-                <StepDots total={2} current={1} />
+                <StepDots total={3} current={2} />
               </div>
             </motion.div>
           )}
