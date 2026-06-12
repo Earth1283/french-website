@@ -83,7 +83,7 @@ export function Navbar() {
                       <motion.span
                         layoutId="desktop-nav-pill"
                         className="absolute inset-0 rounded-full"
-                        style={{ backgroundColor: 'var(--accent)' }}
+                        style={{ backgroundColor: 'var(--accent)', zIndex: 0 }}
                         transition={{ type: 'spring', damping: 26, stiffness: 380 }}
                       />
                     )}

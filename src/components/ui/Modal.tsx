@@ -33,7 +33,7 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
         >
           <motion.div
             className="absolute inset-0 bg-black/40"
-            style={{ backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+            style={{ backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', zIndex: 0 }}
             onClick={closeable ? onClose : undefined}
           />
           <motion.div
