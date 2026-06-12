@@ -1,4 +1,6 @@
 import type { Unit } from '../types';
+import { pronunciationLessons } from './lessons/pronunciation';
+import { buildingBlocksLessons } from './lessons/building-blocks';
 import { emergencyLessons } from './lessons/emergency';
 import { foodLessons } from './lessons/food';
 import { directionsLessons } from './lessons/directions';
@@ -14,8 +16,39 @@ import { slangLessons } from './lessons/slang';
 import { trainsLessons } from './lessons/trains';
 import { cultureLessons } from './lessons/culture';
 import { cinemaLessons } from './lessons/cinema';
+import { identityLessons } from './lessons/identity';
+import { weatherLessons } from './lessons/weather';
+import { plansLessons } from './lessons/plans';
 
 export const UNITS: Unit[] = [
+  {
+    id: 'pronunciation',
+    slug: 'pronunciation',
+    title: 'Your Mouth Is Lying to You',
+    emoji: '👄',
+    tagline: 'French Pronunciation',
+    funnyDescription: 'The French "r" sounds like gentle gargling. The "u" has no English equivalent. Half the letters you see are silent. This unit exists so your first spoken word isn\'t a disaster.',
+    color: '#3B82F6',
+    accentColor: '#60a5fa',
+    lessons: pronunciationLessons,
+    isPreA1: true,
+    isA1: false,
+    isBeyondA1: false,
+  },
+  {
+    id: 'building-blocks',
+    slug: 'building-blocks',
+    title: 'The Vocab You\'re Missing',
+    emoji: '🎨',
+    tagline: 'Colors, Days & Months',
+    funnyDescription: 'Colors go after the noun. Days aren\'t capitalized. Months aren\'t either. The calendar week starts on Monday. These are the building blocks everything else is built on.',
+    color: '#10B981',
+    accentColor: '#34d399',
+    lessons: buildingBlocksLessons,
+    isPreA1: true,
+    isA1: false,
+    isBeyondA1: false,
+  },
   {
     id: 'emergency',
     slug: 'emergency',
@@ -131,6 +164,48 @@ export const UNITS: Unit[] = [
     accentColor: '#f7b87a',
     lessons: smalltalkLessons,
     isA1: true,
+    isBeyondA1: false,
+  },
+  {
+    id: 'identity',
+    slug: 'identity',
+    title: 'Who Even Are You?',
+    emoji: '🙋',
+    tagline: 'Nationality, Profession & Family',
+    funnyDescription: 'You\'ve survived the basics. Now someone asks where you\'re from, what you do, and whether you have kids — all in French. Learn to answer without accidentally claiming to be a country.',
+    color: '#8B5CF6',
+    accentColor: '#a78bfa',
+    lessons: identityLessons,
+    isA1: false,
+    isA1A2: true,
+    isBeyondA1: false,
+  },
+  {
+    id: 'weather',
+    slug: 'weather',
+    title: 'The Forecast for Awkward Silence',
+    emoji: '🌦️',
+    tagline: 'Weather & Seasons',
+    funnyDescription: 'Weather is the universal small-talk opener in every culture — and the French have particularly strong opinions about theirs. "Il fait beau" is not just an observation; it\'s an invitation.',
+    color: '#0EA5E9',
+    accentColor: '#38bdf8',
+    lessons: weatherLessons,
+    isA1: false,
+    isA1A2: true,
+    isBeyondA1: false,
+  },
+  {
+    id: 'plans',
+    slug: 'plans',
+    title: 'Actually Doing Things',
+    emoji: '📅',
+    tagline: 'Time, Plans & Reservations',
+    funnyDescription: 'Telling the time in French requires more precision than you\'d think. Making a rendez-vous is a social contract. Booking a restaurant table involves real stakes. Let\'s sort all of this out.',
+    color: '#F59E0B',
+    accentColor: '#fbbf24',
+    lessons: plansLessons,
+    isA1: false,
+    isA1A2: true,
     isBeyondA1: false,
   },
   {

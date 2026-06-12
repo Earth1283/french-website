@@ -50,7 +50,17 @@ export function UnitCard({ unit, progress, isLocked, index }: UnitCardProps) {
               ✓
             </span>
           )}
+          {unit.isPreA1 && (
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+              Pre-A1
+            </span>
+          )}
           {unit.isA1 && !unit.isBeyondA1 && <span className="a1-tag">A1</span>}
+          {unit.isA1A2 && (
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300">
+              A1→A2
+            </span>
+          )}
           {unit.isBeyondA1 && (
             <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300">
               Bonus

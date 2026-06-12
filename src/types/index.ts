@@ -43,7 +43,9 @@ export interface Unit {
   color: string;
   accentColor: string;
   lessons: Lesson[];
+  isPreA1?: boolean;
   isA1: boolean;
+  isA1A2?: boolean;
   isBeyondA1: boolean;
 }
 
