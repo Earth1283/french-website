@@ -94,7 +94,7 @@ export function BottomNav() {
                   <motion.span
                     layoutId="bottom-nav-bubble"
                     className="absolute inset-0 rounded-full"
-                    style={{ backgroundColor: 'var(--accent-tint)' }}
+                    style={{ backgroundColor: 'var(--accent-tint)', zIndex: 0 }}
                     transition={{ type: 'spring', damping: 22, stiffness: 380 }}
                   />
                 )}
@@ -104,7 +104,8 @@ export function BottomNav() {
                   initial={{ scale: active ? 0.68 : 1 }}
                   animate={{ scale: 1 }}
                   transition={POP_SPRING}
-                  className="relative z-10 flex"
+                  className="relative flex"
+                  style={{ zIndex: 1 }}
                 >
                   <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
                 </motion.span>
