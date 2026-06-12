@@ -19,6 +19,7 @@ import { cinemaLessons } from './lessons/cinema';
 import { identityLessons } from './lessons/identity';
 import { weatherLessons } from './lessons/weather';
 import { plansLessons } from './lessons/plans';
+import { vieFrancaiseLessons } from './lessons/vie-francaise';
 
 export const UNITS: Unit[] = [
   {
@@ -204,6 +205,20 @@ export const UNITS: Unit[] = [
     color: '#F59E0B',
     accentColor: '#fbbf24',
     lessons: plansLessons,
+    isA1: false,
+    isA1A2: true,
+    isBeyondA1: false,
+  },
+  {
+    id: 'vie-francaise',
+    slug: 'vie-francaise',
+    title: 'Vivre à la Française',
+    emoji: '🥂',
+    tagline: 'The Apéro, the Market & the Art of Slowing Down',
+    funnyDescription: 'L\'apéro is not a drink, it\'s a philosophy. The market is not a supermarket, it\'s a ritual. Sitting at a café for two hours is not wasting time, it\'s living correctly. This unit explains all of it.',
+    color: '#9B2335',
+    accentColor: '#c44',
+    lessons: vieFrancaiseLessons,
     isA1: false,
     isA1A2: true,
     isBeyondA1: false,

@@ -151,4 +151,74 @@ export const cultureLessons: Lesson[] = [
       },
     ],
   },
+  {
+    id: 'culture-3',
+    title: 'The French Meal: A 4-Act Play',
+    subtitle: 'Entrée, plat, fromage, dessert. In that order. Always.',
+    xpReward: 25,
+    vocab: [
+      {
+        french: 'L\'entrée',
+        english: 'The starter',
+        pronunciation: 'lɑ̃tʁe',
+        funnyNote: 'WARNING: "entrée" in France means the STARTER, not the main course. This is the opposite of American usage and has caused many ruined dinners.',
+      },
+      {
+        french: 'Le plat (principal)',
+        english: 'The main course',
+        pronunciation: 'lə pla pʁɛ̃sipal',
+        funnyNote: 'The main event. In a proper French meal this arrives after the starter and before the cheese. Not before or during. There is an order.',
+      },
+      {
+        french: 'Le fromage',
+        english: 'The cheese course',
+        pronunciation: 'lə fʁomaʒ',
+        funnyNote: 'Cheese comes BEFORE dessert in France. This surprises almost everyone. It\'s not negotiable. The cheese course is a palate bridge between savoury and sweet.',
+      },
+      {
+        french: 'Le dessert',
+        english: 'Dessert',
+        pronunciation: 'lə desɛʁ',
+        funnyNote: 'Comes last. If someone serves cheese after dessert, a small part of France weeps.',
+      },
+      {
+        french: 'Le digestif',
+        english: 'The after-dinner drink',
+        pronunciation: 'lə diʒɛstif',
+        funnyNote: 'Cognac, Armagnac, Calvados, Chartreuse. The French believe a small shot of something strong helps digestion. Science is uncertain. The tradition is not.',
+      },
+      {
+        french: 'Bon appétit !',
+        english: 'Enjoy your meal!',
+        pronunciation: 'bɔn apeti',
+        funnyNote: 'Said by the host or whoever serves the food, before everyone begins eating. Do not start eating before the host says it. This is not a suggestion.',
+      },
+      {
+        french: 'C\'est convivial',
+        english: 'It\'s warm and sociable',
+        pronunciation: 'sɛ kɔ̃vivjal',
+        funnyNote: '"Convivial" in French doesn\'t mean slightly jolly — it means genuinely warm, social, and life-affirming. The French apply this word to good meals, good company, and any gathering worth attending.',
+      },
+    ],
+    exercises: [
+      {
+        type: 'multiple-choice',
+        prompt: 'In a French meal, what comes after the plat (main course) and BEFORE dessert?',
+        answer: 'Le fromage',
+        options: ['Le pain', 'Le café', 'Le fromage', 'L\'entrée'],
+      },
+      {
+        type: 'multiple-choice',
+        prompt: '"L\'entrée" in French means:',
+        answer: 'The starter',
+        options: ['The main course', 'The entrance', 'The starter', 'The dessert'],
+      },
+      {
+        type: 'translation',
+        prompt: 'What do you say before everyone starts eating?',
+        answer: 'Bon appétit !',
+        hint: 'The host always says this first',
+      },
+    ],
+  },
 ];

@@ -247,7 +247,7 @@ export function Home() {
           <span className="french-word">to France.</span>
         </h1>
         <p className="text-secondary text-lg max-w-xl mx-auto">
-          20 units of practical French — from your very first sound to real conversation.
+          21 units of practical French — from your very first sound to real conversation.
           Funny. Skippable. Honest about how weird French is.
         </p>
 
