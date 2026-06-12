@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, RotateCcw, ChevronRight, Sparkles } from 'lucide-react';
+import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { UnitCard } from '../components/home/UnitCard';
@@ -10,8 +10,19 @@ import { A1Banner } from '../components/home/A1Banner';
 import { ProgressBar } from '../components/layout/ProgressBar';
 import { vocabKey, defaultCard, isDue } from '../utils/srs';
 
+function fuzzyMatch(query: string, target: string): boolean {
+  const q = query.toLowerCase();
+  const t = target.toLowerCase();
+  let qi = 0;
+  for (let i = 0; i < t.length && qi < q.length; i++) {
+    if (t[i] === q[qi]) qi++;
+  }
+  return qi === q.length;
+}
+
 export function Home() {
   const { completedLessons, onboardingDone, isUnit12Unlocked, streak, xp, bookmarkedLessons, srsData } = useProgressStore();
+  const [searchQuery, setSearchQuery] = useState('');
   const unit12Unlocked = isUnit12Unlocked();
 
   const totalLessons = getTotalLessons();
@@ -284,24 +295,66 @@ export function Home() {
         </motion.div>
       )}
 
-      {/* Unit Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {UNITS.map((unit, i) => {
+      {/* Unit Search */}
+      <div className="relative mb-6">
+        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+        <input
+          type="text"
+          placeholder="Search units…"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="ios-input w-full pl-9 pr-4"
+        />
+      </div>
+
+      {/* Unit Grid — grouped by level, or flat filtered results */}
+      {(() => {
+        const unitWithMeta = UNITS.map((unit, i) => {
           const completedCount = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
           const progress = Math.round((completedCount / unit.lessons.length) * 100);
           const isLocked = unit.id === 'slang' && !unit12Unlocked;
+          return { unit, progress, isLocked, index: i };
+        });
 
-          return (
-            <UnitCard
-              key={unit.id}
-              unit={unit}
-              progress={progress}
-              isLocked={isLocked}
-              index={i}
-            />
+        if (searchQuery.trim()) {
+          const results = unitWithMeta.filter(({ unit }) =>
+            fuzzyMatch(searchQuery.trim(), unit.title + ' ' + unit.tagline)
           );
-        })}
-      </div>
+          return results.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {results.map(({ unit, progress, isLocked, index }) => (
+                <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} index={index} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-muted py-10">No units match "{searchQuery}"</p>
+          );
+        }
+
+        const sections: Array<{ label: string; units: typeof unitWithMeta }> = [
+          { label: 'Getting Started', units: unitWithMeta.filter(({ unit }) => unit.isPreA1) },
+          { label: 'Core French', units: unitWithMeta.filter(({ unit }) => unit.isA1 && !unit.isPreA1 && !unit.isA1A2 && !unit.isBeyondA1) },
+          { label: 'Going Further', units: unitWithMeta.filter(({ unit }) => unit.isA1A2) },
+          { label: 'Bonus', units: unitWithMeta.filter(({ unit }) => unit.isBeyondA1) },
+        ];
+
+        return (
+          <div className="space-y-8">
+            {sections.map(({ label, units }) =>
+              units.length === 0 ? null : (
+                <div key={label}>
+                  <p className="section-label">{label}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {units.map(({ unit, progress, isLocked, index }) => (
+                      <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} index={index} />
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        );
+      })()}
 
       <motion.p
         initial={{ opacity: 0 }}
