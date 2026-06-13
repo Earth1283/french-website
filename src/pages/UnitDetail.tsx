@@ -70,7 +70,7 @@ export function UnitDetail() {
                 <h1 className="text-2xl font-bold text-primary">{unit.title}</h1>
                 {unit.isA1 && <span className="a1-tag">A1</span>}
                 {unit.isBeyondA1 && (
-                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300">
+                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-600 dark:text-white">
                     Bonus
                   </span>
                 )}
