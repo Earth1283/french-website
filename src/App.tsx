@@ -53,15 +53,30 @@ const ACCENT_HOVER: Record<string, string> = {
   '#0EA5E9': '#0284c7',
 };
 
+// Full-bleed ambient pages (Landing "/", Focus "/focus") are rendered OUTSIDE
+// the AnimatePresence `mode="wait"` transition system. They don't use the iOS
+// push/pop slide, and keeping them out avoids a wait-deadlock where navigating
+// away mid-transition could leave the outgoing full-screen page (and its fixed
+// backdrop) stuck over the next route. Each ambient page handles its own
+// entrance animation internally.
+function AmbientRoutes() {
+  return (
+    <Suspense fallback={null}>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/focus" element={<Focus />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
   return (
     <Suspense fallback={null}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Landing />} />
           <Route path="/learn" element={<PageTransition keyProp="/learn"><Home /></PageTransition>} />
-          <Route path="/focus" element={<Focus />} />
           <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
           <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
           <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
@@ -106,13 +121,23 @@ function AppContent() {
     document.documentElement.classList.toggle('apple-mode', appleMode);
   }, [appleMode]);
 
+  // Ambient pages get a bare, chrome-less shell; everything else gets the app
+  // chrome (nav + padded main) with the animated route transitions.
+  if (isAmbient) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+        <AmbientRoutes />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      {!isAmbient && <Navbar />}
-      <main className={isAmbient ? '' : reducedGpu ? 'pb-16 sm:pb-0' : 'pb-28 sm:pb-0'}>
+      <Navbar />
+      <main className={reducedGpu ? 'pb-16 sm:pb-0' : 'pb-28 sm:pb-0'}>
         <AnimatedRoutes />
       </main>
-      {!isAmbient && <BottomNav />}
+      <BottomNav />
     </div>
   );
 }

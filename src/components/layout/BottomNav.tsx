@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BookOpen, MessageSquare, User, Settings } from 'lucide-react';
+import { Home, BookOpen, MessageSquare, User, Settings, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 
 const NAV_ITEMS = [
   { to: '/learn', icon: Home, label: 'Home' },
+  { to: '/focus', icon: Timer, label: 'Focus' },
   { to: '/phrasebook', icon: BookOpen, label: 'Phrases' },
   { to: '/converse', icon: MessageSquare, label: 'Converse' },
   { to: '/profile', icon: User, label: 'Profile' },
