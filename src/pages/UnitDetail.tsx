@@ -14,7 +14,7 @@ export function UnitDetail() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <p className="text-muted">Unit not found.</p>
-        <Link to="/" className="text-sm mt-2 block" style={{ color: 'var(--accent)' }}>← Back to home</Link>
+        <Link to="/learn" className="text-sm mt-2 block" style={{ color: 'var(--accent)' }}>← Back to home</Link>
       </div>
     );
   }
@@ -32,7 +32,7 @@ export function UnitDetail() {
         </span>
         <h2 className="text-2xl font-bold mb-2 text-primary">Not yet!</h2>
         <p className="text-secondary">Complete 2 units to unlock this one.</p>
-        <Link to="/">
+        <Link to="/learn">
           <Button variant="tinted" className="mt-5">Back to Home</Button>
         </Link>
       </div>
@@ -45,7 +45,7 @@ export function UnitDetail() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       {/* iOS back affordance */}
       <Link
-        to="/"
+        to="/learn"
         className="inline-flex items-center gap-0.5 text-[0.95rem] font-medium mb-5 no-underline ios-press"
         style={{ color: 'var(--accent)' }}
       >

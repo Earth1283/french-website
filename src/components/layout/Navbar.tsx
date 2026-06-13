@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings } from 'lucide-react';
+import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 
 const NAV_ITEMS = [
-  { to: '/', icon: Home, label: 'Home' },
+  { to: '/learn', icon: Home, label: 'Home' },
+  { to: '/focus', icon: Timer, label: 'Focus' },
   { to: '/phrasebook', icon: BookOpen, label: 'Phrases' },
   { to: '/converse', icon: MessageSquare, label: 'Converse' },
   { to: '/profile', icon: User, label: 'Profile' },
@@ -40,7 +41,7 @@ export function Navbar() {
     >
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <motion.div whileTap={{ scale: 0.94 }} transition={TAP_SPRING}>
-          <Link to="/" className="flex items-center gap-2 no-underline">
+          <Link to="/learn" className="flex items-center gap-2 no-underline">
             <span className="text-xl leading-none">🇫🇷</span>
             <span className="font-bold text-[1.05rem] text-primary font-display">
               Bonjour Survival

@@ -141,7 +141,7 @@ export function Review() {
             </div>
           )}
 
-          <Link to="/" className="inline-block">
+          <Link to="/learn" className="inline-block">
             <Button variant="tinted">Back to Home</Button>
           </Link>
         </motion.div>
@@ -166,7 +166,7 @@ export function Review() {
             </div>
           )}
           <div className="mt-6">
-            <Link to="/"><Button variant="tinted">Back to Home</Button></Link>
+            <Link to="/learn"><Button variant="tinted">Back to Home</Button></Link>
           </div>
         </motion.div>
       </div>
@@ -180,7 +180,7 @@ export function Review() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link
-          to="/"
+          to="/learn"
           aria-label="Back to home"
           className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline"
           style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}

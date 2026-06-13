@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 
 const NAV_ITEMS = [
-  { to: '/', icon: Home, label: 'Home' },
+  { to: '/learn', icon: Home, label: 'Home' },
   { to: '/phrasebook', icon: BookOpen, label: 'Phrases' },
   { to: '/converse', icon: MessageSquare, label: 'Converse' },
   { to: '/profile', icon: User, label: 'Profile' },
@@ -19,7 +19,7 @@ export function BottomNav() {
   const reducedGpu = useProgressStore(s => s.reducedGpu);
 
   const isActive = (to: string) =>
-    to === '/' ? pathname === '/' : pathname.startsWith(to);
+    to === '/learn' ? pathname === '/learn' : pathname.startsWith(to);
 
   // Flat translucent bar — fallback when the user opts out of the liquid glass nav
   if (reducedGpu) {

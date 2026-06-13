@@ -21,6 +21,7 @@ Because most language apps spend three weeks teaching you how to say "The apple 
 Features
 ========
 
+*   **Ambient Landing & Focus Mode:** The front door is a calm, full-bleed ambient screen — a giant live clock, a time-aware French greeting (*Bonjour* / *Bon après-midi* / *Bonsoir*), a *phrase du jour* with audio, and a glass launcher into the app. The date shows in French and morphs to English on hover. A dedicated **Focus mode** (``/#/focus``) adds a Pomodoro study timer with a rotating French *mot du moment*. Backdrops are fetched live from Unsplash — French scenes by day, a cosmic night sky in the small hours (1–4:30 AM) — and gracefully fall back to gradient skins when no key is set.
 *   **Interactive Lessons:** Flashcards, multiple choice, and translation challenges that actually matter.
 *   **Unit-Based Learning:** From A1 basics to "Unlocked: The Good Stuff" (slang).
 *   **Spaced Repetition Review:** SM-2 algorithm schedules vocab reviews at the optimal moment — 1 day, then 3, then a week, then longer. A review banner on the home screen tells you when cards are due.
@@ -61,6 +62,18 @@ Want to run this locally? *D'accord!*
         npm run dev
 
 4.  **Visit:** `http://localhost:5173` (unless your port is already busy being cool).
+
+**Optional — live backdrops:** The ambient landing and focus screens look best with real
+photos. Create a free `Unsplash developer app <https://unsplash.com/developers>`_ and drop the
+access key into a ``.env.local`` file (git-ignored):
+
+.. code-block:: bash
+
+    VITE_UNSPLASH_ACCESS_KEY=your_unsplash_access_key
+
+Without it the app uses bundled gradient skins — nothing breaks, it just won't pull live
+imagery. For the deployed site, add the same value as a repository secret named
+``VITE_UNSPLASH_ACCESS_KEY`` (the deploy workflow already reads it).
 
 Deployment
 ==========

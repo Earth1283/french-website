@@ -28,6 +28,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Optional: powers the ambient Landing / Focus backdrops. If unset, the
+          # app falls back to bundled gradient skins (no broken images).
+          VITE_UNSPLASH_ACCESS_KEY: ${{ secrets.VITE_UNSPLASH_ACCESS_KEY }}
 
       # Publishes dist/ to the gh-pages branch, which Pages serves at
       # https://earth1283.github.io/french-website/

@@ -107,7 +107,7 @@ export function Lesson() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <p className="text-muted">Lesson not found.</p>
-        <Link to="/" className="text-sm mt-2 block" style={{ color: 'var(--accent)' }}>← Home</Link>
+        <Link to="/learn" className="text-sm mt-2 block" style={{ color: 'var(--accent)' }}>← Home</Link>
       </div>
     );
   }
