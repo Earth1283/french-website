@@ -125,7 +125,7 @@ export function UnitDetail() {
                       : <Circle size={22} className="flex-shrink-0" style={{ color: 'var(--border)' }} />
                     }
                     <div className="flex-1 min-w-0 py-0.5">
-                      <p className="font-semibold text-sm text-primary truncate">
+                      <p className="font-semibold text-sm text-primary leading-snug">
                         {lesson.title}
                       </p>
                       <p className="text-xs text-muted truncate">{lesson.subtitle}</p>

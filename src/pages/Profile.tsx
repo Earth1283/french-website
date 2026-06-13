@@ -186,17 +186,39 @@ export function Profile() {
       {/* Badges */}
       <div>
         <p className="section-label">Badges</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {Object.values(BADGES).map(badge => (
-            <Badge
-              key={badge.id}
-              emoji={badge.emoji}
-              name={badge.name}
-              description={badge.description}
-              earned={earnedBadges.includes(badge.id)}
-            />
-          ))}
-        </div>
+        {(() => {
+          const allBadges = Object.values(BADGES);
+          const earned = allBadges.filter(b => earnedBadges.includes(b.id));
+          const locked = allBadges.filter(b => !earnedBadges.includes(b.id));
+          return (
+            <div className="space-y-4">
+              {earned.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 px-1">
+                    Earned · {earned.length}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {earned.map(badge => (
+                      <Badge key={badge.id} emoji={badge.emoji} name={badge.name} description={badge.description} earned />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {locked.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 px-1">
+                    {earned.length > 0 ? `Locked · ${locked.length}` : `Locked · earn them by completing units`}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {locked.map(badge => (
+                      <Badge key={badge.id} emoji={badge.emoji} name={badge.name} description={badge.description} earned={false} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Unit breakdown */}

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Volume2, CheckCircle2, XCircle } from 'lucide-react';
+import { ChevronLeft, Volume2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { vocabKey, defaultCard, isDue } from '../utils/srs';
@@ -90,17 +90,58 @@ export function Review() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showing, idx, dueCards]);
 
+  const nextLessons = useMemo(() => {
+    const items: { unit: (typeof UNITS)[0]; lesson: (typeof UNITS)[0]['lessons'][0] }[] = [];
+    for (const unit of UNITS) {
+      for (const lesson of unit.lessons) {
+        if (!completedLessons.includes(lesson.id)) {
+          items.push({ unit, lesson });
+          if (items.length >= 3) return items;
+        }
+      }
+    }
+    return items;
+  }, [completedLessons]);
+
   if (dueCards.length === 0) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 300 }} className="space-y-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 300 }} className="space-y-5">
           <div className="text-5xl">✅</div>
           <h1 className="text-2xl font-bold text-primary">All caught up!</h1>
           <p className="text-secondary">
-            No cards due right now. Complete more lessons to grow your review deck,
-            or come back tomorrow.
+            No cards due right now.{completedLessons.length > 0 ? ' Come back tomorrow — or keep going with a new lesson.' : ' Complete some lessons to grow your review deck.'}
           </p>
-          <Link to="/" className="inline-block mt-4">
+
+          {nextLessons.length > 0 && (
+            <div className="text-left mt-2">
+              <p className="section-label text-left">Up next</p>
+              <div className="inset-group">
+                {nextLessons.map(({ unit, lesson }, i) => (
+                  <Link
+                    key={lesson.id}
+                    to={`/unit/${unit.slug}/lesson/${lesson.id}`}
+                    className="no-underline flex items-center gap-3 p-3.5 transition-colors hover:bg-[var(--bg-card-hover)]"
+                    style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
+                  >
+                    <span
+                      className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
+                      style={{ backgroundColor: `color-mix(in srgb, ${unit.color} 14%, transparent)` }}
+                    >
+                      {unit.emoji}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-primary leading-snug">{lesson.title}</p>
+                      <p className="text-xs text-muted">{unit.title}</p>
+                    </div>
+                    <ChevronRight size={16} className="text-muted opacity-50 flex-shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Link to="/" className="inline-block">
             <Button variant="tinted">Back to Home</Button>
           </Link>
         </motion.div>

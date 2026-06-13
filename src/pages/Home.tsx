@@ -87,8 +87,8 @@ export function Home() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <OnboardingModal open={!onboardingDone} />
 
-      {/* Continue CTA — mobile only */}
-      {nextUp && onboardingDone && (
+      {/* Continue CTA — mobile only, only after starting at least one lesson */}
+      {nextUp && onboardingDone && completedLessons.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}

@@ -81,10 +81,10 @@ export function BottomNav() {
               <Link
                 to={to}
                 aria-label={label}
-                className="no-underline relative flex items-center justify-center"
+                className="no-underline relative flex flex-col items-center justify-center gap-0.5"
                 style={{
                   borderRadius: '9999px',
-                  padding: '0.5rem 1rem',
+                  padding: '0.45rem 0.8rem',
                   minWidth: '2.75rem',
                   color: active ? 'var(--accent)' : 'var(--text-muted)',
                   transition: 'color 0.18s',
@@ -98,7 +98,6 @@ export function BottomNav() {
                     transition={{ type: 'spring', damping: 22, stiffness: 380 }}
                   />
                 )}
-                {/* Icon pops in when tab becomes active */}
                 <motion.span
                   key={`${to}-${active}`}
                   initial={{ scale: active ? 0.68 : 1 }}
@@ -107,8 +106,14 @@ export function BottomNav() {
                   className="relative flex"
                   style={{ zIndex: 1 }}
                 >
-                  <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
+                  <Icon size={20} strokeWidth={active ? 2.2 : 1.5} />
                 </motion.span>
+                <span
+                  className="relative text-[9px] font-semibold leading-none"
+                  style={{ zIndex: 1 }}
+                >
+                  {label}
+                </span>
               </Link>
             </motion.div>
           );

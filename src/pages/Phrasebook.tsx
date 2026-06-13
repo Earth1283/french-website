@@ -13,15 +13,20 @@ function speak(text: string) {
   }
 }
 
+const PAGE_SIZE = 60;
+
 export function Phrasebook() {
   const [query, setQuery] = useState('');
   const [unitFilter, setUnitFilter] = useState<string>('all');
   const [emergencyOnly, setEmergencyOnly] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   const allVocab = getAllVocab();
 
+  // Reset display count whenever filters change
   const filtered = useMemo(() => {
+    setDisplayCount(PAGE_SIZE);
     return allVocab.filter(v => {
       if (emergencyOnly && v.unitId !== 'emergency') return false;
       if (unitFilter !== 'all' && v.unitId !== unitFilter) return false;
@@ -111,7 +116,7 @@ export function Phrasebook() {
       <p className="section-label">{filtered.length} phrases</p>
 
       {filtered.length > 0 && <div className="inset-group">
-        {filtered.map((v, i) => {
+        {filtered.slice(0, displayCount).map((v, i) => {
           const id = `${v.unitId}-${v.lessonId}-${i}`;
           return (
             <motion.div
@@ -165,6 +170,18 @@ export function Phrasebook() {
           );
         })}
       </div>}
+
+      {filtered.length > displayCount && (
+        <div className="text-center mt-4">
+          <button
+            onClick={() => setDisplayCount(c => c + PAGE_SIZE)}
+            className="px-5 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-colors ios-press"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--hairline)' }}
+          >
+            Show more ({filtered.length - displayCount} remaining)
+          </button>
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <div className="text-center py-16 text-muted">

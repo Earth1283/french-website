@@ -248,6 +248,28 @@ export function Conversation() {
             </p>
           </div>
 
+          {/* Mode notice */}
+          <div
+            className="flex items-center justify-between gap-3 px-4 py-3 mb-5 rounded-xl"
+            style={{ backgroundColor: geminiApiKey ? 'var(--success-light)' : 'var(--bg-inset)', border: '0.5px solid var(--hairline)' }}
+          >
+            <div className="flex items-center gap-2.5">
+              <Bot size={15} style={{ color: geminiApiKey ? 'var(--success)' : 'var(--text-muted)', flexShrink: 0 }} />
+              <span className="text-xs font-medium" style={{ color: geminiApiKey ? 'var(--success)' : 'var(--text-secondary)' }}>
+                {geminiApiKey ? 'AI mode active — conversations powered by Gemini' : 'Scripted mode — scenarios use a fixed dialogue tree'}
+              </span>
+            </div>
+            {!geminiApiKey && (
+              <button
+                onClick={() => setShowKeySection(v => !v)}
+                className="text-xs font-semibold flex-shrink-0 cursor-pointer ios-press"
+                style={{ color: 'var(--accent)', background: 'none', border: 'none', padding: 0 }}
+              >
+                Add API key →
+              </button>
+            )}
+          </div>
+
           {/* Scenario cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {SCENARIOS.map((s, i) => (

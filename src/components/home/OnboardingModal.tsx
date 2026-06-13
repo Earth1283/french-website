@@ -1,236 +1,50 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { useProgressStore } from '../../stores/progressStore';
-
-const SLIDE = {
-  enter: { x: 28, opacity: 0 },
-  center: { x: 0, opacity: 1 },
-  exit: { x: -28, opacity: 0 },
-};
-const SLIDE_TRANSITION = { duration: 0.22, ease: 'easeInOut' } as const;
 
 interface OnboardingModalProps {
   open: boolean;
 }
 
 export function OnboardingModal({ open }: OnboardingModalProps) {
-  const [step, setStep] = useState(0);
-  const { setUnit12Mode, setOnboardingDone } = useProgressStore();
-
-  const choose = (mode: 'full-freedom' | 'earned-reward') => {
-    setUnit12Mode(mode);
-    setOnboardingDone();
-  };
+  const { setOnboardingDone } = useProgressStore();
 
   return (
     <Modal open={open} closeable={false}>
-      {/* overflow-hidden so exiting slides don't escape the card */}
-      <div className="overflow-hidden">
-        <AnimatePresence mode="wait" initial={false}>
-          {step === 0 && (
-            <motion.div
-              key="philosophy"
-              variants={SLIDE}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={SLIDE_TRANSITION}
-            >
-              <div className="text-center mb-5">
-                <div className="text-5xl mb-3">🕊️</div>
-                <h2 className="text-2xl font-bold text-primary mb-2 font-display">
-                  We trust you.
-                </h2>
-                <p className="text-[--text-secondary] text-sm leading-relaxed">
-                  This app doesn't push. It just shows up when you do.
-                </p>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+      >
+        <div className="text-center mb-5">
+          <div className="text-5xl mb-3">🇫🇷</div>
+          <h2 className="text-2xl font-bold text-primary mb-2 font-display">Bienvenue!</h2>
+          <p className="text-[--text-secondary] text-sm leading-relaxed">
+            You've been teleported to France. Here's how this works.
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-6 p-4" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
+          {[
+            { emoji: '🔕', title: 'No nagging.', desc: "No streak anxiety, no notifications. Your phone won't judge you." },
+            { emoji: '🗝️', title: 'Everything is open.', desc: 'All 21 units are accessible from day one. Skip whatever you want.' },
+            { emoji: '📱', title: 'Your data stays here.', desc: 'Progress lives in your browser. No account, no tracking, free forever.' },
+          ].map(({ emoji, title, desc }) => (
+            <div key={title} className="flex gap-3 items-start">
+              <span className="text-xl leading-none mt-0.5">{emoji}</span>
+              <div>
+                <p className="text-sm font-semibold text-[--text-primary]">{title}</p>
+                <p className="text-xs text-[--text-muted] leading-relaxed mt-0.5">{desc}</p>
               </div>
+            </div>
+          ))}
+        </div>
 
-              <div className="space-y-3 mb-6 p-4" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
-                {[
-                  {
-                    emoji: '🔕',
-                    title: 'No nagging.',
-                    desc: "No notifications, no streak anxiety, no guilt trips about missed days. Your phone won't judge you.",
-                  },
-                  {
-                    emoji: '🗝️',
-                    title: 'Everything is open.',
-                    desc: 'All units are skippable and accessible from day one. Learn insults before greetings if that motivates you.',
-                  },
-                  {
-                    emoji: '🧠',
-                    title: 'You know yourself.',
-                    desc: "The best study schedule is the one you'll actually stick to. We don't pretend to know better.",
-                  },
-                ].map(({ emoji, title, desc }) => (
-                  <div key={title} className="flex gap-3 items-start">
-                    <span className="text-xl leading-none mt-0.5">{emoji}</span>
-                    <div>
-                      <p className="text-sm font-semibold text-[--text-primary]">{title}</p>
-                      <p className="text-xs text-[--text-muted] leading-relaxed mt-0.5">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Button variant="primary" className="w-full" onClick={() => setStep(1)}>
-                Sounds good →
-              </Button>
-
-              <StepDots total={3} current={0} />
-            </motion.div>
-          )}
-
-          {step === 1 && (
-            <motion.div
-              key="privacy"
-              variants={SLIDE}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={SLIDE_TRANSITION}
-            >
-              <div className="text-center mb-5">
-                <div className="text-5xl mb-3">🔒</div>
-                <h2 className="text-2xl font-bold text-primary mb-2 font-display">
-                  Your data stays yours.
-                </h2>
-                <p className="text-[--text-secondary] text-sm leading-relaxed">
-                  Here's exactly how we handle your info — and your wallet.
-                </p>
-              </div>
-
-              <div className="space-y-3 mb-6 p-4" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
-                {[
-                  {
-                    emoji: '📱',
-                    title: 'Nothing is ever sent to a server.',
-                    desc: 'Your progress, streak, XP, and settings live entirely in your browser. There is no account, no tracking, no analytics.',
-                  },
-                  {
-                    emoji: '🔑',
-                    title: 'Your Gemini API key stays local.',
-                    desc: 'If you add a key for Conversation mode, it is stored only on your device and sent only to Google — directly, to complete your API request. We never see it.',
-                  },
-                  {
-                    emoji: '💸',
-                    title: 'Free. Free forever.',
-                    desc: 'No subscription, no paywall, no "freemium" — there will never be a locked feature with a price tag on it.',
-                  },
-                ].map(({ emoji, title, desc }) => (
-                  <div key={title} className="flex gap-3 items-start">
-                    <span className="text-xl leading-none mt-0.5">{emoji}</span>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-[--text-primary]">{title}</p>
-                      <p className="text-xs text-[--text-muted] leading-relaxed mt-0.5">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Button variant="primary" className="w-full" onClick={() => setStep(2)}>
-                Got it →
-              </Button>
-
-              <StepDots total={3} current={1} />
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div
-              key="unit12"
-              variants={SLIDE}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={SLIDE_TRANSITION}
-            >
-              <div className="text-center">
-                <div className="text-5xl mb-3">🇫🇷</div>
-                <h2 className="text-2xl font-bold text-primary mb-2 font-display">
-                  Bienvenue!
-                </h2>
-                <p className="text-[--text-secondary] text-sm mb-6 leading-relaxed">
-                  You've been teleported to France. You have zero French.
-                  This course will fix that. No tests. No locked units. Just learning.
-                </p>
-
-                <div className="border-t border-[--border] pt-5 mb-5">
-                  <p className="text-sm font-semibold text-[--text-primary] mb-1">
-                    One quick question about Unit 12 (slang & swearing):
-                  </p>
-                  <p className="text-xs text-[--text-muted] mb-4">
-                    It's the spicy unit. How do you want to access it?
-                  </p>
-
-                  <div className="flex flex-col gap-3">
-                    <button
-                      onClick={() => choose('full-freedom')}
-                      className="w-full p-4 text-left transition-all cursor-pointer ios-press hover:bg-[var(--accent-tint)]"
-                      style={{
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1.5px solid var(--hairline)',
-                        backgroundColor: 'var(--bg-card)',
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">🚀</span>
-                        <div>
-                          <p className="font-semibold text-sm text-[--text-primary]">Full Freedom</p>
-                          <p className="text-xs text-[--text-muted]">Unit 12 is open from the start. Chaos reigns.</p>
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => choose('earned-reward')}
-                      className="w-full p-4 text-left transition-all cursor-pointer ios-press hover:bg-purple-50 dark:hover:bg-purple-900/10"
-                      style={{
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1.5px solid var(--hairline)',
-                        backgroundColor: 'var(--bg-card)',
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">🔓</span>
-                        <div>
-                          <p className="font-semibold text-sm text-[--text-primary]">Earned Reward</p>
-                          <p className="text-xs text-[--text-muted]">Unlock after completing any 2 units. The anticipation.</p>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-xs text-[--text-muted]">
-                  No prerequisites on anything else. Skip whatever you want.
-                </p>
-
-                <StepDots total={3} current={2} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+        <Button variant="primary" className="w-full" onClick={setOnboardingDone}>
+          Let's go! →
+        </Button>
+      </motion.div>
     </Modal>
-  );
-}
-
-function StepDots({ total, current }: { total: number; current: number }) {
-  return (
-    <div className="flex justify-center gap-2 mt-5">
-      {Array.from({ length: total }).map((_, i) => (
-        <motion.span
-          key={i}
-          className="h-1.5 rounded-full"
-          animate={{ width: i === current ? '1.5rem' : '0.375rem' }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          style={{ backgroundColor: i === current ? 'var(--accent)' : 'var(--border)' }}
-        />
-      ))}
-    </div>
   );
 }
