@@ -77,7 +77,7 @@ export function Navbar() {
                 <motion.div key={to} whileTap={{ scale: 0.94 }} transition={TAP_SPRING}>
                   <Link
                     to={to}
-                    className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors"
+                    className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors isolate"
                     style={{ color: isActive ? '#fff' : 'var(--text-secondary)' }}
                   >
                     {isActive && (

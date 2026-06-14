@@ -82,7 +82,7 @@ export function BottomNav() {
               <Link
                 to={to}
                 aria-label={label}
-                className="no-underline relative flex flex-col items-center justify-center gap-0.5"
+                className="no-underline relative flex flex-col items-center justify-center gap-0.5 isolate"
                 style={{
                   borderRadius: '9999px',
                   padding: '0.45rem 0.8rem',
@@ -105,13 +105,13 @@ export function BottomNav() {
                   animate={{ scale: 1 }}
                   transition={POP_SPRING}
                   className="relative flex"
-                  style={{ zIndex: 1 }}
+                  style={{ zIndex: 10 }}
                 >
                   <Icon size={20} strokeWidth={active ? 2.2 : 1.5} />
                 </motion.span>
                 <span
                   className="relative text-[9px] font-semibold leading-none"
-                  style={{ zIndex: 1 }}
+                  style={{ zIndex: 10 }}
                 >
                   {label}
                 </span>
