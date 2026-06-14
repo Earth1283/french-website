@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Volume2, Copy, Check, Zap } from 'lucide-react';
 import { UNITS, getAllVocab } from '../data/units';
@@ -22,11 +22,11 @@ export function Phrasebook() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
-  const allVocab = getAllVocab();
+  // getAllVocab() builds a fresh array each call — memoize so it's a stable
+  // dependency (an unstable dep here re-ran the filter every render).
+  const allVocab = useMemo(() => getAllVocab(), []);
 
-  // Reset display count whenever filters change
   const filtered = useMemo(() => {
-    setDisplayCount(PAGE_SIZE);
     return allVocab.filter(v => {
       if (emergencyOnly && v.unitId !== 'emergency') return false;
       if (unitFilter !== 'all' && v.unitId !== unitFilter) return false;
@@ -39,6 +39,11 @@ export function Phrasebook() {
       );
     });
   }, [query, unitFilter, emergencyOnly, allVocab]);
+
+  // Reset paging when the filters change (in an effect, not during render).
+  useEffect(() => {
+    setDisplayCount(PAGE_SIZE);
+  }, [query, unitFilter, emergencyOnly]);
 
   const copyPhrase = (french: string, id: string) => {
     navigator.clipboard.writeText(french).then(() => {
