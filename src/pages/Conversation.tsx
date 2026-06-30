@@ -356,7 +356,8 @@ export function Conversation() {
                 style={{ borderTop: '0.5px solid var(--hairline)' }}
               >
                 <p className="text-xs text-secondary">
-                  Your key is stored locally in your browser and never sent anywhere except directly to Google's API.
+                  Your key is stored in your browser's localStorage and sent directly to Google's Generative AI API — it never touches our servers.
+                  <strong className="text-primary"> Do not use a key with billing limits you can't afford to exceed</strong>, and avoid entering it on shared devices.
                   Without a key, scenarios use a scripted dialogue tree that still teaches great French.
                 </p>
                 <div className="flex gap-2">
@@ -546,7 +547,7 @@ export function Conversation() {
         </AnimatePresence>
 
         {isLoading && (
-          <div className="flex justify-start">
+          <div className="flex justify-start" role="status" aria-live="polite" aria-label={`${activeScenario?.npcName} is responding…`}>
             <div
               className="px-4 py-3"
               style={{

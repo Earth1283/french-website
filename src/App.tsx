@@ -6,6 +6,7 @@ import { useIdlePreload } from './hooks/useIdlePreload';
 import { Navbar } from './components/layout/Navbar';
 import { BottomNav } from './components/layout/BottomNav';
 import { PageTransition } from './components/layout/PageTransition';
+import { ErrorBoundary } from './components/ErrorBoundary';
 // Landing is the root front door — eager so it paints with no Suspense flash.
 import { Landing } from './pages/Landing';
 
@@ -61,32 +62,36 @@ const ACCENT_HOVER: Record<string, string> = {
 // entrance animation internally.
 function AmbientRoutes() {
   return (
-    <Suspense fallback={null}>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/focus" element={<Focus />} />
-      </Routes>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/focus" element={<Focus />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <Suspense fallback={null}>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/learn" element={<PageTransition keyProp="/learn"><Home /></PageTransition>} />
-          <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
-          <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
-          <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
-          <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
-          <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
-          <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
-          <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
-        </Routes>
-      </AnimatePresence>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={null}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/learn" element={<PageTransition keyProp="/learn"><Home /></PageTransition>} />
+            <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
+            <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
+            <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
+            <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
+            <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
+            <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
+            <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
