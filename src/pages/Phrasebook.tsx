@@ -2,16 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Volume2, Copy, Check, Zap } from 'lucide-react';
 import { UNITS, getAllVocab } from '../data/units';
-
-function speak(text: string) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'fr-FR';
-    utter.rate = 0.85;
-    window.speechSynthesis.speak(utter);
-  }
-}
+import { speak } from '../utils/speech';
 
 const PAGE_SIZE = 60;
 

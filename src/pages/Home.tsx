@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search } from 'lucide-react';
+import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { UnitCard } from '../components/home/UnitCard';
@@ -82,6 +82,22 @@ export function Home() {
       }
     }
     return { dueCount: count, nextReviewDate: earliest };
+  }, [completedLessons, srsData]);
+
+  // Lessons the user struggles with: completed, with at least one card below ease 2.0
+  const weakSpots = useMemo(() => {
+    if (completedLessons.length === 0) return [];
+    type Spot = { unit: (typeof UNITS)[0]; lesson: (typeof UNITS)[0]['lessons'][0]; avgEase: number };
+    const spots: Spot[] = [];
+    for (const unit of UNITS) {
+      for (const lesson of unit.lessons) {
+        if (!completedLessons.includes(lesson.id)) continue;
+        const eases = lesson.vocab.map((_, idx) => (srsData[vocabKey(lesson.id, idx)] ?? defaultCard()).ease);
+        const avg = eases.reduce((a, b) => a + b, 0) / eases.length;
+        if (avg < 2.1) spots.push({ unit, lesson, avgEase: avg });
+      }
+    }
+    return spots.sort((a, b) => a.avgEase - b.avgEase).slice(0, 3);
   }, [completedLessons, srsData]);
 
   const bookmarkDetails = useMemo(() => {
@@ -244,6 +260,45 @@ export function Home() {
           </div>
         </motion.div>
       ) : null}
+
+      {/* Weak spots recommendation */}
+      {weakSpots.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          <div className="card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingDown size={13} style={{ color: 'var(--accent)' }} />
+              <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Needs more practice</h2>
+            </div>
+            <div className="space-y-2">
+              {weakSpots.map(({ unit, lesson }) => (
+                <Link
+                  key={lesson.id}
+                  to={`/unit/${unit.slug}/lesson/${lesson.id}`}
+                  className="no-underline flex items-center gap-3 p-2.5 rounded-xl transition-colors hover:bg-[var(--bg-card-hover)]"
+                  style={{ backgroundColor: 'var(--bg-inset)' }}
+                >
+                  <span
+                    className="w-8 h-8 rounded-[10px] flex items-center justify-center text-base flex-shrink-0"
+                    style={{ backgroundColor: `color-mix(in srgb, ${unit.color} 15%, transparent)` }}
+                  >
+                    {unit.emoji}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-primary truncate">{lesson.title}</p>
+                    <p className="text-xs text-muted truncate">{unit.title}</p>
+                  </div>
+                  <ChevronRight size={14} className="text-muted flex-shrink-0" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Hero */}
       <motion.div

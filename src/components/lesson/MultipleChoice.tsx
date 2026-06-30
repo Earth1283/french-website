@@ -84,16 +84,16 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
                 {i + 1}
               </span>
               <span className="flex-1">{option}</span>
-              <span
+              <button
                 onClick={e => { e.stopPropagation(); speak(option); }}
-                role="button"
-                tabIndex={-1}
+                tabIndex={answered ? -1 : 0}
                 className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ios-press"
-                style={{ color: 'var(--text-muted)' }}
+                style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none', cursor: 'pointer' }}
                 aria-label={`Hear ${option}`}
+                type="button"
               >
                 <Volume2 size={14} />
-              </span>
+              </button>
               {answered && isCorrect && <CheckCircle2 size={18} className="flex-shrink-0" style={{ color: 'var(--success)' }} />}
               {answered && isSelected && !isCorrect && <XCircle size={18} className="flex-shrink-0" style={{ color: 'var(--danger)' }} />}
             </button>
