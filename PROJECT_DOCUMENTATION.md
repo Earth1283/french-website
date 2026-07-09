@@ -268,6 +268,16 @@ npm run preview  # Local preview of production build
 - Framer Motion for polish
 - Playwright for E2E testing
 
+## Monetization
+
+**None. Whatsoever.**
+
+This app has zero monetization, paywalls, premium tiers, ads, analytics tracking, or upsells. No subscriptions. No "pro" features locked behind payment. No freemium bait-and-switch.
+
+Users get the full experience: all 18 lesson modules, all exercise types, progress tracking, streak gamification, spaced repetition, settings customization, and the complete suite of features—for free.
+
+This is intentional. The app exists to teach French effectively, not to extract revenue. If that ever changes, it's no longer the same project.
+
 ## License & Tone
 
 This is a project built for *people who actually use language*, not for language learners who treat it as a chore. The tone is:
