@@ -50,9 +50,9 @@ export function Profile() {
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: Zap, label: 'XP Earned', value: xp, color: '#F4A261' },
-          { icon: Flame, label: 'Day Streak', value: streak, color: '#E63946' },
-          { icon: Trophy, label: 'Units Done', value: `${completedUnits}/${UNITS.length}`, color: '#2A9D8F' },
+          { icon: Zap, label: 'XP Earned', value: xp, color: 'var(--gold)' },
+          { icon: Flame, label: 'Day Streak', value: streak, color: 'var(--accent)' },
+          { icon: Trophy, label: 'Units Done', value: `${completedUnits}/${UNITS.length}`, color: 'var(--success)' },
         ].map(({ icon: Icon, label, value, color }, i) => (
           <motion.div
             key={label}
