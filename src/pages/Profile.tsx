@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Flame, Zap, RotateCcw, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
 import { useProgressStore, BADGES } from '../stores/progressStore';
 import { UNITS } from '../data/units';
@@ -95,9 +95,9 @@ export function Profile() {
             <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
               <motion.div
                 className="h-full rounded-full"
-                style={{ backgroundColor: 'var(--accent)' }}
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(100, (levelInfo.currentLevelXP / levelInfo.levelSpan) * 100)}%` }}
+                style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: Math.min(1, levelInfo.currentLevelXP / levelInfo.levelSpan) }}
                 transition={{ duration: 0.9, ease: 'easeOut' }}
               />
             </div>
@@ -118,9 +118,9 @@ export function Profile() {
         <div className="w-full h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
           <motion.div
             className="h-full rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
-            initial={{ width: 0 }}
-            animate={{ width: `${overallPct}%` }}
+            style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: overallPct / 100 }}
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
@@ -151,36 +151,41 @@ export function Profile() {
           {showA1 ? <ChevronUp size={16} className="text-muted" /> : <ChevronDown size={16} className="text-muted" />}
         </button>
 
-        {showA1 && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            className="p-4 space-y-2"
-            style={{ borderTop: '0.5px solid var(--hairline)' }}
-          >
-            {a1Complete && (
-              <div
-                className="p-3 text-sm font-semibold text-center mb-3"
-                style={{ backgroundColor: 'var(--success-light)', color: 'var(--success)', borderRadius: 'var(--radius-sm)' }}
-              >
-                🎓 You've reached A1 level! Félicitations!
-              </div>
-            )}
-            {A1_COMPETENCIES.map(({ label, units }) => {
-              const done = units.some(uid => isUnitComplete(uid));
-              return (
-                <div key={label} className="flex items-center gap-3">
-                  <span className={`text-lg ${done ? 'opacity-100' : 'opacity-30 grayscale'}`}>
-                    {done ? '✅' : '⬜'}
-                  </span>
-                  <span className={`text-sm ${done ? 'text-primary' : 'text-muted'}`}>
-                    {label}
-                  </span>
+        <AnimatePresence>
+          {showA1 && (
+            <motion.div
+              key="a1-roadmap-body"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="p-4 space-y-2 overflow-hidden"
+              style={{ borderTop: '0.5px solid var(--hairline)' }}
+            >
+              {a1Complete && (
+                <div
+                  className="p-3 text-sm font-semibold text-center mb-3"
+                  style={{ backgroundColor: 'var(--success-light)', color: 'var(--success)', borderRadius: 'var(--radius-sm)' }}
+                >
+                  🎓 You've reached A1 level! Félicitations!
                 </div>
-              );
-            })}
-          </motion.div>
-        )}
+              )}
+              {A1_COMPETENCIES.map(({ label, units }) => {
+                const done = units.some(uid => isUnitComplete(uid));
+                return (
+                  <div key={label} className="flex items-center gap-3">
+                    <span className={`text-lg ${done ? 'opacity-100' : 'opacity-30 grayscale'}`}>
+                      {done ? '✅' : '⬜'}
+                    </span>
+                    <span className={`text-sm ${done ? 'text-primary' : 'text-muted'}`}>
+                      {label}
+                    </span>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Badges */}
@@ -246,9 +251,9 @@ export function Profile() {
                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
                       <motion.div
                         className="h-full rounded-full"
-                        style={{ backgroundColor: unit.color }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
+                        style={{ backgroundColor: unit.color, width: '100%', transformOrigin: 'left' }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: pct / 100 }}
                         transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
                       />
                     </div>
@@ -263,32 +268,44 @@ export function Profile() {
 
       {/* Reset */}
       <div className="pt-6" style={{ borderTop: '0.5px solid var(--hairline)' }}>
-        {!confirmReset ? (
-          <button
-            onClick={() => setConfirmReset(true)}
-            className="flex items-center gap-2 text-sm text-muted transition-colors cursor-pointer hover:text-[var(--danger)]"
-            style={{ background: 'transparent', border: 'none' }}
-          >
-            <RotateCcw size={14} /> Reset all progress
-          </button>
-        ) : (
-          <div
-            className="card p-4 space-y-3"
-            style={{ borderColor: 'color-mix(in srgb, var(--danger) 35%, transparent)' }}
-          >
-            <p className="text-sm font-semibold text-primary">Are you sure? This will wipe everything.</p>
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => setConfirmReset(false)}>Cancel</Button>
-              <button
-                onClick={() => { resetProgress(); setConfirmReset(false); }}
-                className="px-4 py-2 rounded-full text-white text-sm font-semibold transition-colors cursor-pointer ios-press"
-                style={{ backgroundColor: 'var(--danger)', border: 'none' }}
-              >
-                Yes, reset
-              </button>
-            </div>
-          </div>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {!confirmReset ? (
+            <motion.button
+              key="trigger"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setConfirmReset(true)}
+              className="flex items-center gap-2 text-sm text-muted transition-colors cursor-pointer hover:text-[var(--danger)]"
+              style={{ background: 'transparent', border: 'none' }}
+            >
+              <RotateCcw size={14} /> Reset all progress
+            </motion.button>
+          ) : (
+            <motion.div
+              key="confirm"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              className="card p-4 space-y-3"
+              style={{ borderColor: 'color-mix(in srgb, var(--danger) 35%, transparent)' }}
+            >
+              <p className="text-sm font-semibold text-primary">Are you sure? This will wipe everything.</p>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setConfirmReset(false)}>Cancel</Button>
+                <button
+                  onClick={() => { resetProgress(); setConfirmReset(false); }}
+                  className="px-4 py-2 rounded-full text-white text-sm font-semibold transition-colors cursor-pointer ios-press"
+                  style={{ backgroundColor: 'var(--danger)', border: 'none' }}
+                >
+                  Yes, reset
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

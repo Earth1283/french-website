@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { TAP_SPRING } from '../../utils/motion';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'tinted' | 'secondary' | 'ghost';
@@ -39,8 +40,8 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
 
   return (
     <motion.button
-      whileTap={{ scale: 0.96 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+      whileTap={{ scale: 0.97 }}
+      transition={TAP_SPRING}
       className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
       style={variantStyles[variant]}
       {...(props as React.ComponentProps<typeof motion.button>)}

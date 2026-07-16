@@ -61,7 +61,7 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
     <div className="w-full max-w-lg mx-auto text-center py-8 space-y-6">
       <div className="relative inline-block">
         <motion.div
-          initial={{ scale: 0, rotate: -20 }}
+          initial={{ scale: 0.9, rotate: -20 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', damping: 15, stiffness: 300 }}
           className="text-6xl"

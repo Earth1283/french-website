@@ -185,6 +185,14 @@
     border-top: 0.5px solid var(--hairline);
   }
 
+  /* Phrasebook results rows use their own padding/alignment utility
+     classes (not .inset-row's), so they reuse only the sibling-border
+     rule via a dedicated class rather than inheriting .inset-row's
+     conflicting layout properties. */
+  .phrasebook-row + .phrasebook-row {
+    border-top: 0.5px solid var(--hairline);
+  }
+
   /* ── Text ─────────────────────────────────────────────── */
   .text-primary { color: var(--text-primary); }
   .text-secondary { color: var(--text-secondary); }

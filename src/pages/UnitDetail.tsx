@@ -4,6 +4,7 @@ import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock } from 'lucide-re
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { Button } from '../components/ui/Button';
+import { TAP_SPRING } from '../utils/motion';
 
 export function UnitDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -116,7 +117,7 @@ export function UnitDetail() {
                 >
                   <motion.div
                     whileTap={{ scale: 0.98 }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+                    transition={TAP_SPRING}
                     className="inset-row transition-colors hover:bg-[var(--bg-card-hover)]"
                     style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
                   >

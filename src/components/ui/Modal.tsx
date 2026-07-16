@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -13,12 +13,17 @@ interface ModalProps {
 // Mobile: iOS sheet sliding up from the bottom with a grabber.
 // Desktop (sm+): centered card with a spring scale-in.
 export function Modal({ open, onClose, children, title, closeable = true }: ModalProps) {
+  const reduceMotion = useReducedMotion();
+
   useEffect(() => {
     if (!open || !closeable || !onClose) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [open, closeable, onClose]);
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const offscreenY = reduceMotion ? 0 : (isMobile ? '100%' : 24);
 
   return (
     <AnimatePresence>
@@ -28,6 +33,7 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
           role="dialog"
           aria-modal="true"
         >
@@ -44,10 +50,19 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
               border: '0.5px solid var(--hairline)',
               paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
             }}
-            initial={{ y: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : 24, scale: 0.96, opacity: 0 }}
-            animate={{ y: 0, scale: 1, opacity: 1 }}
-            exit={{ y: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : 24, scale: 0.96, opacity: 0 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            initial={{ y: offscreenY, scale: reduceMotion ? 1 : 0.96, opacity: 0 }}
+            animate={{
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              transition: { type: 'spring', damping: 28, stiffness: 320 },
+            }}
+            exit={{
+              y: offscreenY,
+              scale: reduceMotion ? 1 : 0.96,
+              opacity: 0,
+              transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] },
+            }}
           >
             {/* Sheet grabber — mobile only */}
             <div

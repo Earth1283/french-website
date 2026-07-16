@@ -8,6 +8,7 @@ import { SCENARIOS } from '../data/scenarios';
 import { useConversationStore } from '../stores/conversationStore';
 import { Button } from '../components/ui/Button';
 import type { Scenario, Difficulty } from '../types';
+import { TAP_SPRING } from '../utils/motion';
 
 interface ChatMessage {
   role: 'npc' | 'player';
@@ -234,12 +235,19 @@ export function Conversation() {
                   onClick={() => setDifficulty(d)}
                   aria-pressed={difficulty === d}
                   className="seg-item"
-                  style={difficulty === d ? {
-                    backgroundColor: 'var(--bg-card)',
-                    boxShadow: 'var(--shadow-1)',
-                  } : undefined}
+                  style={{ position: 'relative' }}
                 >
-                  {d} · {DIFFICULTY_LABELS[d].name}
+                  {difficulty === d && (
+                    <motion.span
+                      layoutId="conversation-difficulty-seg"
+                      className="absolute inset-0 rounded-[10px]"
+                      style={{ backgroundColor: 'var(--bg-card)', boxShadow: 'var(--shadow-1)', zIndex: 0 }}
+                      transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+                    />
+                  )}
+                  <span style={{ position: 'relative', zIndex: 1 }}>
+                    {d} · {DIFFICULTY_LABELS[d].name}
+                  </span>
                 </button>
               ))}
             </div>
@@ -402,7 +410,7 @@ export function Conversation() {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
         <motion.div
-          initial={{ scale: 0, rotate: -15 }}
+          initial={{ scale: 0.9, rotate: -15 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', damping: 14, stiffness: 280 }}
           className="text-6xl mb-5"
@@ -622,7 +630,7 @@ export function Conversation() {
               <motion.button
                 key={option}
                 whileTap={{ scale: 0.97 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+                transition={TAP_SPRING}
                 onClick={() => handleOptionClick(option)}
                 className="text-left px-4 py-2.5 text-sm text-primary font-medium font-display cursor-pointer transition-colors hover:bg-[var(--bg-card-hover)]"
                 style={{
@@ -657,7 +665,7 @@ export function Conversation() {
               style={{ borderRadius: 99 }}
             />
             <motion.button
-              whileTap={{ scale: 0.85 }}
+              whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', damping: 18, stiffness: 500 }}
               onClick={handleSubmit}
               disabled={!playerInput.trim() || isLoading}

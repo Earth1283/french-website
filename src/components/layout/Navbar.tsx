@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
+import { TAP_SPRING } from '../../utils/motion';
 
 const NAV_ITEMS = [
   { to: '/learn', icon: Home, label: 'Home' },
@@ -11,8 +12,6 @@ const NAV_ITEMS = [
   { to: '/converse', icon: MessageSquare, label: 'Converse' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];
-
-const TAP_SPRING = { type: 'spring', damping: 20, stiffness: 500 } as const;
 
 export function Navbar() {
   const { darkMode, setDarkMode, xp, streak } = useProgressStore();
@@ -40,7 +39,7 @@ export function Navbar() {
       }}
     >
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <motion.div whileTap={{ scale: 0.94 }} transition={TAP_SPRING}>
+        <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
           <Link to="/learn" className="flex items-center gap-2 no-underline">
             <span className="text-xl leading-none">🇫🇷</span>
             <span className="font-bold text-[1.05rem] text-primary font-display">
@@ -52,7 +51,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5">
           {/* Streak + XP — compact tappable chip, visible on mobile too */}
           {(streak > 0 || xp > 0) && (
-            <motion.div whileTap={{ scale: 0.92 }} transition={TAP_SPRING}>
+            <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
               <Link
                 to="/profile"
                 aria-label="Your progress"
@@ -74,7 +73,7 @@ export function Navbar() {
             {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
               const isActive = location.pathname === to;
               return (
-                <motion.div key={to} whileTap={{ scale: 0.94 }} transition={TAP_SPRING}>
+                <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
                   <Link
                     to={to}
                     className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors isolate"
@@ -98,7 +97,7 @@ export function Navbar() {
             })}
           </nav>
 
-          <motion.div whileTap={{ scale: 0.88 }} transition={TAP_SPRING} className="hidden sm:block">
+          <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING} className="hidden sm:block">
             <Link
               to="/settings"
               className="flex p-2 rounded-full transition-colors no-underline ios-press"
@@ -112,7 +111,7 @@ export function Navbar() {
           {/* Dark mode toggle — animated, reachable on mobile */}
           <motion.button
             onClick={() => setDarkMode(!darkMode)}
-            whileTap={{ scale: 0.85, rotate: darkMode ? -40 : 40 }}
+            whileTap={{ scale: 0.97, rotate: darkMode ? -40 : 40 }}
             transition={TAP_SPRING}
             className="p-2 rounded-full cursor-pointer"
             style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}

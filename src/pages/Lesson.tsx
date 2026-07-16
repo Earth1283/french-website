@@ -11,6 +11,7 @@ import { TranslationChallenge } from '../components/lesson/TranslationChallenge'
 import { LessonComplete } from '../components/lesson/LessonComplete';
 import { ProgressBar } from '../components/layout/ProgressBar';
 import { Button } from '../components/ui/Button';
+import { TAP_SPRING } from '../utils/motion';
 
 type Phase = 'intro' | 'flashcards' | 'exercises' | 'complete';
 
@@ -202,7 +203,7 @@ export function Lesson() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
+    <div className="max-w-xl mx-auto px-4 py-6 relative">
       {/* Top bar */}
       <div className="flex items-center gap-3 mb-6">
         <Link
@@ -224,8 +225,8 @@ export function Lesson() {
           {currentStep}/{totalSteps}
         </span>
         <motion.button
-          whileTap={{ scale: 0.85 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+          whileTap={{ scale: 0.97 }}
+          transition={TAP_SPRING}
           onClick={() => toggleBookmark(lesson.id)}
           className="w-9 h-9 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0"
           style={{
@@ -246,7 +247,7 @@ export function Lesson() {
         </motion.button>
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {phase === 'flashcards' && (
           <motion.div
             key={`card-${cardIndex}`}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Volume2, Copy, Check, Zap } from 'lucide-react';
 import { UNITS, getAllVocab } from '../data/units';
 import { speak } from '../utils/speech';
+import { TAP_SPRING } from '../utils/motion';
 
 const PAGE_SIZE = 60;
 
@@ -69,7 +70,7 @@ export function Phrasebook() {
         <div className="flex flex-wrap gap-2 items-center">
           <motion.button
             whileTap={{ scale: 0.94 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+            transition={TAP_SPRING}
             onClick={() => setEmergencyOnly(v => !v)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors"
             style={emergencyOnly
@@ -112,16 +113,15 @@ export function Phrasebook() {
       <p className="section-label">{filtered.length} phrases</p>
 
       {filtered.length > 0 && <div className="inset-group">
-        {filtered.slice(0, displayCount).map((v, i) => {
-          const id = `${v.unitId}-${v.lessonId}-${i}`;
+        {filtered.slice(0, displayCount).map((v) => {
+          const id = `${v.unitId}-${v.lessonId}-${v.french}`;
           return (
             <motion.div
               key={id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: Math.min(i * 0.015, 0.25) }}
-              className="p-4 flex items-start gap-4"
-              style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
+              transition={{ delay: 0.015 }}
+              className="phrasebook-row p-4 flex items-start gap-4"
             >
               <div className="flex-1 min-w-0">
                 <p className="font-bold font-display" style={{ color: 'var(--accent)' }}>

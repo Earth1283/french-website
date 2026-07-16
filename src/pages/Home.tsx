@@ -9,6 +9,7 @@ import { OnboardingModal } from '../components/home/OnboardingModal';
 import { A1Banner } from '../components/home/A1Banner';
 import { ProgressBar } from '../components/layout/ProgressBar';
 import { vocabKey, defaultCard, isDue } from '../utils/srs';
+import { TAP_SPRING } from '../utils/motion';
 
 function fuzzyMatch(query: string, target: string): boolean {
   const q = query.toLowerCase();
@@ -125,7 +126,7 @@ export function Home() {
           <Link to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`} className="no-underline block">
             <motion.div
               whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+              transition={TAP_SPRING}
               className="glass-card p-4 flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -225,7 +226,7 @@ export function Home() {
           <Link to="/review" className="no-underline block">
             <motion.div
               whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+              transition={TAP_SPRING}
               className="card card-lift p-4 flex items-center justify-between gap-3"
               style={{ backgroundColor: 'var(--accent-soft-bg)' }}
             >

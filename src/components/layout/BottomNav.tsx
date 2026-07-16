@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, BookOpen, MessageSquare, User, Settings, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
+import { TAP_SPRING } from '../../utils/motion';
 
 const NAV_ITEMS = [
   { to: '/learn', icon: Home, label: 'Home' },
@@ -12,7 +13,6 @@ const NAV_ITEMS = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
-const TAP_SPRING = { type: 'spring', damping: 20, stiffness: 500 } as const;
 const POP_SPRING = { type: 'spring', damping: 12, stiffness: 420 } as const;
 
 export function BottomNav() {
@@ -59,11 +59,8 @@ export function BottomNav() {
       className="sm:hidden fixed left-0 right-0 z-40 flex justify-center pointer-events-none"
       style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}
     >
-      <motion.nav
+      <nav
         className="pointer-events-auto flex"
-        initial={{ y: 28, opacity: 0, scale: 0.88 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        transition={{ type: 'spring', damping: 22, stiffness: 320 }}
         style={{
           borderRadius: '9999px',
           backdropFilter: 'blur(32px) saturate(180%) brightness(1.04)',
@@ -78,7 +75,7 @@ export function BottomNav() {
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
           const active = isActive(to);
           return (
-            <motion.div key={to} whileTap={{ scale: 0.8 }} transition={TAP_SPRING}>
+            <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
               <Link
                 to={to}
                 aria-label={label}
@@ -100,9 +97,8 @@ export function BottomNav() {
                   />
                 )}
                 <motion.span
-                  key={`${to}-${active}`}
-                  initial={{ scale: active ? 0.68 : 1 }}
-                  animate={{ scale: 1 }}
+                  key={to}
+                  animate={{ scale: active ? [0.68, 1] : 1 }}
                   transition={POP_SPRING}
                   className="relative flex"
                   style={{ zIndex: 10 }}
@@ -119,7 +115,7 @@ export function BottomNav() {
             </motion.div>
           );
         })}
-      </motion.nav>
+      </nav>
     </div>
   );
 }

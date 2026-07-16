@@ -8,6 +8,7 @@ import { vocabKey, defaultCard, isDue } from '../utils/srs';
 import { speak } from '../utils/speech';
 import { Button } from '../components/ui/Button';
 import type { VocabItem } from '../types';
+import { TAP_SPRING } from '../utils/motion';
 
 interface ReviewCard extends VocabItem {
   key: string;
@@ -176,7 +177,7 @@ export function Review() {
   const card = dueCards[idx];
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
+    <div className="max-w-xl mx-auto px-4 py-6 relative">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link
@@ -195,15 +196,15 @@ export function Review() {
           <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
             <motion.div
               className="h-full rounded-full"
-              style={{ backgroundColor: 'var(--accent)' }}
-              animate={{ width: `${(idx / dueCards.length) * 100}%` }}
+              style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
+              animate={{ scaleX: idx / dueCards.length }}
               transition={{ type: 'spring', damping: 26, stiffness: 240 }}
             />
           </div>
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {showing === 'front' ? (
           <motion.div
             key={`front-${idx}`}
@@ -215,7 +216,7 @@ export function Review() {
           >
             <motion.div
               whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+              transition={TAP_SPRING}
               className="card p-8 text-center min-h-[240px] flex flex-col items-center justify-center gap-3 cursor-pointer select-none"
               style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
               onClick={handleReveal}
@@ -242,7 +243,7 @@ export function Review() {
             <motion.button
               onClick={handleReveal}
               whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+              transition={TAP_SPRING}
               className="w-full py-3.5 text-sm font-medium text-muted rounded-2xl cursor-pointer transition-colors hover:text-primary"
               style={{ border: '1.5px dashed var(--border)', background: 'transparent' }}
             >
@@ -282,7 +283,7 @@ export function Review() {
             <div className="grid grid-cols-2 gap-3">
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+                transition={TAP_SPRING}
                 onClick={() => handleRate(false)}
                 className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
                 style={{
@@ -295,7 +296,7 @@ export function Review() {
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 500 }}
+                transition={TAP_SPRING}
                 onClick={() => handleRate(true)}
                 className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
                 style={{
