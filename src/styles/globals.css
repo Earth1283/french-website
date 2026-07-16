@@ -434,6 +434,12 @@
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.10), 0 16px 48px rgba(0, 0, 0, 0.18);
+
+  /* Neutral iOS material tint — the base --glass* vars carry the warm Bonjour cream/black */
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-card: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
 }
 
 .apple-mode.dark {
@@ -459,6 +465,11 @@
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.55);
   --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.5), 0 16px 48px rgba(0, 0, 0, 0.65);
+
+  --glass: rgba(28, 28, 30, 0.72);
+  --glass-card: rgba(28, 28, 30, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
 }
 
 /* Vibrancy: Apple's translucent materials read thicker/more saturated than the base glass */
@@ -466,6 +477,17 @@
 .apple-mode .glass-card {
   backdrop-filter: blur(40px) saturate(190%);
   -webkit-backdrop-filter: blur(40px) saturate(190%);
+}
+
+/* Bottom tab bar acrylic — base pill gets a lighter blur; Apple-ify pushes it to true iOS acrylic */
+.bottom-nav-pill {
+  backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
+  -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
+}
+
+.apple-mode .bottom-nav-pill {
+  backdrop-filter: blur(46px) saturate(210%) brightness(1.08);
+  -webkit-backdrop-filter: blur(46px) saturate(210%) brightness(1.08);
 }
 
 /* No decorative serif under Apple-ify — San Francisco only, italic kept for the French flourish */

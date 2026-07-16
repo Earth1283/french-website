@@ -60,11 +60,9 @@ export function BottomNav() {
       style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}
     >
       <nav
-        className="pointer-events-auto flex"
+        className="pointer-events-auto flex bottom-nav-pill"
         style={{
           borderRadius: '9999px',
-          backdropFilter: 'blur(32px) saturate(180%) brightness(1.04)',
-          WebkitBackdropFilter: 'blur(32px) saturate(180%) brightness(1.04)',
           backgroundColor: 'var(--glass-card)',
           border: '0.5px solid var(--glass-border)',
           boxShadow: 'var(--shadow-3), inset 0 0.5px 0 var(--glass-highlight)',
