@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Volume2, Copy, Check, Zap } from 'lucide-react';
 import { UNITS, getAllVocab } from '../data/units';
 import { speak } from '../utils/speech';
@@ -102,7 +102,7 @@ export function Phrasebook() {
                   : { backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--hairline)' }
                 }
               >
-                {u.emoji} {u.tagline.split(' ')[0]}
+                {u.emoji} {u.tagline.split(/[,&]/)[0].trim()}
               </button>
             ))}
           </div>
@@ -159,7 +159,17 @@ export function Phrasebook() {
                   title="Copy phrase"
                   aria-label="Copy phrase"
                 >
-                  {copiedId === id ? <Check size={14} /> : <Copy size={13} />}
+                  <AnimatePresence mode="wait" initial={false}>
+                    {copiedId === id ? (
+                      <motion.span key="check" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={TAP_SPRING} className="flex">
+                        <Check size={14} />
+                      </motion.span>
+                    ) : (
+                      <motion.span key="copy" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={TAP_SPRING} className="flex">
+                        <Copy size={13} />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </button>
               </div>
             </motion.div>

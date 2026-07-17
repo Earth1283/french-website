@@ -221,46 +221,48 @@ export function Home() {
       )}
 
       {/* Review banner */}
-      {dueCount > 0 ? (
-        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <Link to="/review" className="no-underline block">
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              transition={TAP_SPRING}
-              className="card card-lift p-4 flex items-center justify-between gap-3"
-              style={{ backgroundColor: 'var(--accent-soft-bg)' }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0 text-white"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                >
-                  <RotateCcw size={17} />
+      <AnimatePresence mode="wait">
+        {dueCount > 0 ? (
+          <motion.div key="due" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-6">
+            <Link to="/review" className="no-underline block">
+              <motion.div
+                whileTap={{ scale: 0.98 }}
+                transition={TAP_SPRING}
+                className="card card-lift p-4 flex items-center justify-between gap-3"
+                style={{ backgroundColor: 'var(--accent-soft-bg)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0 text-white"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  >
+                    <RotateCcw size={17} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-primary">
+                      {dueCount} card{dueCount !== 1 ? 's' : ''} due for review
+                    </p>
+                    <p className="text-xs text-muted">Spaced repetition — keep your French sharp</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-sm text-primary">
-                    {dueCount} card{dueCount !== 1 ? 's' : ''} due for review
-                  </p>
-                  <p className="text-xs text-muted">Spaced repetition — keep your French sharp</p>
-                </div>
-              </div>
-              <ChevronRight size={18} style={{ color: 'var(--accent)' }} className="flex-shrink-0" />
-            </motion.div>
-          </Link>
-        </motion.div>
-      ) : nextReviewDate && completedLessons.length > 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
-          <div className="card p-3 flex items-center gap-3 opacity-70">
-            <RotateCcw size={14} className="text-muted flex-shrink-0" />
-            <p className="text-xs text-muted">
-              All caught up! Next review due{' '}
-              <span className="font-semibold text-primary">
-                {new Date(nextReviewDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-              </span>
-            </p>
-          </div>
-        </motion.div>
-      ) : null}
+                <ChevronRight size={18} style={{ color: 'var(--accent)' }} className="flex-shrink-0" />
+              </motion.div>
+            </Link>
+          </motion.div>
+        ) : nextReviewDate && completedLessons.length > 0 ? (
+          <motion.div key="caught-up" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6">
+            <div className="card p-3 flex items-center gap-3 opacity-70">
+              <RotateCcw size={14} className="text-muted flex-shrink-0" />
+              <p className="text-xs text-muted">
+                All caught up! Next review due{' '}
+                <span className="font-semibold text-primary">
+                  {new Date(nextReviewDate + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+              </p>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {/* Weak spots recommendation */}
       {weakSpots.length > 0 && (

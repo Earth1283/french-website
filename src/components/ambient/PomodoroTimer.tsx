@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls } from 'framer-motion';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
 type Mode = 'pomodoro' | 'break' | 'long';
@@ -46,6 +46,8 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
   const [running, setRunning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(MODES[0].minutes * 60);
   const intervalRef = useRef<number | null>(null);
+  const digitControls = useAnimationControls();
+  const ringControls = useAnimationControls();
 
   const duration = MODES.find(m => m.id === mode)!.minutes * 60;
 
@@ -68,6 +70,11 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
           window.clearInterval(intervalRef.current!);
           setRunning(false);
           chime();
+          digitControls.start({ scale: [1, 1.16, 1], transition: { duration: 0.55, ease: 'easeOut' } });
+          ringControls.start({
+            stroke: ['#ffffff', '#F4A261', '#ffffff'],
+            transition: { duration: 1.3, ease: 'easeInOut' },
+          });
           if (mode === 'pomodoro') onComplete?.();
           return 0;
         }
@@ -113,7 +120,7 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
       <div className="relative flex items-center justify-center">
         <svg width="300" height="300" className="-rotate-90">
           <circle cx="150" cy="150" r={R} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
-          <circle
+          <motion.circle
             cx="150"
             cy="150"
             r={R}
@@ -123,13 +130,18 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
             strokeLinecap="round"
             strokeDasharray={C}
             strokeDashoffset={C * (1 - progress)}
+            animate={ringControls}
             style={{ transition: 'stroke-dashoffset 1s linear' }}
           />
         </svg>
         <div className="absolute text-center">
-          <div className="text-[3.75rem] font-extralight tabular-nums leading-none" style={{ letterSpacing: '-0.02em' }}>
+          <motion.div
+            animate={digitControls}
+            className="text-[3.75rem] font-extralight tabular-nums leading-none"
+            style={{ letterSpacing: '-0.02em' }}
+          >
             {fmt(secondsLeft)}
-          </div>
+          </motion.div>
           <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/55">
             {running ? 'Focus' : secondsLeft === 0 ? 'Terminé !' : 'Paused'}
           </div>
