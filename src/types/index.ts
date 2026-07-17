@@ -74,6 +74,45 @@ export interface Scenario {
 
 export type Difficulty = 1 | 2 | 3;
 
+export type CEFRBand = 'pre-a1' | 'a1' | 'a2' | 'b1';
+
+export interface TestItem {
+  id: string;
+  type: ExerciseType;
+  a: number;
+  b: number;
+  topic: string;
+  cefr: CEFRBand;
+  source: 'lesson' | 'authored';
+  sourceRef?: { lessonId: string; exerciseIndex: number };
+  prompt?: string;
+  answer?: string;
+  options?: string[];
+  hint?: string;
+}
+
+export interface TestResponseLog {
+  itemId: string;
+  topic: string;
+  correct: boolean;
+  thetaAtTime: number;
+  a: number;
+  b: number;
+}
+
+export interface TestResult {
+  id: string;
+  date: string;
+  theta: number;
+  se: number;
+  cefrLevel: string;
+  cefrBand: 'lower' | 'mid' | 'upper' | null;
+  itemsAdministered: number;
+  correctCount: number;
+  topicBreakdown: Record<string, { correct: number; total: number }>;
+  responses: TestResponseLog[];
+}
+
 export interface ProgressState {
   completedLessons: string[];
   xp: number;

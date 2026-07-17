@@ -21,6 +21,7 @@ const loadConversation = () => import('./pages/Conversation');
 const loadSettings = () => import('./pages/Settings');
 const loadReview = () => import('./pages/Review');
 const loadFocus = () => import('./pages/Focus');
+const loadAdaptiveTest = () => import('./pages/AdaptiveTest');
 
 const Home = lazy(() => loadHome().then(m => ({ default: m.Home })));
 const Focus = lazy(() => loadFocus().then(m => ({ default: m.Focus })));
@@ -31,6 +32,7 @@ const Profile = lazy(() => loadProfile().then(m => ({ default: m.Profile })));
 const Conversation = lazy(() => loadConversation().then(m => ({ default: m.Conversation })));
 const Settings = lazy(() => loadSettings().then(m => ({ default: m.Settings })));
 const Review = lazy(() => loadReview().then(m => ({ default: m.Review })));
+const AdaptiveTest = lazy(() => loadAdaptiveTest().then(m => ({ default: m.AdaptiveTest })));
 
 // Likeliest next destinations first (Home/dashboard is the most common first hop
 // from the landing front door, so warm it early).
@@ -42,6 +44,7 @@ const IDLE_PRELOAD_ORDER = [
   loadReview,
   loadProfile,
   loadConversation,
+  loadAdaptiveTest,
   loadSettings,
 ];
 
@@ -85,6 +88,7 @@ function AnimatedRoutes() {
             <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
             <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
             <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
+            <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
             <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
             <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
             <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />

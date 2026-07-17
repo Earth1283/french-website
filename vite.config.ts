@@ -22,6 +22,7 @@ export default defineConfig(({ command }) => ({
           }
           if (id.includes('node_modules/framer-motion')) return 'motion';
           if (id.includes('node_modules/lucide-react') || id.includes('node_modules/zustand')) return 'ui';
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) return 'charts';
         },
       },
     },

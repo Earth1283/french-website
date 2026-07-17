@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Flame, Zap, RotateCcw, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trophy, Flame, Zap, RotateCcw, GraduationCap, Gauge, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import { useProgressStore, BADGES } from '../stores/progressStore';
+import { useTestStore } from '../stores/testStore';
 import { UNITS } from '../data/units';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -26,6 +28,7 @@ const A1_COMPETENCIES = [
 
 export function Profile() {
   const { xp, streak, completedLessons, earnedBadges, isA1Complete, getCompletedUnits, resetProgress } = useProgressStore();
+  const latestTestResult = useTestStore(s => s.latestResult());
   const a1Complete = isA1Complete();
   const completedUnits = getCompletedUnits();
   const [showA1, setShowA1] = useState(false);
@@ -125,6 +128,55 @@ export function Profile() {
           />
         </div>
         <p className="text-right text-xs text-muted mt-1">{overallPct}%</p>
+      </div>
+
+      {/* Level test summary */}
+      <div className="card p-5">
+        {latestTestResult ? (
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: 'var(--accent-tint)' }}
+              >
+                <Gauge size={19} style={{ color: 'var(--accent)' }} />
+              </span>
+              <div className="min-w-0">
+                <p className="font-semibold text-primary">
+                  {latestTestResult.cefrLevel}
+                  {latestTestResult.cefrBand ? ` · ${latestTestResult.cefrBand} range` : ''}
+                </p>
+                <p className="text-xs text-muted">
+                  {latestTestResult.correctCount}/{latestTestResult.itemsAdministered} correct ·{' '}
+                  {new Date(latestTestResult.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
+            <Link to="/test" className="flex flex-col flex-shrink-0">
+              <Button variant="secondary" size="sm">Retake</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: 'var(--accent-tint)' }}
+              >
+                <Gauge size={19} style={{ color: 'var(--accent)' }} />
+              </span>
+              <div className="min-w-0">
+                <p className="font-semibold text-primary">Find your level</p>
+                <p className="text-xs text-muted">Take the adaptive test to see where you stand</p>
+              </div>
+            </div>
+            <Link to="/test" className="flex flex-col flex-shrink-0">
+              <Button variant="secondary" size="sm">
+                Start <ArrowRight size={14} />
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* A1 Roadmap */}
