@@ -61,4 +61,14 @@ describe('ITEM_BANK integrity', () => {
     const bad = DERIVED_ITEMS.filter(i => !i.sourceRef).map(i => i.id);
     expect(bad).toEqual([]);
   });
+
+  it('gives every multiple-choice item a guessing floor matching 1/numOptions, and no floor to constructed-response items', () => {
+    const bad: string[] = [];
+    for (const item of ITEM_BANK) {
+      const numOptions = resolveTestItemExercise(item).options?.length ?? 0;
+      const expected = item.type === 'multiple-choice' ? 1 / numOptions : undefined;
+      if (item.c !== expected) bad.push(item.id);
+    }
+    expect(bad).toEqual([]);
+  });
 });

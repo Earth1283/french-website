@@ -81,6 +81,9 @@ export interface TestItem {
   type: ExerciseType;
   a: number;
   b: number;
+  /** Pseudo-guessing floor (3PL "c" parameter) — 0 for constructed-response
+   * types, ~1/numOptions for multiple-choice. Computed once in testItemBank.ts. */
+  c?: number;
   topic: string;
   cefr: CEFRBand;
   source: 'lesson' | 'authored';
@@ -98,6 +101,7 @@ export interface TestResponseLog {
   thetaAtTime: number;
   a: number;
   b: number;
+  c?: number;
 }
 
 export interface TestResult {

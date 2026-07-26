@@ -4,6 +4,8 @@ export interface IRTResponse {
   a: number;
   b: number;
   correct: boolean;
+  /** Pseudo-guessing floor (3PL "c"). Omitted/0 for constructed-response items. */
+  c?: number;
 }
 
 export const MIN_ITEMS = 25;
@@ -26,15 +28,28 @@ function normalPDF(x: number, mean = 0, sd = 1): number {
   return Math.exp(-0.5 * z * z) / (sd * Math.sqrt(2 * Math.PI));
 }
 
-/** 2PL probability of a correct response at ability `theta` for an item with discrimination `a` and difficulty `b`. */
-export function probability2PL(theta: number, a: number, b: number): number {
-  return 1 / (1 + Math.exp(-a * (theta - b)));
+/**
+ * Probability of a correct response at ability `theta` for an item with
+ * discrimination `a` and difficulty `b`. With a guessing floor `c` (3PL) this
+ * is the standard pseudo-guessing model; `c = 0` (the default) collapses it
+ * to plain 2PL, which is exact for constructed-response items (fill-blank,
+ * translation) where a floor doesn't apply.
+ */
+export function probability2PL(theta: number, a: number, b: number, c = 0): number {
+  return c + (1 - c) / (1 + Math.exp(-a * (theta - b)));
 }
 
-/** Fisher information of an item at ability `theta` — higher means the item is more informative there. */
-export function itemInformation(theta: number, a: number, b: number): number {
-  const p = probability2PL(theta, a, b);
-  return a * a * p * (1 - p);
+/**
+ * Fisher information of an item at ability `theta` — higher means the item
+ * is more informative there. A multiple-choice item's guessing floor makes
+ * it less informative for low-ability test-takers (a lucky guess shouldn't
+ * move the estimate much), which the plain 2PL formula ignores.
+ */
+export function itemInformation(theta: number, a: number, b: number, c = 0): number {
+  const p = probability2PL(theta, a, b, c);
+  if (c <= 0) return a * a * p * (1 - p);
+  const safeP = Math.max(p, 1e-6);
+  return (a * a * (p - c) * (p - c) * (1 - p)) / ((1 - c) * (1 - c) * safeP);
 }
 
 /**
@@ -48,7 +63,7 @@ export function estimateAbilityEAP(responses: IRTResponse[]): { theta: number; s
 
   const likelihoods = THETA_GRID.map(t =>
     responses.reduce((lik, r) => {
-      const p = probability2PL(t, r.a, r.b);
+      const p = probability2PL(t, r.a, r.b, r.c ?? 0);
       return lik * (r.correct ? p : 1 - p);
     }, 1)
   );
@@ -74,7 +89,7 @@ export function selectNextItem(candidates: TestItem[], theta: number, recentTopi
   if (candidates.length === 0) throw new Error('selectNextItem: no candidates remaining');
 
   const ranked = candidates
-    .map(item => ({ item, info: itemInformation(theta, item.a, item.b) }))
+    .map(item => ({ item, info: itemInformation(theta, item.a, item.b, item.c ?? 0) }))
     .sort((x, y) => y.info - x.info);
 
   const topPool = ranked.slice(0, Math.min(5, ranked.length));

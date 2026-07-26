@@ -102,7 +102,7 @@ export function AdaptiveTest() {
     sessionStorage.setItem(PROGRESS_KEY, JSON.stringify({ administeredIds, responses }));
   }, [view, administeredIds, responses]);
 
-  // Safety net: the bank (300+ items) should never be exhausted within a
+  // Safety net: the bank (350+ items) should never be exhausted within a
   // 40-item session, but bail out gracefully rather than render nothing.
   useEffect(() => {
     if (view === 'testing' && !currentItem) setView('intro');
@@ -186,6 +186,7 @@ export function AdaptiveTest() {
       thetaAtTime: theta,
       a: currentItem.a,
       b: currentItem.b,
+      c: currentItem.c ?? 0,
     };
     const newResponses = [...responses, log];
     const newAdministeredIds = [...administeredIds, currentItem.id];
