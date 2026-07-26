@@ -92,7 +92,7 @@ export const falseFriendsLessons: Lesson[] = [
       {
         type: 'multiple-choice',
         prompt: '"Je suis blessé" means:',
-        answer: 'I\'m injured',
+        answer: 'I\'m hurt/injured',
         options: ['I\'m blessed', 'I\'m surprised', 'I\'m hurt/injured', 'I\'m offended'],
       },
       {

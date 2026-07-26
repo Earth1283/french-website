@@ -91,6 +91,7 @@ export function AdaptiveTest() {
   });
   const [completedResult, setCompletedResult] = useState<TestResult | null>(null);
   const [expandedAttemptId, setExpandedAttemptId] = useState<string | null>(null);
+  const [keyboardSelect, setKeyboardSelect] = useState<number | null>(null);
 
   // Persist in-progress sessions so a refresh mid-test can resume.
   useEffect(() => {
@@ -105,6 +106,28 @@ export function AdaptiveTest() {
   // 40-item session, but bail out gracefully rather than render nothing.
   useEffect(() => {
     if (view === 'testing' && !currentItem) setView('intro');
+  }, [view, currentItem]);
+
+  useEffect(() => {
+    setKeyboardSelect(null);
+  }, [currentItem]);
+
+  // Keyboard shortcuts: number keys select a multiple-choice option, mirroring Lesson.tsx.
+  useEffect(() => {
+    if (view !== 'testing' || !currentItem) return;
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      const exercise = resolveTestItemExercise(currentItem);
+      if (exercise.type !== 'multiple-choice') return;
+      const n = parseInt(e.key);
+      if (!isNaN(n) && n >= 1 && n <= (exercise.options?.length ?? 0)) {
+        setKeyboardSelect(n - 1);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [view, currentItem]);
 
   const attemptsWithDelta = history.map((result, i) => ({
@@ -262,6 +285,7 @@ export function AdaptiveTest() {
               exercise={exercise}
               onCorrect={() => submitResponse(true)}
               onWrong={() => submitResponse(false)}
+              keyboardSelect={keyboardSelect}
             />
           )}
           {exercise.type === 'fill-blank' && (
