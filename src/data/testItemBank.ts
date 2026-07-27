@@ -61,7 +61,14 @@ function buildDerivedItems(): TestItem[] {
 /** All 171 existing lesson exercises, wrapped with IRT metadata. Resolved to their live `Exercise` at runtime — see `resolveTestItemExercise` — so edits to lesson content never desync from the bank. */
 export const DERIVED_ITEMS: TestItem[] = buildDerivedItems();
 
-export const ITEM_BANK: TestItem[] = [...DERIVED_ITEMS, ...AUTHORED_ITEMS];
+// A guessing floor (3PL "c") only applies to multiple-choice items — a lucky
+// guess among N options succeeds ~1/N of the time regardless of ability.
+// Constructed-response items (fill-blank, translation) have no such floor.
+export const ITEM_BANK: TestItem[] = [...DERIVED_ITEMS, ...AUTHORED_ITEMS].map(item => {
+  if (item.type !== 'multiple-choice') return item;
+  const numOptions = resolveTestItemExercise(item).options?.length ?? 4;
+  return { ...item, c: 1 / numOptions };
+});
 
 /** Resolves a TestItem to the `Exercise` shape the existing lesson components (`MultipleChoice`/`FillInBlank`/`TranslationChallenge`) expect. */
 export function resolveTestItemExercise(item: TestItem): Exercise {

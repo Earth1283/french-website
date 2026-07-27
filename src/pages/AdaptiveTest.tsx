@@ -91,6 +91,7 @@ export function AdaptiveTest() {
   });
   const [completedResult, setCompletedResult] = useState<TestResult | null>(null);
   const [expandedAttemptId, setExpandedAttemptId] = useState<string | null>(null);
+  const [keyboardSelect, setKeyboardSelect] = useState<number | null>(null);
 
   // Persist in-progress sessions so a refresh mid-test can resume.
   useEffect(() => {
@@ -101,10 +102,32 @@ export function AdaptiveTest() {
     sessionStorage.setItem(PROGRESS_KEY, JSON.stringify({ administeredIds, responses }));
   }, [view, administeredIds, responses]);
 
-  // Safety net: the bank (300+ items) should never be exhausted within a
+  // Safety net: the bank (350+ items) should never be exhausted within a
   // 40-item session, but bail out gracefully rather than render nothing.
   useEffect(() => {
     if (view === 'testing' && !currentItem) setView('intro');
+  }, [view, currentItem]);
+
+  useEffect(() => {
+    setKeyboardSelect(null);
+  }, [currentItem]);
+
+  // Keyboard shortcuts: number keys select a multiple-choice option, mirroring Lesson.tsx.
+  useEffect(() => {
+    if (view !== 'testing' || !currentItem) return;
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      const exercise = resolveTestItemExercise(currentItem);
+      if (exercise.type !== 'multiple-choice') return;
+      const n = parseInt(e.key);
+      if (!isNaN(n) && n >= 1 && n <= (exercise.options?.length ?? 0)) {
+        setKeyboardSelect(n - 1);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [view, currentItem]);
 
   const attemptsWithDelta = history.map((result, i) => ({
@@ -163,6 +186,7 @@ export function AdaptiveTest() {
       thetaAtTime: theta,
       a: currentItem.a,
       b: currentItem.b,
+      c: currentItem.c ?? 0,
     };
     const newResponses = [...responses, log];
     const newAdministeredIds = [...administeredIds, currentItem.id];
@@ -262,6 +286,7 @@ export function AdaptiveTest() {
               exercise={exercise}
               onCorrect={() => submitResponse(true)}
               onWrong={() => submitResponse(false)}
+              keyboardSelect={keyboardSelect}
             />
           )}
           {exercise.type === 'fill-blank' && (

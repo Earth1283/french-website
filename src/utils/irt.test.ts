@@ -83,6 +83,31 @@ describe('probability2PL / itemInformation', () => {
   });
 });
 
+describe('3PL guessing floor (c)', () => {
+  it('never lets probability drop below c, however low theta is', () => {
+    const p = probability2PL(-10, 1.4, 0, 0.25);
+    expect(p).toBeGreaterThanOrEqual(0.25);
+    expect(p).toBeCloseTo(0.25, 2);
+  });
+
+  it('matches plain 2PL when c is 0 or omitted', () => {
+    expect(probability2PL(0.3, 1.2, -0.4, 0)).toBeCloseTo(probability2PL(0.3, 1.2, -0.4), 10);
+  });
+
+  it('makes a multiple-choice item less informative than a c=0 item of the same a/b for a low-ability test-taker', () => {
+    const guessable = itemInformation(-2, 1.4, 0.5, 0.25);
+    const noFloor = itemInformation(-2, 1.4, 0.5, 0);
+    expect(guessable).toBeLessThan(noFloor);
+  });
+
+  it('gives a lucky correct guess on a far-too-hard MC item less pull on theta than the same result would under plain 2PL', () => {
+    const hardItem = { a: 1.4, b: 3, correct: true };
+    const withGuessing = estimateAbilityEAP([{ ...hardItem, c: 0.25 }]);
+    const without = estimateAbilityEAP([{ ...hardItem, c: 0 }]);
+    expect(withGuessing.theta).toBeLessThan(without.theta);
+  });
+});
+
 describe('estimateAbilityEAP', () => {
   it('returns the prior (theta=0, se=1) with no responses', () => {
     const { theta, se } = estimateAbilityEAP([]);

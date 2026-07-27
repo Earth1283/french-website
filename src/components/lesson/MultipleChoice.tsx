@@ -10,8 +10,20 @@ interface MultipleChoiceProps {
   keyboardSelect?: number | null;
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<string | null>(null);
+  // Authored option order is not reliably randomized (the correct answer is
+  // often first) — shuffle once per question so position carries no signal.
+  const [options] = useState(() => shuffle(exercise.options ?? []));
   const answered = selected !== null;
   const prevKeyboardSelect = useRef<number | null>(null);
 
@@ -31,7 +43,7 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
     }
     if (keyboardSelect !== prevKeyboardSelect.current) {
       prevKeyboardSelect.current = keyboardSelect;
-      const option = exercise.options?.[keyboardSelect];
+      const option = options[keyboardSelect];
       if (option) handleSelect(option);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,7 +60,7 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
       </div>
 
       <div className="grid gap-2.5">
-        {exercise.options?.map((option, i) => {
+        {options.map((option, i) => {
           const isCorrect = option === exercise.answer;
           const isSelected = option === selected;
 
@@ -124,7 +136,7 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
         </div>
       )}
 
-      <p className="text-center text-xs text-muted">Press 1–{exercise.options?.length} to select</p>
+      <p className="text-center text-xs text-muted">Press 1–{options.length} to select</p>
     </div>
   );
 }
