@@ -112,14 +112,15 @@ interface CEFRCut {
 }
 
 // Cut points on the theta (logit) scale. The top band is deliberately left
-// open-ended ("B1+") rather than claiming B2/C1 precision the content can't
+// open-ended ("B2+") rather than claiming C1 precision the content can't
 // back up — see src/data/testItemBank.ts for the coverage this reflects.
 const CEFR_CUTS: CEFRCut[] = [
   { level: 'Pre-A1', min: -Infinity, max: -1.8 },
   { level: 'A1', min: -1.8, max: -0.6 },
   { level: 'A2', min: -0.6, max: 0.7 },
   { level: 'B1', min: 0.7, max: 1.8 },
-  { level: 'B1+', min: 1.8, max: Infinity },
+  { level: 'B2', min: 1.8, max: 3.0 },
+  { level: 'B2+', min: 3.0, max: Infinity },
 ];
 
 export function thetaToCEFR(theta: number): { level: string; band: 'lower' | 'mid' | 'upper' | null } {
@@ -141,5 +142,6 @@ export function cefrBandToLabel(cefr: CEFRBand): string {
     case 'a1': return 'A1';
     case 'a2': return 'A2';
     case 'b1': return 'B1';
+    case 'b2': return 'B2';
   }
 }

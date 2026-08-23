@@ -74,7 +74,7 @@ export interface Scenario {
 
 export type Difficulty = 1 | 2 | 3;
 
-export type CEFRBand = 'pre-a1' | 'a1' | 'a2' | 'b1';
+export type CEFRBand = 'pre-a1' | 'a1' | 'a2' | 'b1' | 'b2';
 
 export interface TestItem {
   id: string;
