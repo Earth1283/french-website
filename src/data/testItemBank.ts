@@ -9,6 +9,12 @@ const SYNTHETIC_TOPIC_META: Record<string, { emoji: string; title: string; color
   'b1-workplace': { emoji: '💼', title: 'Workplace French', color: '#457B9D' },
   'b1-media': { emoji: '📰', title: 'News & Media', color: '#E76F51' },
   'b1-abstract': { emoji: '🧩', title: 'Abstract & Idiomatic', color: '#2A9D8F' },
+  'b2-syntax': { emoji: '🔗', title: 'Advanced Syntax & Relative Clauses', color: '#6D6875' },
+  'b2-subjunctive': { emoji: '🎭', title: 'Subjunctive Nuance', color: '#B5838D' },
+  'b2-argumentation': { emoji: '🗣️', title: 'Debate & Argumentation', color: '#D62828' },
+  'b2-register': { emoji: '🎩', title: 'Register & Style', color: '#003049' },
+  'b2-idiomatic': { emoji: '🗝️', title: 'Advanced Idioms', color: '#C1121F' },
+  'b2-abstract-issues': { emoji: '🌐', title: 'Society & Global Issues', color: '#219EBC' },
 };
 
 /** Topic metadata for the results/breakdown UI — real units resolve directly, synthetic B1 topics fall back to a local map. */
@@ -20,9 +26,10 @@ export function getTopicMeta(topicId: string): { emoji: string; title: string; c
   return { emoji: '📌', title: topicId, color: 'var(--accent)' };
 }
 
-// Existing lesson content has no true B1 material — isBeyondA1 units ("false
-// friends", "slang", "trains", "culture", "cinema") sit at the harder end of
-// A2, not real B1 (that gap is exactly why AUTHORED_ITEMS exists).
+// Existing lesson content has no true B1/B2 material — isBeyondA1 units
+// ("false friends", "slang", "trains", "culture", "cinema") sit at the
+// harder end of A2, not real B1+ (that gap is exactly why AUTHORED_ITEMS
+// exists).
 function getUnitCEFR(unit: Unit): CEFRBand {
   if (unit.isPreA1) return 'pre-a1';
   if (unit.isA1) return 'a1';

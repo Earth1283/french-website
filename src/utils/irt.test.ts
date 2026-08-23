@@ -122,11 +122,12 @@ describe('thetaToCEFR', () => {
     expect(thetaToCEFR(-1.2).level).toBe('A1');
     expect(thetaToCEFR(0).level).toBe('A2');
     expect(thetaToCEFR(1).level).toBe('B1');
-    expect(thetaToCEFR(2.5).level).toBe('B1+');
+    expect(thetaToCEFR(2.5).level).toBe('B2');
+    expect(thetaToCEFR(3.5).level).toBe('B2+');
   });
 
   it('leaves the open-ended top band without a lower/mid/upper split', () => {
-    expect(thetaToCEFR(3).band).toBeNull();
+    expect(thetaToCEFR(3.5).band).toBeNull();
   });
 
   it('splits a closed band into lower/mid/upper', () => {
