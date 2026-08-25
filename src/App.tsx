@@ -22,6 +22,12 @@ const loadSettings = () => import('./pages/Settings');
 const loadReview = () => import('./pages/Review');
 const loadFocus = () => import('./pages/Focus');
 const loadAdaptiveTest = () => import('./pages/AdaptiveTest');
+const loadClassroomConnect = () => import('./pages/classroom/Connect');
+const loadClassroomAuth = () => import('./pages/classroom/Auth');
+const loadClassesHome = () => import('./pages/classroom/ClassesHome');
+const loadClassDetail = () => import('./pages/classroom/ClassDetail');
+const loadContentEditor = () => import('./pages/classroom/ContentEditor');
+const loadAssignment = () => import('./pages/classroom/Assignment');
 
 const Home = lazy(() => loadHome().then(m => ({ default: m.Home })));
 const Focus = lazy(() => loadFocus().then(m => ({ default: m.Focus })));
@@ -33,6 +39,12 @@ const Conversation = lazy(() => loadConversation().then(m => ({ default: m.Conve
 const Settings = lazy(() => loadSettings().then(m => ({ default: m.Settings })));
 const Review = lazy(() => loadReview().then(m => ({ default: m.Review })));
 const AdaptiveTest = lazy(() => loadAdaptiveTest().then(m => ({ default: m.AdaptiveTest })));
+const Connect = lazy(() => loadClassroomConnect().then(m => ({ default: m.Connect })));
+const ClassroomAuth = lazy(() => loadClassroomAuth().then(m => ({ default: m.ClassroomAuth })));
+const ClassesHome = lazy(() => loadClassesHome().then(m => ({ default: m.ClassesHome })));
+const ClassDetail = lazy(() => loadClassDetail().then(m => ({ default: m.ClassDetail })));
+const ContentEditor = lazy(() => loadContentEditor().then(m => ({ default: m.ContentEditor })));
+const Assignment = lazy(() => loadAssignment().then(m => ({ default: m.Assignment })));
 
 // Likeliest next destinations first (Home/dashboard is the most common first hop
 // from the landing front door, so warm it early).
@@ -46,6 +58,7 @@ const IDLE_PRELOAD_ORDER = [
   loadConversation,
   loadAdaptiveTest,
   loadSettings,
+  loadClassesHome,
 ];
 
 const ACCENT_HOVER: Record<string, string> = {
@@ -89,6 +102,13 @@ function AnimatedRoutes() {
             <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
             <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
             <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
+            <Route path="/classes/connect" element={<PageTransition keyProp="classes-connect"><Connect /></PageTransition>} />
+            <Route path="/classes/auth" element={<PageTransition keyProp="classes-auth"><ClassroomAuth /></PageTransition>} />
+            <Route path="/classes/content/new" element={<PageTransition keyProp="content-new"><ContentEditor /></PageTransition>} />
+            <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
+            <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />
+            <Route path="/classes/:classId" element={<PageTransition keyProp="class-detail"><ClassDetail /></PageTransition>} />
+            <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
             <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
             <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
             <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />

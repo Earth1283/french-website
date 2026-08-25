@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings, Timer, Gauge } from 'lucide-react';
+import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings, Timer, Gauge, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 import { TAP_SPRING } from '../../utils/motion';
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { to: '/phrasebook', icon: BookOpen, label: 'Phrases' },
   { to: '/converse', icon: MessageSquare, label: 'Converse' },
   { to: '/test', icon: Gauge, label: 'Test' },
+  { to: '/classes', icon: GraduationCap, label: 'Classes' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];
 

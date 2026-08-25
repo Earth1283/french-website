@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BookOpen, MessageSquare, User, Settings, Timer, Gauge } from 'lucide-react';
+import { Home, BookOpen, MessageSquare, User, Settings, Timer, Gauge, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 import { TAP_SPRING } from '../../utils/motion';
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: '/phrasebook', icon: BookOpen, label: 'Phrases' },
   { to: '/converse', icon: MessageSquare, label: 'Converse' },
   { to: '/test', icon: Gauge, label: 'Test' },
+  { to: '/classes', icon: GraduationCap, label: 'Classes' },
   { to: '/profile', icon: User, label: 'Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
@@ -81,8 +82,8 @@ export function BottomNav() {
                 className="no-underline relative flex flex-col items-center justify-center gap-0.5 isolate"
                 style={{
                   borderRadius: '9999px',
-                  padding: '0.45rem 0.8rem',
-                  minWidth: '2.75rem',
+                  padding: '0.45rem 0.55rem',
+                  minWidth: '2.4rem',
                   color: active ? 'var(--accent)' : 'var(--text-muted)',
                   transition: 'color 0.18s',
                 }}

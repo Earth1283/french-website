@@ -1,0 +1,15 @@
+[Unit]
+Description=French Classroom Server
+After=network.target
+
+[Service]
+Type=simple
+User=classroom
+WorkingDirectory=/opt/french-classroom/server
+EnvironmentFile=/opt/french-classroom/server/.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
