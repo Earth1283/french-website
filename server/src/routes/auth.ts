@@ -9,7 +9,12 @@ import { loginSchema, studentRegisterSchema, teacherRegisterSchema } from '../li
 
 export const authRouter = Router();
 
-const authLimiter = rateLimit({ windowMs: 60_000, max: 10, standardHeaders: true, legacyHeaders: false });
+const authLimiter = rateLimit({
+  windowMs: 60_000,
+  max: config.authRateLimit,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 authRouter.use(authLimiter);
 
 authRouter.post('/teacher/register', (req, res) => {

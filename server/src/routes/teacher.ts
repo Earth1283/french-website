@@ -17,6 +17,8 @@ import {
   updateContent,
 } from '../db/queries/content.js';
 import { createAssignment, deleteAssignment, getAssignmentById, listAssignmentsByClass } from '../db/queries/assignments.js';
+import { getQuestionStatsForAssignment } from '../db/queries/attempts.js';
+import { countUnresolvedFlagsByAssignment, getFlagById, listFlagsForAssignment, resolveFlag } from '../db/queries/flags.js';
 import {
   createAssignmentSchema,
   createClassSchema,
@@ -38,6 +40,12 @@ function ownedContent(req: Request, contentId: string) {
   const content = getContentById(contentId);
   if (!content || content.teacher_id !== req.teacherId) return null;
   return content;
+}
+
+function promptsFromBody(bodyJson: string): string[] {
+  const body = JSON.parse(bodyJson) as { kind: string; exercises?: { prompt: string }[]; items?: { prompt: string }[] };
+  const list = body.kind === 'lesson' ? body.exercises : body.items;
+  return (list ?? []).map((item) => item.prompt);
 }
 
 teacherRouter.get('/classes', (req, res) => {
@@ -92,11 +100,33 @@ teacherRouter.get('/classes/:classId/assignments', (req, res) => {
     res.status(404).json({ error: 'Class not found' });
     return;
   }
+  const flagCounts = countUnresolvedFlagsByAssignment(cls.id);
   const assignments = listAssignmentsByClass(cls.id).map((a) => ({
     ...a,
     content: getContentById(a.content_id),
+    unresolvedFlagCount: flagCounts[a.id] ?? 0,
   }));
   res.json({ assignments });
+});
+
+teacherRouter.get('/classes/:classId/assignments/:assignmentId/results', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  const assignment = getAssignmentById(req.params.assignmentId);
+  if (!assignment || assignment.class_id !== cls.id) {
+    res.status(404).json({ error: 'Assignment not found' });
+    return;
+  }
+  const content = getContentById(assignment.content_id);
+  const prompts = content ? promptsFromBody(content.body_json) : [];
+  const questions = getQuestionStatsForAssignment(assignment.id).map((q) => ({
+    ...q,
+    prompt: prompts[q.index] ?? `Question ${q.index + 1}`,
+  }));
+  res.json({ assignment, content, questions, flags: listFlagsForAssignment(assignment.id) });
 });
 
 teacherRouter.post('/classes/:classId/assignments', (req, res) => {
@@ -127,6 +157,20 @@ teacherRouter.delete('/assignments/:assignmentId', (req, res) => {
   }
   deleteAssignment(assignment.id);
   res.status(204).end();
+});
+
+teacherRouter.post('/flags/:flagId/resolve', (req, res) => {
+  const flag = getFlagById(req.params.flagId);
+  if (!flag) {
+    res.status(404).json({ error: 'Flag not found' });
+    return;
+  }
+  const assignment = getAssignmentById(flag.assignment_id);
+  if (!assignment || !ownedClass(req, assignment.class_id)) {
+    res.status(404).json({ error: 'Flag not found' });
+    return;
+  }
+  res.json({ flag: resolveFlag(flag.id) });
 });
 
 teacherRouter.get('/content', (req, res) => {

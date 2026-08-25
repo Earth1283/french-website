@@ -53,3 +53,38 @@ export function listAttemptsForStudentInClass(studentId: string, classId: string
     )
     .all(studentId, classId) as AttemptRow[];
 }
+
+export interface QuestionStat {
+  index: number;
+  correctCount: number;
+  wrongCount: number;
+  totalCount: number;
+}
+
+// responses_json is a JSON blob per attempt rather than normalized rows, so
+// per-question tallying happens here in JS instead of in SQL.
+export function getQuestionStatsForAssignment(assignmentId: string): QuestionStat[] {
+  const rows = db
+    .prepare("SELECT responses_json FROM attempts WHERE assignment_id = ? AND completed_at IS NOT NULL")
+    .all(assignmentId) as Array<{ responses_json: string }>;
+
+  const tally = new Map<number, { correct: number; wrong: number }>();
+  for (const row of rows) {
+    const responses = JSON.parse(row.responses_json) as AttemptResponse[];
+    for (const r of responses) {
+      const entry = tally.get(r.index) ?? { correct: 0, wrong: 0 };
+      if (r.correct) entry.correct += 1;
+      else entry.wrong += 1;
+      tally.set(r.index, entry);
+    }
+  }
+
+  return [...tally.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([index, { correct, wrong }]) => ({
+      index,
+      correctCount: correct,
+      wrongCount: wrong,
+      totalCount: correct + wrong,
+    }));
+}

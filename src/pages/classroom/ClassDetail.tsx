@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen } from 'lucide-react';
+import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen, BarChart3, Flag } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import type { AssignmentInfo, ClassInfo, ClassroomContent, RosterStudent } from '../../types/classroom';
@@ -109,21 +109,39 @@ export function ClassDetail() {
           )}
           {assignments?.map((a) => (
             <div key={a.id} className="inset-row justify-between">
-              <div className="flex items-center gap-2.5">
+              <Link to={`/classes/${classId}/assignments/${a.id}/results`} className="flex items-center gap-2.5 no-underline">
                 <BookOpen size={14} style={{ color: 'var(--text-muted)' }} />
                 <div>
                   <p className="text-sm font-semibold text-primary">{a.title}</p>
                   <p className="text-xs text-muted capitalize">{a.kind}</p>
                 </div>
+                {!!a.unresolvedFlagCount && (
+                  <span
+                    className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)', color: 'var(--danger)' }}
+                  >
+                    <Flag size={10} /> {a.unresolvedFlagCount}
+                  </span>
+                )}
+              </Link>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Link
+                  to={`/classes/${classId}/assignments/${a.id}/results`}
+                  aria-label="View results"
+                  className="p-1.5 rounded-full"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <BarChart3 size={14} />
+                </Link>
+                <button
+                  onClick={() => removeAssignment(a.id)}
+                  aria-label="Remove assignment"
+                  className="p-1.5 rounded-full cursor-pointer"
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
-              <button
-                onClick={() => removeAssignment(a.id)}
-                aria-label="Remove assignment"
-                className="p-1.5 rounded-full cursor-pointer"
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-              >
-                <Trash2 size={14} />
-              </button>
             </div>
           ))}
           <div className="p-4 inset-divider space-y-3">

@@ -124,7 +124,15 @@ export function Connect() {
           </span>
           <p className="text-xs text-muted leading-relaxed">
             Your teacher runs their own classroom server and can give you its address — ask them for it,
-            or if you're the teacher, see your server's terminal output after starting it.
+            or if you're the teacher, see your server's terminal output after starting it.{' '}
+            <a
+              href="https://github.com/Earth1283/french-website/blob/main/server/SETUP.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--accent)' }}
+            >
+              Setting one up for the first time? Read the setup guide.
+            </a>
           </p>
         </div>
 

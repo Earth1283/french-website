@@ -28,6 +28,7 @@ export const config = {
   tlsCertPath: process.env.TLS_CERT_PATH?.trim() || null,
   tlsKeyPath: process.env.TLS_KEY_PATH?.trim() || null,
   teacherSignupCode: process.env.TEACHER_SIGNUP_CODE?.trim() || null,
+  authRateLimit: Number(process.env.AUTH_RATE_LIMIT) || 10,
   dataDir: DATA_DIR,
 };
 

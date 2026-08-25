@@ -13,6 +13,7 @@ export async function createTestApp(): Promise<{ app: Express; db: Database.Data
   process.env.TEACHER_SIGNUP_CODE = 'test-invite-code';
   process.env.TLS_CERT_PATH = '';
   process.env.TLS_KEY_PATH = '';
+  process.env.AUTH_RATE_LIMIT = '1000';
 
   const { app } = await import('../src/app.js');
   const { db } = await import('../src/db/connection.js');
@@ -23,6 +24,7 @@ export async function createTestApp(): Promise<{ app: Express; db: Database.Data
 
 export function resetDb(db: Database.Database): void {
   db.exec(`
+    DELETE FROM flags;
     DELETE FROM attempts;
     DELETE FROM assignments;
     DELETE FROM content_items;

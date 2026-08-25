@@ -4,7 +4,8 @@ import { enrollStudent, getClassByJoinCode, isEnrolled, listClassesForStudent } 
 import { getAssignmentById, listAssignmentsForStudent } from '../db/queries/assignments.js';
 import { getContentById } from '../db/queries/content.js';
 import { listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
-import { enrollSchema, submitAttemptSchema } from '../lib/validation.js';
+import { createFlag } from '../db/queries/flags.js';
+import { createFlagSchema, enrollSchema, submitAttemptSchema } from '../lib/validation.js';
 
 export const studentRouter = Router();
 studentRouter.use(requireStudent);
@@ -78,6 +79,21 @@ studentRouter.post('/assignments/:assignmentId/attempts', (req, res) => {
     parsed.data.xpEarned
   );
   res.status(201).json({ attempt });
+});
+
+studentRouter.post('/assignments/:assignmentId/flags', (req, res) => {
+  const assignment = getAssignmentById(req.params.assignmentId);
+  if (!assignment || !isEnrolled(req.studentId!, assignment.class_id)) {
+    res.status(404).json({ error: 'Assignment not found' });
+    return;
+  }
+  const parsed = createFlagSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const flag = createFlag(req.studentId!, assignment.id, parsed.data.questionIndex, parsed.data.reason);
+  res.status(201).json({ flag });
 });
 
 studentRouter.get('/progress', (req, res) => {

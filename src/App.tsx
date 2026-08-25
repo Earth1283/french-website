@@ -28,6 +28,7 @@ const loadClassesHome = () => import('./pages/classroom/ClassesHome');
 const loadClassDetail = () => import('./pages/classroom/ClassDetail');
 const loadContentEditor = () => import('./pages/classroom/ContentEditor');
 const loadAssignment = () => import('./pages/classroom/Assignment');
+const loadAssignmentResults = () => import('./pages/classroom/AssignmentResults');
 
 const Home = lazy(() => loadHome().then(m => ({ default: m.Home })));
 const Focus = lazy(() => loadFocus().then(m => ({ default: m.Focus })));
@@ -45,6 +46,7 @@ const ClassesHome = lazy(() => loadClassesHome().then(m => ({ default: m.Classes
 const ClassDetail = lazy(() => loadClassDetail().then(m => ({ default: m.ClassDetail })));
 const ContentEditor = lazy(() => loadContentEditor().then(m => ({ default: m.ContentEditor })));
 const Assignment = lazy(() => loadAssignment().then(m => ({ default: m.Assignment })));
+const AssignmentResults = lazy(() => loadAssignmentResults().then(m => ({ default: m.AssignmentResults })));
 
 // Likeliest next destinations first (Home/dashboard is the most common first hop
 // from the landing front door, so warm it early).
@@ -107,6 +109,7 @@ function AnimatedRoutes() {
             <Route path="/classes/content/new" element={<PageTransition keyProp="content-new"><ContentEditor /></PageTransition>} />
             <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
             <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />
+            <Route path="/classes/:classId/assignments/:assignmentId/results" element={<PageTransition keyProp="assignment-results"><AssignmentResults /></PageTransition>} />
             <Route path="/classes/:classId" element={<PageTransition keyProp="class-detail"><ClassDetail /></PageTransition>} />
             <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
             <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />

@@ -75,6 +75,16 @@ Without it the app uses bundled gradient skins — nothing breaks, it just won't
 imagery. For the deployed site, add the same value as a repository secret named
 ``VITE_UNSPLASH_ACCESS_KEY`` (the deploy workflow already reads it).
 
+Running Your Own Classroom
+===========================
+
+Teachers can self-host an optional backend to create custom lessons and
+quizzes, and track student progress — the main site becomes a thin client
+that connects to whichever server you point it at. No Docker, no external
+database, just Node.js. See `server/SETUP.md <server/SETUP.md>`_ for a
+full guided walkthrough, or `server/README.md <server/README.md>`_ for the
+technical reference.
+
 Deployment
 ==========
 

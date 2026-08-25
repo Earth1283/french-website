@@ -6,6 +6,10 @@ main site (GitHub Pages) then connects to whatever URL you host this at.
 
 No Docker, no external database — just Node.js and a SQLite file.
 
+**New here?** [`SETUP.md`](SETUP.md) is a full guided walkthrough, start to
+finish, aimed at teachers rather than developers. This README is the
+technical reference — configuration, certificates, and troubleshooting.
+
 ## Quick start
 
 ```bash

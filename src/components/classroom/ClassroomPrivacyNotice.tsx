@@ -1,4 +1,4 @@
-import { Eye, Lock, Server } from 'lucide-react';
+import { Eye, Lock, Server, Flag } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 function Row({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
@@ -23,12 +23,18 @@ export function ClassroomPrivacyNotice() {
     <div className="space-y-4">
       <Row icon={<Eye size={13} />} title="Your teacher can see">
         Your name, email, which classes you've joined, and — per assignment — whether you completed it and
-        your score. Not which individual questions you got right or wrong.
+        your score. They can also see, for the whole class at once, which questions students commonly get
+        wrong — as a chart of counts, not a list of who missed what.
+      </Row>
+      <Row icon={<Flag size={13} />} title="If you flag a question">
+        Your name is attached to it — flags go straight to your teacher on purpose, so that one's not
+        anonymous.
       </Row>
       <Row icon={<Lock size={13} />} title="Stays private">
-        Your password (stored as an unreadable hash — not even your teacher can see it), and your regular
-        progress on this device (XP, streaks, badges). That's a separate, local-only account and is never
-        sent anywhere.
+        Your password (stored as an unreadable hash — not even your teacher can see it), which specific
+        question <em>you personally</em> got wrong (only class-wide patterns are visible, not per-student),
+        and your regular progress on this device (XP, streaks, badges) — a separate, local-only account
+        that's never sent anywhere.
       </Row>
       <Row icon={<Server size={13} />} title="Where it's stored">
         On your teacher's own self-hosted server — not on servers run by the people who made this website,

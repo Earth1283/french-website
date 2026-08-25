@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, PartyPopper } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, PartyPopper, Flag, Check } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { FlashCard } from '../../components/lesson/FlashCard';
 import { MultipleChoice } from '../../components/lesson/MultipleChoice';
@@ -25,6 +25,10 @@ export function Assignment() {
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [responses, setResponses] = useState<AttemptResponseEntry[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [flaggedIndices, setFlaggedIndices] = useState<Set<number>>(new Set());
+  const [flagFormOpen, setFlagFormOpen] = useState(false);
+  const [flagReason, setFlagReason] = useState('');
+  const [flagSubmitting, setFlagSubmitting] = useState(false);
 
   useEffect(() => {
     if (!assignmentId) return;
@@ -34,6 +38,11 @@ export function Assignment() {
       )
       .then(setData);
   }, [assignmentId]);
+
+  useEffect(() => {
+    setFlagFormOpen(false);
+    setFlagReason('');
+  }, [exerciseIndex]);
 
   if (!data) {
     return <div className="max-w-xl mx-auto px-4 py-16 text-center text-muted">Loading…</div>;
@@ -56,6 +65,21 @@ export function Assignment() {
     } finally {
       setSubmitting(false);
       setPhase('complete');
+    }
+  }
+
+  async function submitFlag() {
+    setFlagSubmitting(true);
+    try {
+      await classroomApi.post(`/api/student/assignments/${assignmentId}/flags`, {
+        questionIndex: exerciseIndex,
+        reason: flagReason.trim(),
+      });
+      setFlaggedIndices((prev) => new Set(prev).add(exerciseIndex));
+      setFlagFormOpen(false);
+      setFlagReason('');
+    } finally {
+      setFlagSubmitting(false);
     }
   }
 
@@ -167,6 +191,50 @@ export function Assignment() {
               if (ex.type === 'translation') return <TranslationChallenge key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
               return null;
             })()}
+
+            <div className="max-w-lg mx-auto text-center">
+              {flaggedIndices.has(exerciseIndex) ? (
+                <p className="text-xs text-muted flex items-center justify-center gap-1">
+                  <Check size={12} /> Flagged for your teacher
+                </p>
+              ) : !flagFormOpen ? (
+                <button
+                  onClick={() => setFlagFormOpen(true)}
+                  className="text-xs text-muted hover:underline cursor-pointer inline-flex items-center gap-1"
+                  style={{ background: 'transparent', border: 'none' }}
+                >
+                  <Flag size={11} /> Something wrong with this question?
+                </button>
+              ) : (
+                <div className="text-left space-y-2 p-3" style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', backgroundColor: 'var(--bg-card)' }}>
+                  <p className="text-xs text-muted">Let your teacher know what's off (optional).</p>
+                  <input
+                    value={flagReason}
+                    onChange={(e) => setFlagReason(e.target.value)}
+                    placeholder="e.g. the correct answer looks wrong"
+                    className="ios-input py-1.5 text-sm"
+                    maxLength={500}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={submitFlag}
+                      disabled={flagSubmitting}
+                      className="chip cursor-pointer"
+                      style={{ border: 'none' }}
+                    >
+                      {flagSubmitting ? 'Sending…' : 'Send to teacher'}
+                    </button>
+                    <button
+                      onClick={() => setFlagFormOpen(false)}
+                      className="text-xs text-muted hover:underline cursor-pointer"
+                      style={{ background: 'transparent', border: 'none' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 

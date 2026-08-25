@@ -58,6 +58,27 @@ export interface AssignmentInfo {
   completed?: number;
   score?: number | null;
   content?: ClassroomContent;
+  unresolvedFlagCount?: number;
+}
+
+export interface QuestionStat {
+  index: number;
+  prompt: string;
+  correctCount: number;
+  wrongCount: number;
+  totalCount: number;
+}
+
+export interface FlagInfo {
+  id: string;
+  student_id: string;
+  assignment_id: string;
+  question_index: number;
+  reason: string;
+  created_at: string;
+  resolved_at: string | null;
+  studentName: string;
+  contentTitle: string;
 }
 
 export interface AttemptResponseEntry {

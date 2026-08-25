@@ -92,3 +92,8 @@ export const submitAttemptSchema = z.object({
   score: z.number().min(0).max(100),
   xpEarned: z.number().int().nonnegative(),
 });
+
+export const createFlagSchema = z.object({
+  questionIndex: z.number().int().nonnegative(),
+  reason: z.string().trim().max(500).optional().default(''),
+});
