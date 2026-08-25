@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { LogIn } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LogIn, ShieldQuestion, ChevronDown, ChevronUp } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
+import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
 
 type Role = 'teacher' | 'student';
 type Mode = 'login' | 'register';
@@ -21,6 +22,7 @@ export function ClassroomAuth() {
   const [signupCode, setSignupCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   if (!backendUrl || !certTrusted) {
     return <Navigate to="/classes/connect" replace />;
@@ -112,6 +114,41 @@ export function ClassroomAuth() {
             Create Account
           </button>
         </div>
+
+        {role === 'student' && (
+          <div style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', overflow: 'hidden' }}>
+            <button
+              onClick={() => setPrivacyOpen((v) => !v)}
+              className="w-full p-3 flex items-center justify-between text-left cursor-pointer"
+              style={{ background: 'var(--bg-inset)', border: 'none' }}
+            >
+              <span className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <ShieldQuestion size={15} style={{ color: 'var(--accent)' }} />
+                What data do I share?
+              </span>
+              {privacyOpen ? (
+                <ChevronUp size={14} style={{ color: 'var(--text-muted)' }} />
+              ) : (
+                <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} />
+              )}
+            </button>
+            <AnimatePresence>
+              {privacyOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+                    <ClassroomPrivacyNotice />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         <div className="space-y-3">
           {mode === 'register' && (

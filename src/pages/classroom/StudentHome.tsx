@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight } from 'lucide-react';
+import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
 import type { AssignmentInfo, ClassInfo } from '../../types/classroom';
 
 interface ClassWithAssignments extends ClassInfo {
@@ -17,6 +19,7 @@ export function StudentHome() {
   const [joinCode, setJoinCode] = useState('');
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   async function load() {
     const res = await classroomApi.get<{ classes: ClassInfo[] }>('/api/student/classes');
@@ -55,14 +58,27 @@ export function StudentHome() {
           <h1 className="text-3xl font-bold text-primary mb-1">My Classes</h1>
           <p className="text-secondary text-sm">{profile?.name}</p>
         </div>
-        <button
-          onClick={disconnect}
-          className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-          style={{ background: 'transparent', border: 'none' }}
-        >
-          <LogOut size={12} /> Log out
-        </button>
+        <div className="flex flex-col items-end gap-1.5">
+          <button
+            onClick={() => setPrivacyOpen(true)}
+            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
+            style={{ background: 'transparent', border: 'none' }}
+          >
+            <ShieldQuestion size={12} /> What does my teacher see?
+          </button>
+          <button
+            onClick={disconnect}
+            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
+            style={{ background: 'transparent', border: 'none' }}
+          >
+            <LogOut size={12} /> Log out
+          </button>
+        </div>
       </motion.div>
+
+      <Modal open={privacyOpen} onClose={() => setPrivacyOpen(false)} title="Your Data">
+        <ClassroomPrivacyNotice />
+      </Modal>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-4">
         <div className="flex gap-2">
