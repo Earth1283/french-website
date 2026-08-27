@@ -12,7 +12,9 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>
 );
 
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+const isTauri = '__TAURI_INTERNALS__' in window;
+
+if ('serviceWorker' in navigator && import.meta.env.PROD && !isTauri) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/french-website/sw.js').catch(() => {
       // SW registration is best-effort; silently ignore failures

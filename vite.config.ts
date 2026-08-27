@@ -2,16 +2,24 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+// Tauri sets TAURI_ENV_PLATFORM during `tauri dev`/`tauri build`; the desktop
+// bundle serves assets from its own root, not the GitHub Pages subpath.
+const isTauri = !!process.env.TAURI_ENV_PLATFORM;
+
 export default defineConfig(({ command }) => ({
   // Hosted at https://earth1283.github.io/french-website/ — assets need the
-  // subpath in production builds; dev server stays at /
-  base: command === 'build' ? '/french-website/' : '/',
+  // subpath in production builds; dev server and the Tauri bundle stay at /
+  base: command === 'build' && !isTauri ? '/french-website/' : '/',
   plugins: [
     react(),
     tailwindcss(),
   ],
+  // Tauri needs a fixed, predictable dev server port to point its webview at.
+  clearScreen: false,
   server: {
     allowedHosts: ['mc3.leapmotorintl.com'],
+    port: 5173,
+    strictPort: true,
   },
   build: {
     rollupOptions: {
