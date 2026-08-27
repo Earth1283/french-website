@@ -75,11 +75,23 @@ jobs:
 
       # Only runs when the APPLE_CERTIFICATE secret is configured — until then,
       # builds are produced unsigned (see README for how to add signing).
+      #
+      # Rust's env::var() can't tell "secret not set" apart from "secret set to
+      # an empty string" — and `${{ secrets.X }}` evaluates to "" when a secret
+      # doesn't exist. If we forwarded these to the build step unconditionally,
+      # tauri-bundler would see APPLE_CERTIFICATE="" and still try to import it
+      # as a certificate (failing with a SecKeychainItemImport error). So they're
+      # only written to $GITHUB_ENV here, inside this already-gated step — that
+      # way they're genuinely absent from later steps' environment, not just empty.
       - name: Import Apple signing certificate
         if: runner.os == 'macOS' && env.HAS_APPLE_CERT == 'true'
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
@@ -90,6 +102,17 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           rm certificate.p12
+
+          {
+            echo "APPLE_CERTIFICATE<<APPLE_CERTIFICATE_EOF"
+            echo "$APPLE_CERTIFICATE"
+            echo "APPLE_CERTIFICATE_EOF"
+          } >> "$GITHUB_ENV"
+          echo "APPLE_CERTIFICATE_PASSWORD=$APPLE_CERTIFICATE_PASSWORD" >> "$GITHUB_ENV"
+          echo "APPLE_SIGNING_IDENTITY=$APPLE_SIGNING_IDENTITY" >> "$GITHUB_ENV"
+          echo "APPLE_ID=$APPLE_ID" >> "$GITHUB_ENV"
+          echo "APPLE_PASSWORD=$APPLE_PASSWORD" >> "$GITHUB_ENV"
+          echo "APPLE_TEAM_ID=$APPLE_TEAM_ID" >> "$GITHUB_ENV"
 
       # Only runs when the WINDOWS_CERTIFICATE secret is configured. Imports the
       # cert into the user store and writes its thumbprint into tauri.conf.json
@@ -123,13 +146,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Optional: powers the ambient Landing / Focus backdrops (see deploy.yml).
           VITE_UNSPLASH_ACCESS_KEY: ${{ secrets.VITE_UNSPLASH_ACCESS_KEY }}
-          # macOS signing + notarization — no-ops unless the secrets above are set.
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # macOS signing + notarization vars (APPLE_CERTIFICATE, APPLE_ID, etc.)
+          # come from $GITHUB_ENV via the "Import Apple signing certificate" step
+          # above, and only exist at all when that step actually ran — see the
+          # comment there for why they can't just be set to "" here instead.
         with:
           tagName: app-v__VERSION__
           releaseName: 'Bonjour Survival v__VERSION__'
