@@ -44,6 +44,7 @@ The Tech Stack (The "Ingrédients")
 *   **Zustand:** Keeping track of your progress so you don't have to.
 *   **Lucide React:** Pretty icons for pretty people.
 *   **Web Speech API:** Pronunciation audio — free, no key required.
+*   **Tauri:** Rust-powered native shell for the desktop app builds.
 
 Getting Started
 ===============
@@ -95,3 +96,39 @@ To ship this masterpiece to GitHub Pages:
     npm run deploy
 
 *Bonne chance!* You're going to need it (especially for Unit 11: Grammar Survival Kit).
+
+Desktop App (Tauri)
+====================
+
+The same frontend also ships as a native desktop app via `Tauri
+<https://tauri.app>`_ — the ``src-tauri/`` Rust shell just loads the built
+``dist/`` output in a system webview, so it behaves exactly like the web
+app (same HashRouter, same optional self-hosted classroom server over
+HTTP, same Web Speech API for pronunciation).
+
+.. code-block:: bash
+
+    npm run tauri dev     # run the desktop app in dev mode
+    npm run tauri build   # build an installer for your current OS
+
+**CI builds:** the ``Build Desktop App`` GitHub Actions workflow
+(``.github/workflows/tauri-build.yml``) cross-builds installers for macOS
+(Apple Silicon + Intel), Windows (x86-64), and Linux (amd64 + arm64) on
+every ``v*.*.*`` tag push, or on demand via "Run workflow". Builds are
+attached to a draft GitHub Release and also uploaded as workflow
+artifacts.
+
+Builds are unsigned by default — macOS shows an "unidentified developer"
+prompt and Windows shows a SmartScreen warning, both bypassable by the
+user. To enable signing, add these repository secrets and the workflow
+picks them up automatically:
+
+*   **macOS** (code signing + notarization): ``APPLE_CERTIFICATE``,
+    ``APPLE_CERTIFICATE_PASSWORD``, ``APPLE_SIGNING_IDENTITY``,
+    ``APPLE_ID``, ``APPLE_PASSWORD``, ``APPLE_TEAM_ID``,
+    ``KEYCHAIN_PASSWORD``.
+*   **Windows** (code signing): ``WINDOWS_CERTIFICATE`` (base64-encoded
+    ``.pfx``), ``WINDOWS_CERTIFICATE_PASSWORD``.
+
+See `Tauri's code signing docs <https://v2.tauri.app/distribute/sign/>`_
+for how to obtain these.
