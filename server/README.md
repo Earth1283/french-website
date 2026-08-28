@@ -72,8 +72,11 @@ working default except what you choose to customize.
 
 Everything lives in `data/` (created automatically, gitignored): the SQLite
 database, the auto-generated certificate (if used), and the signing key for
-login tokens. Back this directory up if you care about not losing your
-classes/rosters/content. Deleting `data/secret.key` will log everyone out;
+login tokens. It also holds `data/content-files/` — the page text for any
+"reading" (long-form, multi-page) lessons a teacher creates, stored as plain
+markdown files rather than in the database, one folder per piece of content.
+Back this directory up if you care about not losing your classes, rosters,
+content, or reading pages. Deleting `data/secret.key` will log everyone out;
 deleting the whole `data/` directory starts you over from scratch.
 
 ## Multiple teachers on one instance

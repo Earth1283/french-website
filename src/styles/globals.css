@@ -518,3 +518,141 @@
     background: var(--bg-card);
   }
 }
+
+/* ── Deep-lesson reader (long-form article typography) ──────────────────
+   Distinct from the app's card/chip chrome on purpose: this is the one
+   place people read continuous prose instead of tapping through discrete
+   steps, so it earns its own editorial treatment — serif headline, a
+   generous measure, a drop cap on the lesson's opening paragraph. Every
+   *italicized* word in the markdown body picks up the site's signature
+   french-word treatment (serif italic, accent color) for free, so authors
+   just wrap a French term in asterisks to get the flourish. */
+.prose-reading {
+  max-width: 64ch;
+  margin: 0 auto;
+  color: var(--text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.prose-reading > * + * {
+  margin-top: 1.15em;
+}
+
+.prose-reading h2 {
+  font-size: 1.35rem;
+  margin-top: 1.8em;
+}
+
+.prose-reading h3 {
+  font-size: 1.1rem;
+  margin-top: 1.5em;
+}
+
+.prose-reading p {
+  color: var(--text-secondary);
+}
+
+.prose-reading strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.prose-reading em {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--accent);
+}
+
+.prose-reading.drop-cap > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-style: normal;
+  float: left;
+  font-size: 3.4em;
+  line-height: 0.82;
+  font-weight: 700;
+  padding: 0.04em 0.08em 0 0;
+  color: var(--accent);
+}
+
+.prose-reading ul,
+.prose-reading ol {
+  color: var(--text-secondary);
+  padding-left: 1.4em;
+}
+
+.prose-reading li + li {
+  margin-top: 0.4em;
+}
+
+.prose-reading blockquote {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  background: var(--bg-inset);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.prose-reading blockquote p {
+  color: inherit;
+}
+
+.prose-reading code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.87em;
+  background: var(--bg-inset);
+  color: var(--accent);
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+}
+
+.prose-reading a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-underline-offset: 2px;
+}
+
+.prose-reading a:hover {
+  text-decoration-color: currentColor;
+}
+
+.prose-reading hr {
+  border: none;
+  height: 4px;
+  width: 4px;
+  border-radius: 99px;
+  background: var(--hairline);
+  margin: 2em auto;
+}
+
+.prose-reading .table-scroll {
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline);
+}
+
+.prose-reading table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.prose-reading th {
+  text-align: left;
+  background: var(--bg-inset);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 0.8rem;
+}
+
+.prose-reading td {
+  padding: 0.55rem 0.8rem;
+  border-top: 0.5px solid var(--hairline);
+  color: var(--text-secondary);
+}

@@ -25,7 +25,7 @@ export function recordAttempt(
   studentId: string,
   assignmentId: string,
   responses: AttemptResponse[],
-  score: number,
+  score: number | null,
   xpEarned: number
 ): AttemptRow {
   const id = randomUUID();

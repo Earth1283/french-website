@@ -7,12 +7,14 @@ import { FlashCard } from '../../components/lesson/FlashCard';
 import { MultipleChoice } from '../../components/lesson/MultipleChoice';
 import { FillInBlank } from '../../components/lesson/FillInBlank';
 import { TranslationChallenge } from '../../components/lesson/TranslationChallenge';
+import { DeepLessonReader } from '../../components/lesson/DeepLessonReader';
 import { ProgressBar } from '../../components/layout/ProgressBar';
 import { Button } from '../../components/ui/Button';
 import { bodyToExercises } from '../../types/classroom';
+import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { AssignmentDetailResponse, AttemptResponseEntry } from '../../types/classroom';
 
-type Phase = 'intro' | 'flashcards' | 'exercises' | 'complete';
+type Phase = 'intro' | 'flashcards' | 'exercises' | 'reading' | 'complete';
 
 export function Assignment() {
   const { assignmentId } = useParams<{ assignmentId: string }>();
@@ -45,6 +47,9 @@ export function Assignment() {
   const { content } = data;
   const vocab = content.body.kind === 'lesson' ? content.body.vocab : [];
   const exercises = bodyToExercises(content.body);
+  const isReading = content.body.kind === 'reading';
+  const readingPages = content.body.kind === 'reading' ? content.body.pages.map(parseMarkdownPage) : [];
+  const readingGradable = content.body.kind === 'reading' ? content.body.gradable : true;
 
   async function finish(finalResponses: AttemptResponseEntry[]) {
     setSubmitting(true);
@@ -55,6 +60,20 @@ export function Assignment() {
         responses: finalResponses,
         score,
         xpEarned: content.body.xpReward,
+      });
+    } finally {
+      setSubmitting(false);
+      setPhase('complete');
+    }
+  }
+
+  async function finishReading() {
+    setSubmitting(true);
+    try {
+      await classroomApi.post(`/api/student/assignments/${assignmentId}/attempts`, {
+        responses: [],
+        score: readingGradable ? 100 : null,
+        xpEarned: readingGradable ? content.body.xpReward : 0,
       });
     } finally {
       setSubmitting(false);
@@ -102,26 +121,63 @@ export function Assignment() {
             {content.subtitle && <p className="text-secondary mt-2">{content.subtitle}</p>}
           </div>
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            {vocab.length > 0 && <span className="chip">📖 {vocab.length} vocab items</span>}
-            <span className="chip">✏️ {exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>
-            <span className="xp-badge text-sm px-3 py-1.5">+{content.body.xpReward} XP</span>
+            {isReading && <span className="chip">📄 {readingPages.length} pages</span>}
+            {!isReading && vocab.length > 0 && <span className="chip">📖 {vocab.length} vocab items</span>}
+            {!isReading && <span className="chip">✏️ {exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>}
+            {(!isReading || readingGradable) && <span className="xp-badge text-sm px-3 py-1.5">+{content.body.xpReward} XP</span>}
           </div>
           {data.previousAttempt && (
             <p className="text-xs text-muted">
-              You already completed this — scored {data.previousAttempt.score}%. Doing it again replaces that score.
+              {data.previousAttempt.score === null
+                ? "You've already read this. Doing it again just re-marks it as read."
+                : `You already completed this — scored ${data.previousAttempt.score}%. Doing it again replaces that score.`}
             </p>
           )}
-          <Button size="lg" onClick={() => setPhase(vocab.length > 0 ? 'flashcards' : 'exercises')} className="w-full max-w-xs mx-auto">
-            {data.previousAttempt ? 'Retake' : "Let's go!"} <ArrowRight size={17} />
+          <Button
+            size="lg"
+            onClick={() => setPhase(isReading ? 'reading' : vocab.length > 0 ? 'flashcards' : 'exercises')}
+            className="w-full max-w-xs mx-auto"
+          >
+            {data.previousAttempt ? 'Retake' : isReading ? 'Start Reading' : "Let's go!"} <ArrowRight size={17} />
           </Button>
         </motion.div>
       </div>
     );
   }
 
+  if (phase === 'reading') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Link
+            to="/classes"
+            aria-label="Back to My Classes"
+            className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+          >
+            <ChevronLeft size={20} strokeWidth={2.4} />
+          </Link>
+          <p className="text-sm font-semibold text-primary flex-1 truncate">{content.title}</p>
+        </div>
+        {submitting ? (
+          <div className="text-center py-16 text-muted flex flex-col items-center gap-2">
+            <CheckCircle2 size={24} />
+            <p className="text-sm">Saving…</p>
+          </div>
+        ) : (
+          <DeepLessonReader
+            pages={readingPages}
+            onComplete={finishReading}
+            completeLabel={readingGradable ? 'Finish for XP' : 'Mark as Read'}
+          />
+        )}
+      </div>
+    );
+  }
+
   if (phase === 'complete') {
     const correct = responses.filter((r) => r.correct).length;
-    const score = Math.round((correct / responses.length) * 100);
+    const score = responses.length ? Math.round((correct / responses.length) * 100) : null;
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-5">
         <span className="w-16 h-16 mx-auto rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--accent-tint)' }}>
@@ -129,7 +185,11 @@ export function Assignment() {
         </span>
         <h1 className="text-2xl font-bold text-primary">Nice work!</h1>
         <p className="text-secondary">
-          {correct}/{responses.length} correct · {score}% · +{content.body.xpReward} XP
+          {isReading
+            ? readingGradable
+              ? `Lesson complete · +${content.body.xpReward} XP`
+              : 'Marked as read'
+            : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
         </p>
         <Link to="/classes">
           <Button className="mt-2">Back to My Classes</Button>

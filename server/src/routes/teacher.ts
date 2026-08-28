@@ -14,6 +14,7 @@ import {
   createContent,
   deleteContent,
   getContentById,
+  hydrateContentBody,
   listContentByTeacher,
   updateContent,
 } from '../db/queries/content.js';
@@ -212,7 +213,7 @@ teacherRouter.get('/content/:contentId', (req, res) => {
     res.status(404).json({ error: 'Content not found' });
     return;
   }
-  res.json({ content });
+  res.json({ content: { ...content, body: hydrateContentBody(content) } });
 });
 
 teacherRouter.put('/content/:contentId', (req, res) => {

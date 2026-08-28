@@ -23,12 +23,21 @@ export interface ClassroomQuizBody {
   xpReward: number;
 }
 
-export type ClassroomContentBody = ClassroomLessonBody | ClassroomQuizBody;
+export interface ClassroomReadingBody {
+  kind: 'reading';
+  /** Raw markdown per page — first line "# Title" is the page title. */
+  pages: string[];
+  xpReward: number;
+  /** Whether finishing this counts toward XP/grades, or is just tracked as read. */
+  gradable: boolean;
+}
+
+export type ClassroomContentBody = ClassroomLessonBody | ClassroomQuizBody | ClassroomReadingBody;
 
 export interface ClassroomContent {
   id: string;
   teacher_id: string;
-  kind: 'lesson' | 'quiz';
+  kind: 'lesson' | 'quiz' | 'reading';
   title: string;
   subtitle: string;
   body_json?: string;
@@ -54,7 +63,7 @@ export interface AssignmentInfo {
   due_at: string | null;
   visible: number;
   title?: string;
-  kind?: 'lesson' | 'quiz';
+  kind?: 'lesson' | 'quiz' | 'reading';
   completed?: number;
   score?: number | null;
   content?: ClassroomContent;
@@ -109,9 +118,11 @@ export interface ClassroomProfile {
   email: string;
 }
 
-// Both content kinds reduce to a flat Exercise[] so the exercise renderers never branch on kind.
+// Lesson/quiz reduce to a flat Exercise[] so the exercise renderers never branch on kind.
+// Reading has no exercises at all — it's handled by its own reader flow.
 export function bodyToExercises(body: ClassroomContentBody): Exercise[] {
   if (body.kind === 'lesson') return body.exercises;
+  if (body.kind === 'reading') return [];
   return body.items.map((item) => ({
     type: item.type,
     prompt: item.prompt,

@@ -28,7 +28,20 @@ export function runMigrations(db: Database.Database): void {
       db.exec(sql);
       db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(file);
     });
-    run();
+    // Foreign keys are off for the duration of the migration (never inside
+    // the transaction — SQLite ignores this pragma mid-transaction). A
+    // migration that rebuilds a table (e.g. to change a CHECK constraint)
+    // has to DROP the old table, and SQLite's DROP TABLE performs an
+    // implicit cascading DELETE against every referencing child row when
+    // foreign keys are enforced — silently wiping unrelated data. Disabling
+    // enforcement for the rebuild avoids that; it's restored immediately
+    // after and never applies to normal app operation.
+    db.pragma('foreign_keys = OFF');
+    try {
+      run();
+    } finally {
+      db.pragma('foreign_keys = ON');
+    }
     console.log(`[migrate] applied ${file}`);
   }
 }

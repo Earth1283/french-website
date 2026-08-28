@@ -1,7 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock, BookOpen } from 'lucide-react';
 import { UNITS } from '../data/units';
+import { hasDeepLesson } from '../content/deepLessons';
 import { useProgressStore } from '../stores/progressStore';
 import { Button } from '../components/ui/Button';
 import { TAP_SPRING } from '../utils/motion';
@@ -126,8 +127,11 @@ export function UnitDetail() {
                       : <Circle size={22} className="flex-shrink-0" style={{ color: 'var(--border)' }} />
                     }
                     <div className="flex-1 min-w-0 py-0.5">
-                      <p className="font-semibold text-sm text-primary leading-snug">
+                      <p className="font-semibold text-sm text-primary leading-snug flex items-center gap-1.5">
                         {lesson.title}
+                        {hasDeepLesson(unit.slug, lesson.id) && (
+                          <BookOpen size={12} aria-label="Full lesson available" style={{ color: unit.color, flexShrink: 0 }} />
+                        )}
                       </p>
                       <p className="text-xs text-muted truncate">{lesson.subtitle}</p>
                     </div>

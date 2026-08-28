@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { requireStudent } from '../auth/middleware.js';
 import { enrollStudent, getClassByJoinCode, isEnrolled, listClassesForStudent } from '../db/queries/classes.js';
 import { getAssignmentById, listAssignmentsForStudent } from '../db/queries/assignments.js';
-import { getContentById } from '../db/queries/content.js';
+import { getContentById, hydrateContentBody } from '../db/queries/content.js';
 import { getAttemptForStudentAssignment, listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
 import { createFlag } from '../db/queries/flags.js';
 import { createFlagSchema, enrollSchema, submitAttemptSchema } from '../lib/validation.js';
@@ -56,7 +56,7 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
       title: content.title,
       subtitle: content.subtitle,
       kind: content.kind,
-      body: JSON.parse(content.body_json),
+      body: hydrateContentBody(content),
     },
     previousAttempt: previousAttempt?.completed_at
       ? { score: previousAttempt.score, xpEarned: previousAttempt.xp_earned }

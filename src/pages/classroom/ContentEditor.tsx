@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Plus, Trash2, Save } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Save, Eye, Pencil } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
+import { MarkdownField } from '../../components/classroom/MarkdownField';
+import { MarkdownFormattingGuide } from '../../components/classroom/MarkdownFormattingGuide';
+import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { ExerciseType } from '../../types';
 import type { ClassroomContent, ClassroomContentBody } from '../../types/classroom';
 
@@ -21,6 +26,8 @@ interface ExerciseRow {
   hint: string;
 }
 
+type ContentKind = 'lesson' | 'quiz' | 'reading';
+
 const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'multiple-choice', label: 'Multiple Choice' },
   { value: 'fill-blank', label: 'Fill in the Blank' },
@@ -33,18 +40,24 @@ function blankExercise(): ExerciseRow {
 function blankVocab(): VocabRow {
   return { french: '', english: '', pronunciation: '' };
 }
+function blankPage(): string {
+  return '# Page title\n\nWrite this page\'s content here, in markdown. *Italic French words* pick up the site\'s accent styling automatically.';
+}
 
 export function ContentEditor() {
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
   const isEditing = !!contentId;
 
-  const [kind, setKind] = useState<'lesson' | 'quiz'>('lesson');
+  const [kind, setKind] = useState<ContentKind>('lesson');
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [xpReward, setXpReward] = useState(10);
   const [vocab, setVocab] = useState<VocabRow[]>([blankVocab()]);
   const [exercises, setExercises] = useState<ExerciseRow[]>([blankExercise()]);
+  const [pages, setPages] = useState<string[]>([blankPage()]);
+  const [gradable, setGradable] = useState(true);
+  const [previewOn, setPreviewOn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(!isEditing);
@@ -69,6 +82,9 @@ export function ContentEditor() {
             hint: e.hint ?? '',
           }))
         );
+      } else if (body.kind === 'reading') {
+        setPages(body.pages.length ? body.pages : [blankPage()]);
+        setGradable(body.gradable);
       } else {
         setExercises(
           body.items.map((e) => ({
@@ -97,21 +113,33 @@ export function ContentEditor() {
   async function save() {
     setSaving(true);
     setError(null);
-    const cleanExercises = exercises.filter((e) => e.prompt.trim() && e.answer.trim()).map(toExercise);
-    if (!title.trim() || cleanExercises.length === 0) {
-      setError('A title and at least one complete exercise are required.');
-      setSaving(false);
-      return;
+
+    let body: ClassroomContentBody;
+    if (kind === 'reading') {
+      const cleanPages = pages.map((p) => p.trim()).filter(Boolean);
+      if (!title.trim() || cleanPages.length === 0) {
+        setError('A title and at least one non-empty page are required.');
+        setSaving(false);
+        return;
+      }
+      body = { kind: 'reading', pages: cleanPages, xpReward, gradable };
+    } else {
+      const cleanExercises = exercises.filter((e) => e.prompt.trim() && e.answer.trim()).map(toExercise);
+      if (!title.trim() || cleanExercises.length === 0) {
+        setError('A title and at least one complete exercise are required.');
+        setSaving(false);
+        return;
+      }
+      body =
+        kind === 'lesson'
+          ? {
+              kind: 'lesson',
+              vocab: vocab.filter((v) => v.french.trim() && v.english.trim() && v.pronunciation.trim()),
+              exercises: cleanExercises,
+              xpReward,
+            }
+          : { kind: 'quiz', items: cleanExercises, xpReward };
     }
-    const body: ClassroomContentBody =
-      kind === 'lesson'
-        ? {
-            kind: 'lesson',
-            vocab: vocab.filter((v) => v.french.trim() && v.english.trim() && v.pronunciation.trim()),
-            exercises: cleanExercises,
-            xpReward,
-          }
-        : { kind: 'quiz', items: cleanExercises, xpReward };
 
     try {
       if (isEditing) {
@@ -147,7 +175,7 @@ export function ContentEditor() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
         <div className="p-4 space-y-3">
           <div className="seg-control">
-            {(['lesson', 'quiz'] as const).map((k) => (
+            {(['lesson', 'quiz', 'reading'] as const).map((k) => (
               <button key={k} onClick={() => setKind(k)} aria-pressed={kind === k} className="seg-item capitalize">
                 {k}
               </button>
@@ -170,6 +198,13 @@ export function ContentEditor() {
               className="ios-input py-1.5 text-sm w-24"
             />
           </div>
+          {kind === 'reading' && (
+            <label className="flex items-center gap-2 text-sm text-secondary cursor-pointer pt-1">
+              <input type="checkbox" checked={gradable} onChange={(e) => setGradable(e.target.checked)} />
+              Counts toward XP and grades
+              <span className="text-xs text-muted">— uncheck for supplementary reading students just mark as read</span>
+            </label>
+          )}
         </div>
       </motion.div>
 
@@ -218,6 +253,7 @@ export function ContentEditor() {
         </motion.section>
       )}
 
+      {kind !== 'reading' && (
       <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <div className="section-label">{kind === 'lesson' ? 'Exercises' : 'Questions'}</div>
         <div className="inset-group">
@@ -281,6 +317,64 @@ export function ContentEditor() {
           </div>
         </div>
       </motion.section>
+      )}
+
+      {kind === 'reading' && (
+        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <div className="flex items-center justify-between mb-1">
+            <div className="section-label !mb-0">Pages</div>
+            <button
+              onClick={() => setPreviewOn((p) => !p)}
+              className="text-xs font-medium flex items-center gap-1 cursor-pointer mr-1"
+              style={{ background: 'transparent', border: 'none', color: 'var(--accent)' }}
+            >
+              {previewOn ? <><Pencil size={12} /> Edit</> : <><Eye size={12} /> Preview</>}
+            </button>
+          </div>
+          <div className="mb-3">
+            <MarkdownFormattingGuide />
+          </div>
+          <div className="space-y-3">
+            {pages.map((pageText, i) => {
+              const parsed = parseMarkdownPage(pageText);
+              return (
+                <div key={i} className="card p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted uppercase tracking-wider">Page {i + 1}</span>
+                    <button
+                      onClick={() => setPages((rows) => rows.filter((_, j) => j !== i))}
+                      aria-label="Remove page"
+                      className="p-1.5 cursor-pointer flex-shrink-0"
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                      disabled={pages.length === 1}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  {previewOn ? (
+                    <div>
+                      {parsed.title && <h3 className="font-display text-xl font-bold mb-2 text-primary">{parsed.title}</h3>}
+                      <div className="prose-reading text-sm">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{parsed.body}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ) : (
+                    <MarkdownField
+                      value={pageText}
+                      onChange={(v) => setPages((rows) => rows.map((r, j) => (j === i ? v : r)))}
+                      placeholder={'# Page title\n\nMarkdown content…'}
+                      rows={8}
+                    />
+                  )}
+                </div>
+              );
+            })}
+            <Button variant="ghost" size="sm" onClick={() => setPages((rows) => [...rows, blankPage()])}>
+              <Plus size={14} /> Add page
+            </Button>
+          </div>
+        </motion.section>
+      )}
 
       {error && (
         <p className="text-sm" style={{ color: 'var(--danger)' }}>

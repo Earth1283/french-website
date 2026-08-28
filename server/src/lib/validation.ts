@@ -61,7 +61,19 @@ const quizBodySchema = z.object({
   xpReward: z.number().int().nonnegative().default(10),
 });
 
-export const contentBodySchema = z.discriminatedUnion('kind', [lessonBodySchema, quizBodySchema]);
+// Page bodies are markdown text; the array is a validation-time payload
+// only — createContent/updateContent strip it out to files on disk and
+// never persist it into body_json (see server/src/lib/contentFiles.ts).
+const readingBodySchema = z.object({
+  kind: z.literal('reading'),
+  pages: z.array(z.string().trim().min(1).max(20_000)).min(1).max(50),
+  xpReward: z.number().int().nonnegative().default(10),
+  // Whether finishing this counts toward XP/grades, or is just tracked as
+  // read. A teacher chooses this per lesson.
+  gradable: z.boolean().default(true),
+});
+
+export const contentBodySchema = z.discriminatedUnion('kind', [lessonBodySchema, quizBodySchema, readingBodySchema]);
 export type ContentBody = z.infer<typeof contentBodySchema>;
 
 export const createContentSchema = z.object({
@@ -89,7 +101,9 @@ export const submitAttemptSchema = z.object({
       answerGiven: z.string().optional(),
     })
   ),
-  score: z.number().min(0).max(100),
+  // null for a completed non-gradable reading assignment — see
+  // ClassroomReadingBody.gradable on the frontend.
+  score: z.number().min(0).max(100).nullable(),
   xpEarned: z.number().int().nonnegative(),
 });
 

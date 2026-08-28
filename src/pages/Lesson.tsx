@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bookmark, BookOpen } from 'lucide-react';
 import { UNITS } from '../data/units';
+import { getDeepLessonPages } from '../content/deepLessons';
 import { useProgressStore } from '../stores/progressStore';
 import { FlashCard } from '../components/lesson/FlashCard';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { FillInBlank } from '../components/lesson/FillInBlank';
 import { TranslationChallenge } from '../components/lesson/TranslationChallenge';
 import { LessonComplete } from '../components/lesson/LessonComplete';
+import { DeepLessonReader } from '../components/lesson/DeepLessonReader';
 import { ProgressBar } from '../components/layout/ProgressBar';
 import { Button } from '../components/ui/Button';
 import { TAP_SPRING } from '../utils/motion';
 
-type Phase = 'intro' | 'flashcards' | 'exercises' | 'complete';
+type Phase = 'intro' | 'read' | 'flashcards' | 'exercises' | 'complete';
 
 function loadSavedProgress(lessonId: string | undefined): { phase: Phase; cardIndex: number; exerciseIndex: number } | null {
   if (!lessonId) return null;
@@ -115,6 +117,7 @@ export function Lesson() {
 
   const nextLessonIndex = unit.lessons.findIndex(l => l.id === lessonId) + 1;
   const nextLesson = nextLessonIndex < unit.lessons.length ? unit.lessons[nextLessonIndex] : undefined;
+  const deepPages = getDeepLessonPages(unit.slug, lesson.id);
 
   const handleFinish = () => {
     sessionStorage.removeItem(`lesson-progress-${lesson.id}`);
@@ -174,15 +177,55 @@ export function Lesson() {
           </div>
 
           <div className="flex items-center justify-center gap-2 flex-wrap">
+            {deepPages && <span className="chip"><BookOpen size={12} /> Full lesson available</span>}
             <span className="chip">📖 {lesson.vocab.length} vocab items</span>
             <span className="chip">✏️ {lesson.exercises.length} exercises</span>
             <span className="xp-badge text-sm px-3 py-1.5">+{lesson.xpReward} XP</span>
           </div>
 
-          <Button size="lg" onClick={() => setPhase('flashcards')} className="w-full max-w-xs mx-auto">
-            Let's go! <ArrowRight size={17} />
-          </Button>
+          {deepPages ? (
+            <div className="space-y-3 max-w-xs mx-auto">
+              <Button size="lg" onClick={() => setPhase('read')} className="w-full">
+                Read the Full Lesson <BookOpen size={16} />
+              </Button>
+              <button
+                onClick={() => setPhase('flashcards')}
+                className="text-sm text-muted hover:underline cursor-pointer"
+                style={{ background: 'transparent', border: 'none' }}
+              >
+                Skip straight to practice
+              </button>
+            </div>
+          ) : (
+            <Button size="lg" onClick={() => setPhase('flashcards')} className="w-full max-w-xs mx-auto">
+              Let's go! <ArrowRight size={17} />
+            </Button>
+          )}
         </motion.div>
+      </div>
+    );
+  }
+
+  if (phase === 'read' && deepPages) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Link
+            to={`/unit/${slug}`}
+            aria-label={`Back to ${unit.title}`}
+            className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+          >
+            <ChevronLeft size={20} strokeWidth={2.4} />
+          </Link>
+          <p className="text-sm font-semibold text-primary flex-1 truncate">{lesson.title}</p>
+        </div>
+        <DeepLessonReader
+          pages={deepPages}
+          accentColor={unit.color}
+          completeLabel="Start Flashcards"
+          onComplete={() => setPhase('flashcards')}
+        />
       </div>
     );
   }
