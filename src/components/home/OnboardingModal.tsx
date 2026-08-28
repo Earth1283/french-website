@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { FrenchFlag } from '../ui/FrenchFlag';
 import { useProgressStore } from '../../stores/progressStore';
 
 interface OnboardingModalProps {
@@ -18,7 +19,9 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
         transition={{ duration: 0.22, ease: 'easeOut' }}
       >
         <div className="text-center mb-5">
-          <div className="text-5xl mb-3">🇫🇷</div>
+          <div className="mb-3 flex justify-center">
+            <FrenchFlag size={56} />
+          </div>
           <h2 className="text-2xl font-bold text-primary mb-2 font-display">Bienvenue!</h2>
           <p className="text-[--text-secondary] text-sm leading-relaxed">
             You've been teleported to France. Here's how this works.

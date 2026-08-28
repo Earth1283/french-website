@@ -3,7 +3,7 @@ import { requireStudent } from '../auth/middleware.js';
 import { enrollStudent, getClassByJoinCode, isEnrolled, listClassesForStudent } from '../db/queries/classes.js';
 import { getAssignmentById, listAssignmentsForStudent } from '../db/queries/assignments.js';
 import { getContentById } from '../db/queries/content.js';
-import { listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
+import { getAttemptForStudentAssignment, listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
 import { createFlag } from '../db/queries/flags.js';
 import { createFlagSchema, enrollSchema, submitAttemptSchema } from '../lib/validation.js';
 
@@ -48,6 +48,7 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
     res.status(404).json({ error: 'Assignment content not found' });
     return;
   }
+  const previousAttempt = getAttemptForStudentAssignment(req.studentId!, assignment.id);
   res.json({
     assignment,
     content: {
@@ -57,6 +58,9 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
       kind: content.kind,
       body: JSON.parse(content.body_json),
     },
+    previousAttempt: previousAttempt?.completed_at
+      ? { score: previousAttempt.score, xpEarned: previousAttempt.xp_earned }
+      : null,
   });
 });
 

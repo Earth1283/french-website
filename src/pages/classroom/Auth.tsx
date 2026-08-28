@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogIn, ShieldQuestion, ChevronDown, ChevronUp } from 'lucide-react';
+import { LogIn, ShieldQuestion, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
+import { RecoveryCodeReveal } from '../../components/classroom/RecoveryCodeReveal';
 
 type Role = 'teacher' | 'student';
 type Mode = 'login' | 'register';
+type View = 'form' | 'forgot-password' | 'recovery-reveal';
 
 export function ClassroomAuth() {
   const navigate = useNavigate();
@@ -16,10 +18,14 @@ export function ClassroomAuth() {
 
   const [role, setRole] = useState<Role>('student');
   const [mode, setMode] = useState<Mode>('login');
+  const [view, setView] = useState<View>('form');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [signupCode, setSignupCode] = useState('');
+  const [recoveryCodeInput, setRecoveryCodeInput] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [revealCode, setRevealCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -33,24 +39,138 @@ export function ClassroomAuth() {
     setError(null);
     try {
       if (role === 'teacher') {
-        const res =
-          mode === 'login'
-            ? await classroomApi.teacherLogin({ email, password })
-            : await classroomApi.teacherRegister({ name, email, password, signupCode: signupCode || undefined });
-        setAuth('teacher', res.token, res.teacher);
+        if (mode === 'login') {
+          const res = await classroomApi.teacherLogin({ email, password });
+          setAuth('teacher', res.token, res.teacher);
+          navigate('/classes');
+        } else {
+          const res = await classroomApi.teacherRegister({ name, email, password, signupCode: signupCode || undefined });
+          setAuth('teacher', res.token, res.teacher);
+          setRevealCode(res.recoveryCode);
+          setView('recovery-reveal');
+        }
       } else {
-        const res =
-          mode === 'login'
-            ? await classroomApi.studentLogin({ email, password })
-            : await classroomApi.studentRegister({ name, email, password });
-        setAuth('student', res.token, res.student);
+        if (mode === 'login') {
+          const res = await classroomApi.studentLogin({ email, password });
+          setAuth('student', res.token, res.student);
+          navigate('/classes');
+        } else {
+          const res = await classroomApi.studentRegister({ name, email, password });
+          setAuth('student', res.token, res.student);
+          setRevealCode(res.recoveryCode);
+          setView('recovery-reveal');
+        }
       }
-      navigate('/classes');
     } catch (err) {
       setError(err instanceof ClassroomApiError ? err.message : 'Something went wrong.');
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function submitRecovery() {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const path = role === 'teacher' ? '/api/auth/teacher/reset-with-recovery-code' : '/api/auth/student/reset-with-recovery-code';
+      const res = await classroomApi.post<{
+        token: string;
+        recoveryCode: string;
+        teacher?: { id: string; name: string; email: string };
+        student?: { id: string; name: string; email: string };
+      }>(path, { email, recoveryCode: recoveryCodeInput.trim(), newPassword });
+      const profile = role === 'teacher' ? res.teacher! : res.student!;
+      setAuth(role, res.token, profile);
+      setRevealCode(res.recoveryCode);
+      setView('recovery-reveal');
+    } catch (err) {
+      setError(err instanceof ClassroomApiError ? err.message : 'Something went wrong.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (view === 'recovery-reveal') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-10">
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <h1 className="text-3xl font-bold text-primary mb-1">Almost there</h1>
+          <p className="text-secondary text-sm font-display italic">One thing before you go in.</p>
+        </motion.div>
+        <RecoveryCodeReveal
+          code={revealCode}
+          email={email}
+          backendUrl={backendUrl}
+          onDone={() => navigate('/classes')}
+          doneLabel="I've saved it — Continue"
+        />
+      </div>
+    );
+  }
+
+  if (view === 'forgot-password') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-10">
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-3xl font-bold text-primary mb-1">Reset Password</h1>
+          <p className="text-secondary text-sm font-display italic truncate">{backendUrl}</p>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="card p-5 mt-6 space-y-3"
+        >
+          <p className="text-xs text-muted">
+            Use the recovery code you saved when you created your account.
+          </p>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            className="ios-input py-2.5 text-sm"
+          />
+          <input
+            value={recoveryCodeInput}
+            onChange={(e) => setRecoveryCodeInput(e.target.value)}
+            placeholder="Recovery code"
+            className="ios-input py-2.5 text-sm font-mono"
+          />
+          <input
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="New password"
+            type="password"
+            className="ios-input py-2.5 text-sm"
+          />
+          {error && (
+            <p className="text-xs" style={{ color: 'var(--danger)' }}>
+              {error}
+            </p>
+          )}
+          <Button
+            onClick={submitRecovery}
+            disabled={submitting || !email.trim() || !recoveryCodeInput.trim() || !newPassword.trim()}
+            className="w-full"
+          >
+            <KeyRound size={16} /> Reset Password
+          </Button>
+          <button
+            onClick={() => { setView('form'); setError(null); }}
+            className="text-xs text-muted hover:underline cursor-pointer"
+            style={{ background: 'transparent', border: 'none' }}
+          >
+            Back to log in
+          </button>
+          <p className="text-xs text-muted">
+            {role === 'student'
+              ? "Lost your recovery code too? Ask your teacher to reset your password from the class roster."
+              : "Lost your recovery code too? See the server's README for the recovery script (needs access to the machine it runs on)."}
+          </p>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
@@ -182,6 +302,16 @@ export function ClassroomAuth() {
             />
           )}
         </div>
+
+        {mode === 'login' && (
+          <button
+            onClick={() => { setView('forgot-password'); setError(null); }}
+            className="text-xs text-muted hover:underline cursor-pointer -mt-2"
+            style={{ background: 'transparent', border: 'none' }}
+          >
+            Forgot password?
+          </button>
+        )}
 
         {error && (
           <p className="text-xs" style={{ color: 'var(--danger)' }}>

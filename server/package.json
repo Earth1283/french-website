@@ -7,7 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json && mkdir -p dist/db/migrations && cp src/db/migrations/*.sql dist/db/migrations/",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "reset-teacher-password": "tsx src/cli/reset-teacher-password.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

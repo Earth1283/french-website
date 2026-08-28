@@ -69,6 +69,12 @@ export interface QuestionStat {
   totalCount: number;
 }
 
+export interface AssignmentDetailResponse {
+  assignment: AssignmentInfo;
+  content: { title: string; subtitle: string; kind: string; body: ClassroomContentBody };
+  previousAttempt: { score: number | null; xpEarned: number | null } | null;
+}
+
 export interface FlagInfo {
   id: string;
   student_id: string;

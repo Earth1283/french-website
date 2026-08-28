@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion } from 'lucide-react';
+import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion, KeyRound } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
@@ -66,6 +66,9 @@ export function StudentHome() {
           >
             <ShieldQuestion size={12} /> What does my teacher see?
           </button>
+          <Link to="/classes/account" className="text-xs text-muted hover:underline flex items-center gap-1 no-underline">
+            <KeyRound size={12} /> Account
+          </Link>
           <button
             onClick={disconnect}
             className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"

@@ -5,6 +5,7 @@ import {
   createClass,
   getClassById,
   getRoster,
+  isEnrolled,
   listClassesByTeacher,
   rotateJoinCode,
   updateClass,
@@ -19,10 +20,13 @@ import {
 import { createAssignment, deleteAssignment, getAssignmentById, listAssignmentsByClass } from '../db/queries/assignments.js';
 import { getQuestionStatsForAssignment } from '../db/queries/attempts.js';
 import { countUnresolvedFlagsByAssignment, getFlagById, listFlagsForAssignment, resolveFlag } from '../db/queries/flags.js';
+import { updateStudentPassword } from '../db/queries/students.js';
+import { hashPassword } from '../auth/hash.js';
 import {
   createAssignmentSchema,
   createClassSchema,
   createContentSchema,
+  resetStudentPasswordSchema,
   updateClassSchema,
   updateContentSchema,
 } from '../lib/validation.js';
@@ -38,7 +42,7 @@ function ownedClass(req: Request, classId: string) {
 
 function ownedContent(req: Request, contentId: string) {
   const content = getContentById(contentId);
-  if (!content || content.teacher_id !== req.teacherId) return null;
+  if (!content || content.teacher_id !== req.teacherId || content.deleted_at) return null;
   return content;
 }
 
@@ -92,6 +96,21 @@ teacherRouter.get('/classes/:classId/roster', (req, res) => {
     return;
   }
   res.json({ roster: getRoster(cls.id) });
+});
+
+teacherRouter.post('/classes/:classId/students/:studentId/reset-password', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls || !isEnrolled(req.params.studentId, cls.id)) {
+    res.status(404).json({ error: 'Student not found in this class' });
+    return;
+  }
+  const parsed = resetStudentPasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  updateStudentPassword(req.params.studentId, hashPassword(parsed.data.newPassword));
+  res.status(204).end();
 });
 
 teacherRouter.get('/classes/:classId/assignments', (req, res) => {

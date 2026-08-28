@@ -51,20 +51,20 @@ export const classroomApi = {
   health: () => request<{ ok: boolean; requiresTeacherSetup: boolean; allowOpenTeacherSignup: boolean }>('/api/health'),
 
   teacherRegister: (data: { name: string; email: string; password: string; signupCode?: string }) =>
-    request<{ token: string; teacher: { id: string; name: string; email: string } }>('/api/auth/teacher/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    request<{ token: string; teacher: { id: string; name: string; email: string }; recoveryCode: string }>(
+      '/api/auth/teacher/register',
+      { method: 'POST', body: JSON.stringify(data) }
+    ),
   teacherLogin: (data: { email: string; password: string }) =>
     request<{ token: string; teacher: { id: string; name: string; email: string } }>('/api/auth/teacher/login', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
   studentRegister: (data: { name: string; email: string; password: string }) =>
-    request<{ token: string; student: { id: string; name: string; email: string } }>('/api/auth/student/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    request<{ token: string; student: { id: string; name: string; email: string }; recoveryCode: string }>(
+      '/api/auth/student/register',
+      { method: 'POST', body: JSON.stringify(data) }
+    ),
   studentLogin: (data: { email: string; password: string }) =>
     request<{ token: string; student: { id: string; name: string; email: string } }>('/api/auth/student/login', {
       method: 'POST',

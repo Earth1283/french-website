@@ -10,15 +10,13 @@ import { TranslationChallenge } from '../../components/lesson/TranslationChallen
 import { ProgressBar } from '../../components/layout/ProgressBar';
 import { Button } from '../../components/ui/Button';
 import { bodyToExercises } from '../../types/classroom';
-import type { AssignmentInfo, AttemptResponseEntry, ClassroomContentBody } from '../../types/classroom';
+import type { AssignmentDetailResponse, AttemptResponseEntry } from '../../types/classroom';
 
 type Phase = 'intro' | 'flashcards' | 'exercises' | 'complete';
 
 export function Assignment() {
   const { assignmentId } = useParams<{ assignmentId: string }>();
-  const [data, setData] = useState<{ assignment: AssignmentInfo; content: { title: string; subtitle: string; kind: string; body: ClassroomContentBody } } | null>(
-    null
-  );
+  const [data, setData] = useState<AssignmentDetailResponse | null>(null);
   const [phase, setPhase] = useState<Phase>('intro');
   const [cardIndex, setCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -32,11 +30,7 @@ export function Assignment() {
 
   useEffect(() => {
     if (!assignmentId) return;
-    classroomApi
-      .get<{ assignment: AssignmentInfo; content: { title: string; subtitle: string; kind: string; body: ClassroomContentBody } }>(
-        `/api/student/assignments/${assignmentId}`
-      )
-      .then(setData);
+    classroomApi.get<AssignmentDetailResponse>(`/api/student/assignments/${assignmentId}`).then(setData);
   }, [assignmentId]);
 
   useEffect(() => {
@@ -112,8 +106,13 @@ export function Assignment() {
             <span className="chip">✏️ {exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>
             <span className="xp-badge text-sm px-3 py-1.5">+{content.body.xpReward} XP</span>
           </div>
+          {data.previousAttempt && (
+            <p className="text-xs text-muted">
+              You already completed this — scored {data.previousAttempt.score}%. Doing it again replaces that score.
+            </p>
+          )}
           <Button size="lg" onClick={() => setPhase(vocab.length > 0 ? 'flashcards' : 'exercises')} className="w-full max-w-xs mx-auto">
-            Let's go! <ArrowRight size={17} />
+            {data.previousAttempt ? 'Retake' : "Let's go!"} <ArrowRight size={17} />
           </Button>
         </motion.div>
       </div>

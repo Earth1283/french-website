@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen, BarChart3, Flag } from 'lucide-react';
+import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen, BarChart3, Flag, Archive, ArchiveRestore, KeyRound } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import type { AssignmentInfo, ClassInfo, ClassroomContent, RosterStudent } from '../../types/classroom';
@@ -14,6 +14,11 @@ export function ClassDetail() {
   const [content, setContent] = useState<ClassroomContent[] | null>(null);
   const [copied, setCopied] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
+  const [resetPasswordFor, setResetPasswordFor] = useState<string | null>(null);
+  const [newPasswordDraft, setNewPasswordDraft] = useState('');
+  const [resetSubmitting, setResetSubmitting] = useState(false);
+  const [resetSuccessFor, setResetSuccessFor] = useState<string | null>(null);
 
   async function load() {
     if (!classId) return;
@@ -59,6 +64,29 @@ export function ClassDetail() {
     await load();
   }
 
+  async function resetStudentPassword(studentId: string) {
+    if (!classId || newPasswordDraft.trim().length < 8) return;
+    setResetSubmitting(true);
+    try {
+      await classroomApi.post(`/api/teacher/classes/${classId}/students/${studentId}/reset-password`, {
+        newPassword: newPasswordDraft.trim(),
+      });
+      setResetPasswordFor(null);
+      setNewPasswordDraft('');
+      setResetSuccessFor(studentId);
+      setTimeout(() => setResetSuccessFor(null), 4000);
+    } finally {
+      setResetSubmitting(false);
+    }
+  }
+
+  async function setArchived(archived: boolean) {
+    if (!classId) return;
+    await classroomApi.patch(`/api/teacher/classes/${classId}`, { archived });
+    setConfirmArchive(false);
+    await load();
+  }
+
   const assignedContentIds = new Set(assignments?.map((a) => a.content_id));
   const availableToAssign = content?.filter((c) => !assignedContentIds.has(c.id)) ?? [];
 
@@ -78,6 +106,24 @@ export function ClassDetail() {
         </Link>
         <h1 className="text-3xl font-bold text-primary">{cls.name}</h1>
       </motion.div>
+
+      {cls.archived_at && (
+        <div
+          className="flex items-center justify-between gap-3 p-3.5"
+          style={{
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: 'var(--bg-inset)',
+            border: '1px solid var(--hairline)',
+          }}
+        >
+          <p className="text-xs text-muted flex items-center gap-2">
+            <Archive size={13} /> This class is archived — students can no longer join with its code.
+          </p>
+          <button onClick={() => setArchived(false)} className="chip cursor-pointer flex-shrink-0" style={{ border: 'none' }}>
+            <ArchiveRestore size={11} /> Unarchive
+          </button>
+        </div>
+      )}
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-5">
         <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Join code — share with students</p>
@@ -180,21 +226,92 @@ export function ClassDetail() {
         <div className="inset-group">
           {roster?.length === 0 && <p className="p-4 text-sm text-muted">No students enrolled yet.</p>}
           {roster?.map((s) => (
-            <div key={s.id} className="inset-row justify-between">
-              <div>
-                <p className="text-sm font-semibold text-primary">{s.name}</p>
-                <p className="text-xs text-muted">{s.email}</p>
+            <div key={s.id} className="inset-divider">
+              <div className="inset-row justify-between" style={{ borderTop: 'none' }}>
+                <div>
+                  <p className="text-sm font-semibold text-primary">{s.name}</p>
+                  <p className="text-xs text-muted">{s.email}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-primary">
+                    {s.completedAssignments}/{s.totalAssignments}
+                  </p>
+                  <p className="text-xs text-muted">{Math.round(s.averageScore)}% avg</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-primary">
-                  {s.completedAssignments}/{s.totalAssignments}
-                </p>
-                <p className="text-xs text-muted">{Math.round(s.averageScore)}% avg</p>
+
+              <div className="px-4 pb-3 -mt-1.5">
+                {resetSuccessFor === s.id ? (
+                  <p className="text-xs flex items-center gap-1" style={{ color: 'var(--success)' }}>
+                    <Check size={11} /> Password reset — let {s.name.split(' ')[0]} know their new password.
+                  </p>
+                ) : resetPasswordFor === s.id ? (
+                  <div className="flex gap-2">
+                    <input
+                      value={newPasswordDraft}
+                      onChange={(e) => setNewPasswordDraft(e.target.value)}
+                      placeholder="New password (min. 8 characters)"
+                      className="ios-input py-1.5 text-sm flex-1"
+                    />
+                    <button
+                      onClick={() => resetStudentPassword(s.id)}
+                      disabled={resetSubmitting || newPasswordDraft.trim().length < 8}
+                      className="chip cursor-pointer flex-shrink-0"
+                      style={{ border: 'none' }}
+                    >
+                      Set
+                    </button>
+                    <button
+                      onClick={() => { setResetPasswordFor(null); setNewPasswordDraft(''); }}
+                      className="text-xs text-muted hover:underline cursor-pointer flex-shrink-0"
+                      style={{ background: 'transparent', border: 'none' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setResetPasswordFor(s.id)}
+                    className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
+                    style={{ background: 'transparent', border: 'none' }}
+                  >
+                    <KeyRound size={11} /> Reset password
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       </motion.section>
+
+      {!cls.archived_at && (
+        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          {!confirmArchive ? (
+            <button
+              onClick={() => setConfirmArchive(true)}
+              className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
+              style={{ background: 'transparent', border: 'none' }}
+            >
+              <Archive size={11} /> Archive this class
+            </button>
+          ) : (
+            <div className="p-3.5 space-y-2" style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)' }}>
+              <p className="text-xs text-primary">
+                Archiving stops new students from joining. Existing students, assignments, and results are kept —
+                you can unarchive anytime.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setConfirmArchive(false)}>
+                  Cancel
+                </Button>
+                <Button variant="tinted" size="sm" onClick={() => setArchived(true)}>
+                  <Archive size={12} /> Archive
+                </Button>
+              </div>
+            </div>
+          )}
+        </motion.section>
+      )}
     </div>
   );
 }

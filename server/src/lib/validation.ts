@@ -93,6 +93,21 @@ export const submitAttemptSchema = z.object({
   xpEarned: z.number().int().nonnegative(),
 });
 
+export const resetWithRecoveryCodeSchema = z.object({
+  email,
+  recoveryCode: z.string().trim().min(1),
+  newPassword: password,
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: password,
+});
+
+export const resetStudentPasswordSchema = z.object({
+  newPassword: password,
+});
+
 export const createFlagSchema = z.object({
   questionIndex: z.number().int().nonnegative(),
   reason: z.string().trim().max(500).optional().default(''),

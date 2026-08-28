@@ -27,6 +27,8 @@ const loadClassroomAuth = () => import('./pages/classroom/Auth');
 const loadClassesHome = () => import('./pages/classroom/ClassesHome');
 const loadClassDetail = () => import('./pages/classroom/ClassDetail');
 const loadContentEditor = () => import('./pages/classroom/ContentEditor');
+const loadContentLibrary = () => import('./pages/classroom/ContentLibrary');
+const loadAccountSettings = () => import('./pages/classroom/AccountSettings');
 const loadAssignment = () => import('./pages/classroom/Assignment');
 const loadAssignmentResults = () => import('./pages/classroom/AssignmentResults');
 
@@ -45,6 +47,8 @@ const ClassroomAuth = lazy(() => loadClassroomAuth().then(m => ({ default: m.Cla
 const ClassesHome = lazy(() => loadClassesHome().then(m => ({ default: m.ClassesHome })));
 const ClassDetail = lazy(() => loadClassDetail().then(m => ({ default: m.ClassDetail })));
 const ContentEditor = lazy(() => loadContentEditor().then(m => ({ default: m.ContentEditor })));
+const ContentLibrary = lazy(() => loadContentLibrary().then(m => ({ default: m.ContentLibrary })));
+const AccountSettings = lazy(() => loadAccountSettings().then(m => ({ default: m.AccountSettings })));
 const Assignment = lazy(() => loadAssignment().then(m => ({ default: m.Assignment })));
 const AssignmentResults = lazy(() => loadAssignmentResults().then(m => ({ default: m.AssignmentResults })));
 
@@ -106,6 +110,8 @@ function AnimatedRoutes() {
             <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
             <Route path="/classes/connect" element={<PageTransition keyProp="classes-connect"><Connect /></PageTransition>} />
             <Route path="/classes/auth" element={<PageTransition keyProp="classes-auth"><ClassroomAuth /></PageTransition>} />
+            <Route path="/classes/account" element={<PageTransition keyProp="classes-account"><AccountSettings /></PageTransition>} />
+            <Route path="/classes/content" element={<PageTransition keyProp="content-library"><ContentLibrary /></PageTransition>} />
             <Route path="/classes/content/new" element={<PageTransition keyProp="content-new"><ContentEditor /></PageTransition>} />
             <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
             <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />

@@ -84,6 +84,9 @@ works from this same computer.
 5. Choose **I'm the Teacher** → **Create Account**. The first account
    created on a fresh server automatically becomes the teacher — no invite
    code needed.
+6. You'll be shown a one-time **recovery code** — save or download it. It's
+   the only way to reset your password later without server access, and it
+   won't be shown again.
 
 ## Step 6 — Create a class
 
@@ -110,7 +113,9 @@ Each student, once per device:
 2. Clicks through the same one-time certificate warning (Step 5.3).
 3. Chooses **I'm a Student** → **Create Account** — their own name, email,
    and password. This account exists only on your server, separate from
-   anything else on the site.
+   anything else on the site. They'll get a one-time recovery code too —
+   worth reminding them to actually save it, since you'd otherwise be the
+   fallback for a forgotten password.
 4. Enters your class's join code.
 
 After that, they'll see whatever you've assigned every time they log back
@@ -141,10 +146,18 @@ zero-warning alternative (requires a domain name).
   are running on a server with a public address. That's the trade-off of
   this zero-config, no-Docker setup — if your students are off-site, you'll
   want a small VPS instead of your laptop.
-- **A student forgot their password.** There's currently no self-service
-  password reset — worth knowing before relying on this for something
-  high-stakes. (You, as the server operator, could add one directly to the
-  database if truly needed, but there's no built-in flow for it yet.)
+- **Someone forgot their password.** Everyone gets a one-time recovery code
+  when they create their account (there's a "download as file" button —
+  encourage saving it). The "Forgot password?" link on the login screen
+  uses that code to set a new password with no one else involved. This
+  server doesn't send email, so there's no "check your inbox" link — the
+  recovery code is the whole mechanism.
+- **A student lost their recovery code too.** Open their class's roster on
+  your dashboard and use **Reset password** next to their name.
+- **You (the teacher) lost your recovery code too.** From the `server`
+  folder, run `npm run reset-teacher-password -- your@email.com newpassword123`
+  — this requires access to the machine the server runs on, same as any
+  other admin recovery on a self-hosted service.
 - **Join codes stopped working after a restart.** They shouldn't — everything
   is saved to `server/data/classroom.sqlite3`. If that `data/` folder was
   deleted, you're starting fresh.

@@ -14,6 +14,7 @@ interface ClassroomStore {
   setConnection: (backendUrl: string) => void;
   markCertTrusted: () => void;
   setAuth: (role: Role, token: string, profile: ClassroomProfile) => void;
+  setToken: (token: string) => void;
   disconnect: () => void;
   forgetBackend: () => void;
 }
@@ -37,6 +38,8 @@ export const useClassroomStore = create<ClassroomStore>()(
       markCertTrusted: () => set({ certTrusted: true }),
 
       setAuth: (role, token, profile) => set({ role, token, profile }),
+
+      setToken: (token) => set({ token }),
 
       disconnect: () => set({ role: null, token: null, profile: null }),
 

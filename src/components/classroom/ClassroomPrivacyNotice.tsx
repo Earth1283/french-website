@@ -1,4 +1,4 @@
-import { Eye, Lock, Server, Flag } from 'lucide-react';
+import { Eye, Lock, Server, Flag, KeyRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 function Row({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
@@ -30,11 +30,15 @@ export function ClassroomPrivacyNotice() {
         Your name is attached to it — flags go straight to your teacher on purpose, so that one's not
         anonymous.
       </Row>
+      <Row icon={<KeyRound size={13} />} title="About your password">
+        It's stored as an unreadable hash — nobody, including your teacher, can see it. If you forget it,
+        your teacher <em>can</em> set a new one for your account (there's no self-service email reset on a
+        self-hosted server), which logs you out everywhere until you sign in again with the new one.
+      </Row>
       <Row icon={<Lock size={13} />} title="Stays private">
-        Your password (stored as an unreadable hash — not even your teacher can see it), which specific
-        question <em>you personally</em> got wrong (only class-wide patterns are visible, not per-student),
-        and your regular progress on this device (XP, streaks, badges) — a separate, local-only account
-        that's never sent anywhere.
+        Which specific question <em>you personally</em> got wrong (only class-wide patterns are visible, not
+        per-student), and your regular progress on this device (XP, streaks, badges) — a separate,
+        local-only account that's never sent anywhere.
       </Row>
       <Row icon={<Server size={13} />} title="Where it's stored">
         On your teacher's own self-hosted server — not on servers run by the people who made this website,

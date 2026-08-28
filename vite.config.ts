@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => ({
   // Tauri needs a fixed, predictable dev server port to point its webview at.
   clearScreen: false,
   server: {
-    allowedHosts: ['mc3.leapmotorintl.com'],
+    allowedHosts: ['mc5.leapmotorintl.com'],
     port: 5173,
     strictPort: true,
   },

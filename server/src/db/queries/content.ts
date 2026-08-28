@@ -11,6 +11,7 @@ export interface ContentRow {
   body_json: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export function createContent(
@@ -26,9 +27,12 @@ export function createContent(
   return getContentById(id)!;
 }
 
+// Excludes soft-deleted content — this is the "content library" listing.
+// Historical assignments/results still resolve deleted content via
+// getContentById directly, so deleting content never breaks past attempts.
 export function listContentByTeacher(teacherId: string): ContentRow[] {
   return db
-    .prepare('SELECT * FROM content_items WHERE teacher_id = ? ORDER BY updated_at DESC')
+    .prepare('SELECT * FROM content_items WHERE teacher_id = ? AND deleted_at IS NULL ORDER BY updated_at DESC')
     .all(teacherId) as ContentRow[];
 }
 
@@ -57,6 +61,9 @@ export function updateContent(
   return getContentById(id);
 }
 
+// Soft delete — content that's already been assigned may have attempt
+// history depending on it (via ON DELETE CASCADE from assignments), so a
+// hard delete would silently destroy students' completed work.
 export function deleteContent(id: string): void {
-  db.prepare('DELETE FROM content_items WHERE id = ?').run(id);
+  db.prepare("UPDATE content_items SET deleted_at = datetime('now') WHERE id = ?").run(id);
 }

@@ -4,6 +4,7 @@ import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings, Timer, Gauge,
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 import { TAP_SPRING } from '../../utils/motion';
+import { FrenchFlag } from '../ui/FrenchFlag';
 
 const NAV_ITEMS = [
   { to: '/learn', icon: Home, label: 'Home' },
@@ -43,7 +44,7 @@ export function Navbar() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
           <Link to="/learn" className="flex items-center gap-2 no-underline">
-            <span className="text-xl leading-none">🇫🇷</span>
+            <FrenchFlag size={20} className="rounded-[2px]" />
             <span className="font-bold text-[1.05rem] text-primary font-display">
               Bonjour Survival
             </span>

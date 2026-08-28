@@ -1,4 +1,5 @@
 import { useClock } from '../../hooks/useClock';
+import { FrenchFlag } from '../ui/FrenchFlag';
 
 /** Time-aware French greeting with an English subtitle. */
 function greetingFor(hour: number): { fr: string; en: string } {
@@ -13,10 +14,10 @@ export function Greeting({ name }: { name?: string }) {
 
   return (
     <div className="text-center text-white">
-      <h1 className="font-display text-[clamp(1.6rem,5vw,2.4rem)] font-semibold tracking-tight">
+      <h1 className="font-display text-[clamp(1.6rem,5vw,2.4rem)] font-semibold tracking-tight inline-flex items-center gap-2">
         {fr}
         {name ? `, ${name}` : ''}
-        <span className="text-white/70"> 🇫🇷</span>
+        <FrenchFlag size={22} className="opacity-70 inline-block" />
       </h1>
       <p className="mt-0.5 text-sm text-white/65">{en}</p>
     </div>

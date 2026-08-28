@@ -18,6 +18,9 @@ export interface AttemptResponse {
   answerGiven?: string;
 }
 
+// One attempt per (student, assignment) — a retake replaces the previous
+// attempt in place (enforced by a unique index) rather than adding a second
+// row, so roster counts and per-question stats can't double-count a redo.
 export function recordAttempt(
   studentId: string,
   assignmentId: string,
@@ -28,13 +31,24 @@ export function recordAttempt(
   const id = randomUUID();
   db.prepare(
     `INSERT INTO attempts (id, student_id, assignment_id, completed_at, score, xp_earned, responses_json)
-     VALUES (?, ?, ?, datetime('now'), ?, ?, ?)`
+     VALUES (?, ?, ?, datetime('now'), ?, ?, ?)
+     ON CONFLICT(student_id, assignment_id) DO UPDATE SET
+       completed_at = excluded.completed_at,
+       score = excluded.score,
+       xp_earned = excluded.xp_earned,
+       responses_json = excluded.responses_json`
   ).run(id, studentId, assignmentId, score, xpEarned, JSON.stringify(responses));
-  return getAttemptById(id)!;
+  return getAttemptForStudentAssignment(studentId, assignmentId)!;
 }
 
 export function getAttemptById(id: string): AttemptRow | undefined {
   return db.prepare('SELECT * FROM attempts WHERE id = ?').get(id) as AttemptRow | undefined;
+}
+
+export function getAttemptForStudentAssignment(studentId: string, assignmentId: string): AttemptRow | undefined {
+  return db
+    .prepare('SELECT * FROM attempts WHERE student_id = ? AND assignment_id = ?')
+    .get(studentId, assignmentId) as AttemptRow | undefined;
 }
 
 export function listAttemptsForStudent(studentId: string): AttemptRow[] {

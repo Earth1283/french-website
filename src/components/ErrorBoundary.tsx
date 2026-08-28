@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ReactNode, ErrorInfo } from 'react';
+import { FrenchFlag } from './ui/FrenchFlag';
 
 interface Props {
   children: ReactNode;
@@ -40,7 +41,9 @@ export class ErrorBoundary extends Component<Props, State> {
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           }}
         >
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🇫🇷</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            <FrenchFlag size={48} />
+          </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary, #1a1f3a)' }}>
             Oh non, quelque chose a planté
           </h2>
