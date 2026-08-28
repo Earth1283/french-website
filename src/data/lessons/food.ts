@@ -104,7 +104,7 @@ export const foodLessons: Lesson[] = [
         funnyNote: 'Complaining about food in France is a delicate art. Tread carefully.',
       },
       {
-        french: 'Un carafe d\'eau, s\'il vous plaît',
+        french: 'Une carafe d\'eau, s\'il vous plaît',
         english: 'A jug of tap water, please',
         pronunciation: 'yn kaʁaf do sil vu plɛ',
         funnyNote: 'FREE in French restaurants by law. They can\'t refuse this. Knowing this will save you money.',
