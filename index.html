@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Bonjour Survival — French for the Suddenly Teleported</title>
+    <meta name="description" content="Learn practical French fast. Funny, modern, and actually useful if you find yourself in France." />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://earth1283.github.io/french-website/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://earth1283.github.io/french-website/" />
+    <meta property="og:title" content="Bonjour Survival — French for the Suddenly Teleported" />
+    <meta property="og:description" content="Learn practical French fast. 21 units, spaced repetition, AI conversation practice — funny and actually useful if you find yourself in France." />
+    <meta property="og:image" content="https://earth1283.github.io/french-website/og-image.png" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Bonjour Survival" />
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Bonjour Survival — French for the Suddenly Teleported" />
+    <meta name="twitter:description" content="Learn practical French fast. 21 units, spaced repetition, AI conversation practice — funny and actually useful." />
+    <meta name="twitter:image" content="https://earth1283.github.io/french-website/og-image.png" />
+
+    <!-- PWA / Theme -->
+    <meta name="theme-color" content="#E63946" />
+    <link rel="manifest" href="/french-website/manifest.json" />
+    <link rel="apple-touch-icon" href="/french-website/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #FAF7F0;
+        z-index: 99999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        transition: opacity 0.45s ease;
+      }
+      #boot.boot-dark { background: #0f1117; }
+      #boot.boot-out { opacity: 0; pointer-events: none; }
+
+      #boot-inner { text-align: center; width: min(280px, 78vw); }
+
+      #boot-flag { font-size: 2.4rem; margin-bottom: 0.65rem; line-height: 1; }
+
+      #boot-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1a1f3a;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.75rem;
+      }
+      #boot.boot-dark #boot-title { color: #eef0f7; }
+
+      #boot-track {
+        height: 3px;
+        background: #E8E4DB;
+        border-radius: 9999px;
+        overflow: hidden;
+        margin-bottom: 0.55rem;
+      }
+      #boot.boot-dark #boot-track { background: #2a3050; }
+
+      #boot-fill {
+        height: 100%;
+        border-radius: 9999px;
+        width: 5%;
+        transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      #boot-status {
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+        color: #999;
+        height: 1em;
+      }
+    </style>
+    <script type="module" crossorigin src="/french-website/assets/index-wYFXbhxL.js"></script>
+    <link rel="modulepreload" crossorigin href="/french-website/assets/rolldown-runtime-Cyuzqnbw.js">
+    <link rel="modulepreload" crossorigin href="/french-website/assets/charts-DRRUjNcF.js">
+    <link rel="modulepreload" crossorigin href="/french-website/assets/motion-TB4TPvXK.js">
+    <link rel="modulepreload" crossorigin href="/french-website/assets/react-vendor-wVhzR248.js">
+    <link rel="modulepreload" crossorigin href="/french-website/assets/ui-DgJecpmF.js">
+    <link rel="stylesheet" crossorigin href="/french-website/assets/index-BujjwnTH.css">
+  </head>
+  <body>
+    <!-- Loading screen — shown immediately, dismissed by React on first mount -->
+    <div id="boot">
+      <div id="boot-inner">
+        <div id="boot-flag">🇫🇷</div>
+        <div id="boot-title">Bonjour Survival</div>
+        <div id="boot-track"><div id="boot-fill"></div></div>
+        <div id="boot-status">Starting up…</div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var boot = document.getElementById('boot');
+        var fill = document.getElementById('boot-fill');
+        var statusEl = document.getElementById('boot-status');
+        var pct = 5;
+
+        // Read stored preferences so the loading screen matches the user's theme
+        var stored = {};
+        try { stored = JSON.parse(localStorage.getItem('french-progress') || '{}'); } catch (_) {}
+        var state = stored.state || {};
+        var dark = !!state.darkMode;
+        var accent = (typeof state.accentColor === 'string' && state.accentColor.startsWith('#'))
+          ? state.accentColor : '#E63946';
+
+        if (dark) boot.classList.add('boot-dark');
+        fill.style.backgroundColor = accent;
+
+        function advance(p, msg) {
+          if (p > pct) {
+            pct = p;
+            fill.style.width = pct + '%';
+          }
+          if (msg) statusEl.textContent = msg;
+        }
+
+        // Chunk names → progress milestones (weights ≈ gzip sizes)
+        var STEPS = [
+          { key: 'rolldown-runtime', label: 'Initialising runtime…',   pct: 10 },
+          { key: 'react-vendor',     label: 'Loading React…',          pct: 45 },
+          { key: 'motion',           label: 'Loading animations…',     pct: 75 },
+          { key: 'ui-',              label: 'Loading UI layer…',       pct: 83 },
+          { key: 'index-',           label: 'Wiring app together…',    pct: 94 },
+        ];
+        var seen = {};
+
+        if (window.PerformanceObserver) {
+          try {
+            var obs = new PerformanceObserver(function (list) {
+              list.getEntries().forEach(function (e) {
+                var url = e.name;
+                STEPS.forEach(function (step) {
+                  if (!seen[step.key] && url.indexOf(step.key) !== -1) {
+                    seen[step.key] = true;
+                    advance(step.pct, step.label);
+                  }
+                });
+              });
+            });
+            obs.observe({ type: 'resource', buffered: true });
+          } catch (_) {}
+        }
+
+        // Called by React on first mount
+        window.__bootReady = function () {
+          advance(100, 'Prêt !');
+          setTimeout(function () {
+            boot.classList.add('boot-out');
+            setTimeout(function () { boot.remove(); }, 500);
+          }, 150);
+        };
+      })();
+    </script>
+
+    <div id="root"></div>
+  </body>
+</html>

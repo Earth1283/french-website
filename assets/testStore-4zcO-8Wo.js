@@ -1,0 +1,1 @@
+import{Ct as e,St as t}from"./ui-DgJecpmF.js";var n=e()(t((e,t)=>({history:[],addResult:t=>{e(e=>({history:[...e.history,t]}))},clearHistory:()=>e({history:[]}),latestResult:()=>{let{history:e}=t();return e.length>0?e[e.length-1]:void 0}}),{name:`french-adaptive-test`}));export{n as t};
