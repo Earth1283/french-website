@@ -1,53 +1,43 @@
-import { motion } from 'framer-motion';
+import { BellOff, HardDrive, LockOpen } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { FrenchFlag } from '../ui/FrenchFlag';
+import { Wordmark } from '../ui/Signage';
 import { useProgressStore } from '../../stores/progressStore';
 
-interface OnboardingModalProps {
-  open: boolean;
-}
+const PROMISES = [
+  { icon: BellOff, title: 'No nagging.', description: "No streak anxiety, no notifications. Your phone won't judge you." },
+  { icon: LockOpen, title: 'Every line is open.', description: 'All 21 lines are there from day one. Skip whatever you want.' },
+  { icon: HardDrive, title: 'Your data stays here.', description: 'Progress lives in your browser. No account, no tracking, free forever.' },
+];
 
-export function OnboardingModal({ open }: OnboardingModalProps) {
-  const { setOnboardingDone } = useProgressStore();
+export function OnboardingModal({ open }: { open: boolean }) {
+  const setOnboardingDone = useProgressStore(s => s.setOnboardingDone);
 
   return (
-    <Modal open={open} closeable={false}>
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22, ease: 'easeOut' }}
-      >
-        <div className="text-center mb-5">
-          <div className="mb-3 flex justify-center">
-            <FrenchFlag size={56} />
-          </div>
-          <h2 className="text-2xl font-bold text-primary mb-2 font-display">Bienvenue!</h2>
-          <p className="text-[--text-secondary] text-sm leading-relaxed">
-            You've been teleported to France. Here's how this works.
-          </p>
-        </div>
+    <Modal open={open} closeable={false} title="Welcome">
+      <div className="mb-4 flex justify-center">
+        <Wordmark />
+      </div>
+      <p className="read-display text-center text-36" lang="fr">
+        Bienvenue&#8239;!
+      </p>
+      <p className="t-body mt-2 text-center">You've been teleported to France. Here's how this works.</p>
 
-        <div className="space-y-3 mb-6 p-4" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
-          {[
-            { emoji: '🔕', title: 'No nagging.', desc: "No streak anxiety, no notifications. Your phone won't judge you." },
-            { emoji: '🗝️', title: 'Everything is open.', desc: 'All 21 units are accessible from day one. Skip whatever you want.' },
-            { emoji: '📱', title: 'Your data stays here.', desc: 'Progress lives in your browser. No account, no tracking, free forever.' },
-          ].map(({ emoji, title, desc }) => (
-            <div key={title} className="flex gap-3 items-start">
-              <span className="text-xl leading-none mt-0.5">{emoji}</span>
-              <div>
-                <p className="text-sm font-semibold text-[--text-primary]">{title}</p>
-                <p className="text-xs text-[--text-muted] leading-relaxed mt-0.5">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+      <ul className="sheet rows my-6">
+        {PROMISES.map(({ icon: Icon, title, description }) => (
+          <li key={title} className="row items-start">
+            <Icon size={20} className="mt-0.5 text-enamel-text" aria-hidden="true" />
+            <span>
+              <span className="block font-semibold text-ink">{title}</span>
+              <span className="t-small block">{description}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
 
-        <Button variant="primary" className="w-full" onClick={setOnboardingDone}>
-          Let's go! →
-        </Button>
-      </motion.div>
+      <Button variant="primary" block onClick={setOnboardingDone}>
+        Let's go!
+      </Button>
     </Modal>
   );
 }

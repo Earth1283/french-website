@@ -1,0 +1,137 @@
+/* Guide de survie — design tokens (mockup copy).
+   Source of truth: docs/DESIGN.md §4–§8. The app's globals.css is rebuilt from this file in phase 1. */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap');
+
+:root {
+  color-scheme: light;
+
+  /* ── Surfaces ── */
+  --paper: #F2EFE9;         /* page ground */
+  --sheet: #FBFAF6;         /* raised surfaces: sheets, tickets, rows */
+  --inset: #E8E3D9;         /* wells: inputs at rest, tracks */
+  --rule: #CFC7B8;          /* decorative dividers (non-text, not a boundary cue) */
+  --rule-strong: #5C6074;   /* control borders — meets 3:1 */
+
+  /* ── Ink ── */
+  --ink: #16213E;
+  --ink-2: #474D63;
+  --ink-3: #5C6074;
+
+  /* ── Brand roles ── */
+  --enamel: #1E3F8A;        /* wayfinding fill: header, tab bar, plaques */
+  --enamel-text: #1E3F8A;   /* wayfinding as text/icon on paper */
+  --on-enamel: #FFFFFF;
+  --on-enamel-2: #B9C8EC;
+  --enamel-edge: transparent;
+
+  --signal: #B91D2A;        /* fill: the one primary action */
+  --signal-text: #B91D2A;   /* French words in running English, "Oh non !" */
+
+  --amber: #E0A526;         /* fill: XP & streak (ink text on top) */
+  --amber-text: #855600;
+
+  --go: #2A6649;            /* correct / done */
+
+  /* ── Departure board (identical in both themes) ── */
+  --board: #10172B;
+  --board-cell: #1A2340;
+  --board-rule: #243056;
+  --board-text: #FFFFFF;
+  --board-dim: #9AA3BD;
+  --board-amber: #F2B33D;
+
+  /* ── Lines (units). White numerals ≥ 5:1 on every one. Never signal red. ── */
+  --line-start-a: #1E7A4F;
+  --line-start-b: #44702A;
+  --line-core-a: #1D5FA6;
+  --line-core-b: #0E6E8C;
+  --line-core-c: #157A74;
+  --line-further-a: #9A6408;
+  --line-further-b: #A8521C;
+  --line-bonus-a: #6B3FA0;
+  --line-bonus-b: #A0327A;
+  --line-bonus-c: #7A3E9A;
+  --roundel-ring: transparent;
+
+  /* ── Type ── */
+  --font-sign: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-read: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  /* Bringhurst's classic scale */
+  --t-12: 0.75rem;
+  --t-14: 0.875rem;
+  --t-16: 1rem;
+  --t-18: 1.125rem;
+  --t-21: 1.3125rem;
+  --t-24: 1.5rem;
+  --t-36: 2.25rem;
+  --t-48: 3rem;
+  --t-60: 3.75rem;
+  --t-72: 4.5rem;
+  --w-condensed: 75%;
+  --w-semi: 88%;
+  --w-expanded: 125%;
+
+  /* ── Shape ── */
+  --r-plaque: 6px;
+  --r-control: 8px;
+  --r-sheet: 12px;
+  --r-ticket: 14px;
+
+  /* ── Elevation: flat by default; lift only for overlays ── */
+  --lift: 0 10px 30px rgba(22, 33, 62, 0.18);
+
+  /* ── Motion ── */
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 240ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Density (adaptive) ── */
+  --gutter: 16px;
+  --row: 52px;
+  --stack: 24px;            /* vertical rhythm between sections */
+  --tap: 44px;
+}
+
+@media (min-width: 640px) {
+  :root { --gutter: 24px; --row: 48px; --stack: 32px; }
+}
+@media (min-width: 1024px) {
+  :root { --gutter: 32px; --row: 44px; --stack: 40px; --tap: 36px; }
+}
+@media (pointer: coarse) {
+  :root { --tap: 44px; }
+}
+
+.dark {
+  color-scheme: dark;
+
+  --paper: #0C1222;
+  --sheet: #151C30;
+  --inset: #0A0F1C;
+  --rule: #2A3354;
+  --rule-strong: #9094A4;
+
+  --ink: #EEE7D8;
+  --ink-2: #B8B2A6;
+  --ink-3: #9094A4;
+
+  --enamel: #22397A;
+  --enamel-text: #8FAAE6;
+  --on-enamel: #FFFFFF;
+  --on-enamel-2: #B9C8EC;
+  --enamel-edge: #34509A;
+
+  --signal: #B91D2A;
+  --signal-text: #FF7A80;
+
+  --amber: #F2B33D;
+  --amber-text: #F2B33D;
+
+  --go: #62C495;
+
+  --roundel-ring: #EEE7D8;
+  --lift: 0 10px 30px rgba(0, 0, 0, 0.5);
+}

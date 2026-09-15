@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unit · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .back { margin-left: -6px; margin-bottom: 12px; }
+  .unit-head { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
+  .unit-head__meta { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; font: 700 var(--t-14)/1 var(--font-sign); font-stretch: var(--w-condensed); letter-spacing: 0.03em; color: var(--ink-3); }
+  .unit-head .body { margin-top: 4px; }
+  .unit-blurb { margin-top: 20px; font: 400 var(--t-18)/1.6 var(--font-read); color: var(--ink-2); max-width: 60ch; }
+  .unit-progress { margin: 20px 0 8px; display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  .stop__end { padding-top: 2px; text-align: right; }
+  .stop__earned { display: inline-flex; align-items: center; gap: 4px; font: 600 var(--t-14)/1 var(--font-sign); color: var(--go); }
+  .stop--next .stop__title { color: var(--ink-2); }
+  .stop__meta .deep { display: inline-flex; align-items: center; gap: 5px; color: var(--enamel-text); }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js"></script>
+
+<header class="appbar">
+  <div class="appbar__inner">
+    <a class="wordmark" href="landing.html" aria-label="Bonjour Survival, home"><span class="wordmark__small">Bonjour</span><span class="wordmark__big">Survival</span></a>
+    <nav class="appbar__nav" aria-label="Main">
+      <a href="learn.html" aria-current="page"><svg class="i"><use href="#i-map"/></svg>Learn</a>
+      <a href="practice.html"><svg class="i"><use href="#i-target"/></svg>Practice</a>
+      <a href="#"><svg class="i"><use href="#i-book-open"/></svg>Phrasebook</a>
+      <a href="#"><svg class="i"><use href="#i-circle-user-round"/></svg>Me</a>
+    </nav>
+    <div class="appbar__end"><span class="stat"><svg class="i"><use href="#i-zap"/></svg>240</span></div>
+  </div>
+</header>
+
+<main class="page page--narrow">
+  <a class="btn btn--quiet back" href="learn.html"><svg class="i"><use href="#i-chevron-left"/></svg>Learn</a>
+
+  <header class="unit-head">
+    <span class="roundel roundel--xl" style="--line: var(--line-core-b)" aria-label="Line 4">4</span>
+    <div>
+      <p class="unit-head__meta"><span>Line 4</span><span class="tag" style="--swatch: var(--line-core-a); letter-spacing: 0">A1</span></p>
+      <h1 class="h-page">Feed Me or I'll Cry</h1>
+      <p class="body">Food, Cafés &amp; Restaurants</p>
+    </div>
+  </header>
+
+  <p class="unit-blurb">The croissant is your first friend. Treat it with respect. Also learn how to order coffee without getting a tall drip from somewhere that rhymes with Starducks.</p>
+
+  <div class="unit-progress small num"><span>1 of 3 lessons done</span><span>20 of 60 XP</span></div>
+
+  <ol class="linemap" style="--line: var(--line-core-b)">
+    <li class="stop stop--done">
+      <span class="stop__dot" aria-label="Done"><svg class="i"><use href="#i-check"/></svg></span>
+      <div>
+        <h2 class="stop__title">The Sacred Art of Ordering Coffee</h2>
+        <p class="stop__sub">In France, getting this wrong is a social crime.</p>
+      </div>
+      <div class="stop__end"><span class="stop__earned"><svg class="i i--sm"><use href="#i-check"/></svg>+20 XP</span></div>
+    </li>
+
+    <li class="stop stop--here">
+      <span class="stop__dot" aria-label="Current lesson"></span>
+      <div>
+        <p class="youarehere"><span lang="fr">Vous êtes ici</span><small>You are here</small></p>
+        <h2 class="stop__title">At the Restaurant: Ordering &amp; Surviving</h2>
+        <p class="stop__sub">Navigate a French menu without accidentally ordering offal.</p>
+        <p class="stop__meta"><span>+25 XP</span><span class="deep"><svg class="i i--sm"><use href="#i-book-open-text"/></svg>Full lesson, 4 pages</span></p>
+      </div>
+      <div class="stop__end"><a class="btn btn--primary btn--sm" href="lesson.html">Start</a></div>
+    </li>
+
+    <li class="stop stop--next">
+      <span class="stop__dot" aria-label="Not started"></span>
+      <div>
+        <h2 class="stop__title">Boulangerie Basics</h2>
+        <p class="stop__sub">The bread is non-negotiable. You must buy bread.</p>
+        <p class="stop__meta"><span>+15 XP</span></p>
+      </div>
+      <div class="stop__end"><svg class="i i--sm" style="color: var(--enamel-text)" aria-label="Saved for later"><use href="#i-bookmark"/></svg></div>
+    </li>
+  </ol>
+</main>
+
+<nav class="tabbar" aria-label="Main" style="--tabs: 4">
+  <a href="learn.html" aria-current="page"><svg class="i"><use href="#i-map"/></svg>Learn</a>
+  <a href="practice.html"><svg class="i"><use href="#i-target"/></svg>Practice</a>
+  <a href="#"><svg class="i"><use href="#i-book-open"/></svg>Phrasebook</a>
+  <a href="#"><svg class="i"><use href="#i-circle-user-round"/></svg>Me</a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,115 @@
+@layer components {
+  .wordmark {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--enamel);
+    color: var(--on-enamel);
+    border-radius: var(--r-plaque);
+    padding: 7px 14px 8px;
+    box-shadow: inset 0 0 0 3px var(--enamel), inset 0 0 0 4.5px rgba(255, 255, 255, 0.9);
+    font-family: var(--font-sign);
+    font-stretch: var(--w-condensed);
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .wordmark__small { font-size: 9px; font-weight: 600; letter-spacing: 0.22em; opacity: 0.92; }
+  .wordmark__big { font-size: 19px; font-weight: 800; letter-spacing: 0.03em; margin-top: 2px; }
+  .wordmark--lg {
+    padding: 16px 30px 18px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 6px var(--enamel), inset 0 0 0 8.5px rgba(255, 255, 255, 0.9);
+  }
+  .wordmark--lg .wordmark__small { font-size: 15px; letter-spacing: 0.3em; }
+  .wordmark--lg .wordmark__big { font-size: 44px; margin-top: 4px; }
+
+  .appbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--enamel);
+    color: var(--on-enamel);
+    border-bottom: 1px solid var(--enamel-edge);
+    padding-top: env(safe-area-inset-top);
+  }
+  .appbar__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .appbar__nav { display: none; align-self: stretch; gap: 22px; }
+  .appbar__nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 2px 0;
+    border-bottom: 3px solid transparent;
+    color: var(--on-enamel-2);
+    font: 600 var(--t-16)/1 var(--font-sign);
+    font-stretch: var(--w-semi);
+    transition: color var(--dur-1) var(--ease-out);
+  }
+  .appbar__nav a:hover { color: var(--on-enamel); }
+  .appbar__nav a[aria-current="page"] { color: var(--on-enamel); border-bottom-color: var(--on-enamel); }
+  .appbar__end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .appbar__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-control);
+    color: var(--on-enamel);
+  }
+  .appbar__icon:hover { background: rgba(255, 255, 255, 0.1); }
+  .appbar :focus-visible { outline-color: #FFFFFF; }
+  @media (min-width: 768px) {
+    .appbar__nav { display: flex; }
+  }
+
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    background: var(--enamel);
+    border-top: 1px solid var(--enamel-edge);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar a {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 62px;
+    color: var(--on-enamel-2);
+    font: 600 var(--t-12)/1 var(--font-sign);
+    font-stretch: var(--w-semi);
+  }
+  .tabbar a[aria-current="page"] { color: var(--on-enamel); }
+  .tabbar a[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24%;
+    right: 24%;
+    height: 3px;
+    background: var(--on-enamel);
+    border-radius: 0 0 2px 2px;
+  }
+  .tabbar :focus-visible { outline-color: #FFFFFF; outline-offset: -4px; }
+  @media (min-width: 768px) {
+    .tabbar { display: none; }
+  }
+}

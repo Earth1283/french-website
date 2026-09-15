@@ -1,0 +1,100 @@
+@layer components {
+  .say {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--enamel-text);
+    box-shadow: inset 0 0 0 1.5px currentColor;
+    cursor: pointer;
+  }
+  .say:hover { background: color-mix(in oklab, var(--enamel-text) 10%, transparent); }
+  .say--sm { width: 32px; height: 32px; }
+  .say--sm .lucide { width: 16px; height: 16px; }
+
+  .ohnon {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    background: var(--sheet);
+    border-left: 4px solid var(--signal-text);
+    border-radius: 0 var(--r-control) var(--r-control) 0;
+  }
+  .ohnon__cry { font: italic 500 var(--t-21)/1.2 var(--font-read); color: var(--signal-text); }
+  .ohnon__msg { font: 400 var(--t-16)/1.45 var(--font-sign); color: var(--ink-2); }
+  .ohnon__msg b, .ohnon__msg strong { color: var(--ink); font-weight: 600; }
+  .ohnon--go { border-left-color: var(--go); }
+  .ohnon--go .ohnon__cry { color: var(--go); font-family: var(--font-sign); font-style: normal; font-weight: 700; font-size: var(--t-18); }
+
+  .options { display: grid; gap: 10px; }
+  .option {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 14px;
+    text-align: left;
+    background: var(--sheet);
+    color: var(--ink);
+    border-radius: var(--r-control);
+    box-shadow: inset 0 0 0 1px var(--rule-strong);
+    cursor: pointer;
+    transition: box-shadow var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out), opacity var(--dur-1) var(--ease-out);
+  }
+  .option:hover:not(:disabled) { background: var(--inset); }
+  .option:disabled { cursor: default; }
+  .option__text { font: italic 500 var(--t-21)/1.25 var(--font-read); color: var(--ink); }
+  .option--correct { box-shadow: inset 0 0 0 2px var(--go), inset 6px 0 0 var(--go); }
+  .option--wrong { box-shadow: inset 0 0 0 2px var(--signal-text), inset 6px 0 0 var(--signal-text); }
+  .option--dim { opacity: 0.55; }
+  .option__mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #FFFFFF; }
+  .option--correct .option__mark { background: var(--go); }
+  .option--wrong .option__mark { background: var(--signal); }
+  .option__mark .lucide { width: 16px; height: 16px; stroke-width: 2.6; }
+  .key {
+    display: inline-grid;
+    place-items: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 5px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--rule-strong), inset 0 -2px 0 var(--rule-strong);
+    font: 700 var(--t-12)/1 var(--font-sign);
+    color: var(--ink-2);
+  }
+
+  .trip { display: flex; flex: 1; gap: 2px; height: 8px; overflow: hidden; border-radius: 4px; }
+  .trip i { flex: 1; background: var(--inset); transition: background-color var(--dur-3) var(--ease-out); }
+  .trip i.done { background: var(--line, var(--enamel-text)); }
+
+  .cahier {
+    position: relative;
+    min-height: 300px;
+    padding: 28px 24px 24px 56px;
+    border-radius: var(--r-sheet);
+    border: 1px solid var(--rule);
+    background:
+      linear-gradient(to right, transparent 39px, color-mix(in oklab, var(--signal-text) 55%, transparent) 39px 40.5px, transparent 40.5px),
+      repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in oklab, var(--enamel-text) 11%, transparent) 31px 32px),
+      var(--sheet);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+  .cahier__word {
+    font: italic 500 var(--t-48)/1.05 var(--font-read);
+    font-optical-sizing: auto;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+  .cahier__say { font: 400 var(--t-16)/1.4 var(--font-sign); color: var(--ink-3); }
+  .cahier__en { font: 600 var(--t-24)/1.2 var(--font-sign); color: var(--ink); }
+  .cahier__note { font: 400 var(--t-16)/1.5 var(--font-read); color: var(--ink-2); }
+}

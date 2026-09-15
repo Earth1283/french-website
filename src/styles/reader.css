@@ -1,0 +1,51 @@
+@layer components {
+  .prose-reading {
+    max-width: 64ch;
+    margin: 0 auto;
+    font-family: var(--font-read);
+    font-optical-sizing: auto;
+    font-size: var(--t-18);
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .prose-reading > * + * { margin-top: 1em; }
+  .prose-reading h1 { font: 500 var(--t-36)/1.1 var(--font-read); letter-spacing: -0.01em; }
+  .prose-reading h2 { font: 600 var(--t-24)/1.2 var(--font-read); margin-top: 1.7em; letter-spacing: -0.005em; }
+  .prose-reading h3 { font: 600 var(--t-21)/1.25 var(--font-read); margin-top: 1.5em; }
+  .prose-reading strong { font-weight: 650; }
+  .prose-reading em { font-style: italic; color: var(--signal-text); }
+  .prose-reading.drop-cap > p:first-of-type::first-letter {
+    float: left;
+    font-size: 3.7em;
+    line-height: 0.8;
+    padding: 0.07em 0.09em 0 0;
+    font-weight: 600;
+    font-style: normal;
+    color: var(--signal-text);
+  }
+  .prose-reading ul { list-style: disc; padding-left: 1.2em; }
+  .prose-reading ol { list-style: decimal; padding-left: 1.4em; }
+  .prose-reading li + li { margin-top: 0.35em; }
+  .prose-reading li::marker { color: var(--ink-3); }
+  .prose-reading blockquote { border-left: 3px solid var(--enamel-text); padding: 0.1em 0 0.1em 1em; color: var(--ink-2); }
+  .prose-reading code {
+    font-family: var(--font-sign);
+    font-size: 0.85em;
+    font-weight: 600;
+    background: var(--inset);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  .prose-reading a { color: var(--enamel-text); text-decoration: underline; text-underline-offset: 3px; }
+  .prose-reading hr { border: 0; border-top: 1px solid var(--rule); margin: 2em 0; }
+  .prose-reading .table-scroll { overflow-x: auto; }
+  .prose-reading table { width: 100%; border-collapse: collapse; font: 400 var(--t-16)/1.4 var(--font-sign); }
+  .prose-reading th {
+    text-align: left;
+    font: 600 var(--t-14)/1.2 var(--font-sign);
+    color: var(--ink-3);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .prose-reading td { padding: 9px 10px; border-bottom: 1px solid var(--rule); color: var(--ink-2); vertical-align: top; }
+}

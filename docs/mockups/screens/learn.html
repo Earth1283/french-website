@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Learn · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .learn__grid { display: grid; gap: var(--stack); }
+  @media (min-width: 1024px) {
+    .learn__grid { grid-template-columns: 4fr 8fr; gap: 56px; align-items: start; }
+    .learn__today { position: sticky; top: 92px; }
+  }
+  .learn__today > * + * { margin-top: 16px; }
+  .learn__today .h-section { margin-bottom: 4px; }
+
+  .ticket__title { font: 650 var(--t-21)/1.2 var(--font-sign); color: var(--ink); }
+  .ticket__unit { font: 400 var(--t-14)/1.35 var(--font-sign); color: var(--ink-2); margin-top: 4px; }
+  .ticket__meta { display: flex; gap: 14px; margin-top: 10px; font: 600 var(--t-14)/1 var(--font-sign); color: var(--ink-3); }
+  .ticket__meta b { color: var(--amber-text); font-weight: 700; }
+  .ticket__body .btn { margin-top: 16px; }
+
+  .notice { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; min-height: var(--row); padding: 6px 4px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .notice .i { color: var(--enamel-text); }
+  .notice__text { font: 600 var(--t-16)/1.3 var(--font-sign); }
+  .notice__text small { display: block; font-weight: 400; font-size: var(--t-14); color: var(--ink-3); }
+
+  .revisit__row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 4px; border-top: 1px solid var(--rule); }
+  .revisit__row:hover { background: var(--sheet); }
+  .revisit__title { font: 600 var(--t-16)/1.25 var(--font-sign); }
+  .revisit__why { font: 400 var(--t-14)/1.3 var(--font-sign); color: var(--ink-3); }
+  .revisit__row .i { color: var(--ink-3); }
+
+  .network__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .group { display: flex; align-items: center; gap: 12px; margin: 28px 0 4px; }
+  .group:first-of-type { margin-top: 16px; }
+  .group__name { font: 650 var(--t-18)/1.2 var(--font-sign); font-stretch: var(--w-semi); }
+  .group__note { font: 400 var(--t-14)/1.4 var(--font-sign); color: var(--ink-3); margin: 0 0 10px; max-width: 56ch; }
+  .linerow__end { display: flex; align-items: center; gap: 10px; }
+  .linerow__end .i { color: var(--ink-3); }
+
+  .appbar .stat { height: 30px; }
+  @media (max-width: 420px) { .appbar .stat .label { display: none; } }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js"></script>
+
+<header class="appbar">
+  <div class="appbar__inner">
+    <a class="wordmark" href="landing.html" aria-label="Bonjour Survival, home"><span class="wordmark__small">Bonjour</span><span class="wordmark__big">Survival</span></a>
+    <nav class="appbar__nav" aria-label="Main">
+      <a href="learn.html" aria-current="page"><svg class="i"><use href="#i-map"/></svg>Learn</a>
+      <a href="practice.html"><svg class="i"><use href="#i-target"/></svg>Practice</a>
+      <a href="#"><svg class="i"><use href="#i-book-open"/></svg>Phrasebook</a>
+      <a href="#"><svg class="i"><use href="#i-circle-user-round"/></svg>Me</a>
+    </nav>
+    <div class="appbar__end">
+      <button class="appbar__icon" aria-label="Search lines"><svg class="i"><use href="#i-search"/></svg></button>
+      <span class="stat" aria-label="12-day streak"><svg class="i"><use href="#i-flame"/></svg><span>12<span class="label"> days</span></span></span>
+      <span class="stat"><svg class="i"><use href="#i-zap"/></svg><span>240<span class="label"> XP</span></span></span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <h1 class="sr-only">Learn</h1>
+  <div class="learn__grid">
+
+    <section class="learn__today" aria-labelledby="today">
+      <h2 class="h-section" id="today">Today</h2>
+
+      <article class="ticket">
+        <div class="ticket__stub">
+          <span class="roundel roundel--lg" style="--line: var(--line-core-b)" aria-hidden="true">4</span>
+          <span>Line 4</span>
+        </div>
+        <div class="ticket__body">
+          <h3 class="ticket__title">At the Restaurant: Ordering &amp; Surviving</h3>
+          <p class="ticket__unit">Feed Me or I'll Cry</p>
+          <p class="ticket__meta"><span>Lesson 2 of 3</span><b>+25 XP</b></p>
+          <a class="btn btn--primary btn--block" href="lesson.html">Continue lesson</a>
+        </div>
+      </article>
+
+      <a class="notice" href="#">
+        <svg class="i"><use href="#i-rotate-ccw"/></svg>
+        <span class="notice__text">14 cards due<small>Spaced review keeps words from slipping</small></span>
+        <span class="btn btn--quiet btn--sm">Review</span>
+      </a>
+
+      <div>
+        <h2 class="h-section" style="font-size: var(--t-21); margin-bottom: 8px">Revisit</h2>
+        <a class="revisit__row" href="#">
+          <span class="roundel roundel--sm" style="--line: var(--line-core-b)" aria-label="Line 10">10</span>
+          <span><span class="revisit__title">Body Parts &amp; Symptoms</span><br><span class="revisit__why">Needs practice: 4 words keep slipping</span></span>
+          <svg class="i i--sm"><use href="#i-chevron-right"/></svg>
+        </a>
+        <a class="revisit__row" href="#">
+          <span class="roundel roundel--sm" style="--line: var(--line-core-b)" aria-label="Line 4">4</span>
+          <span><span class="revisit__title">Boulangerie Basics</span><br><span class="revisit__why">Saved for later</span></span>
+          <svg class="i i--sm"><use href="#i-chevron-right"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <section class="learn__network" aria-labelledby="lines">
+      <div class="network__head">
+        <h2 class="h-section" id="lines">Your lines</h2>
+        <span class="small num">10 of 53 lessons done</span>
+      </div>
+
+      <div class="group"><h3 class="group__name">Getting started</h3><span class="tag" style="--swatch: var(--line-start-a)">Pre-A1</span></div>
+      <div class="lines lines--2">
+        <a class="linerow" href="#">
+          <span class="roundel" style="--line: var(--line-start-a)" aria-label="Line 1">1</span>
+          <span><span class="linerow__title">Your Mouth Is Lying to You</span><span class="linerow__sub" style="display:block">French Pronunciation</span></span>
+          <span class="stations" style="--line: var(--line-start-a)" aria-label="3 of 3 lessons done"><i class="done"></i><i class="done"></i><i class="done"></i></span>
+        </a>
+        <a class="linerow" href="#">
+          <span class="roundel" style="--line: var(--line-start-b)" aria-label="Line 2">2</span>
+          <span><span class="linerow__title">The Vocab You're Missing</span><span class="linerow__sub" style="display:block">Colors, Days &amp; Months</span></span>
+          <span class="stations" style="--line: var(--line-start-b)" aria-label="3 of 3 lessons done"><i class="done"></i><i class="done"></i><i class="done"></i></span>
+        </a>
+      </div>
+
+      <div class="group"><h3 class="group__name">Core French</h3><span class="tag" style="--swatch: var(--line-core-a)">A1</span></div>
+      <p class="group__note">The A1 curriculum. Finish all ten lines to earn the A1 stamp.</p>
+      <div class="lines lines--2">
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-a)">3</span><span><span class="linerow__title">Oh Non, I'm in France</span><span class="linerow__sub" style="display:block">Emergency Survival</span></span><span class="stations" style="--line: var(--line-core-a)"><i class="done"></i><i class="done"></i></span></a>
+        <a class="linerow" href="unit.html"><span class="roundel" style="--line: var(--line-core-b)">4</span><span><span class="linerow__title">Feed Me or I'll Cry</span><span class="linerow__sub" style="display:block">Food, Cafés &amp; Restaurants</span></span><span class="stations" style="--line: var(--line-core-b)"><i class="done"></i><i class="here"></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-c)">5</span><span><span class="linerow__title">Where On Earth Am I?</span><span class="linerow__sub" style="display:block">Getting Around</span></span><span class="stations" style="--line: var(--line-core-c)"><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-a)">6</span><span><span class="linerow__title">Money Talks (Poorly)</span><span class="linerow__sub" style="display:block">Numbers &amp; Money</span></span><span class="stations" style="--line: var(--line-core-a)"><i></i><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-b)">7</span><span><span class="linerow__title">Bonjour, Everyone</span><span class="linerow__sub" style="display:block">Greetings &amp; Social</span></span><span class="stations" style="--line: var(--line-core-b)"><i></i><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-c)">8</span><span><span class="linerow__title">Retail Therapy</span><span class="linerow__sub" style="display:block">Shopping &amp; Pharmacies</span></span><span class="stations" style="--line: var(--line-core-c)"><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-a)">9</span><span><span class="linerow__title">A Bed, Please</span><span class="linerow__sub" style="display:block">Hotels &amp; Accommodation</span></span><span class="stations" style="--line: var(--line-core-a)"><i></i><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-b)">10</span><span><span class="linerow__title">I Am Dying (Probably)</span><span class="linerow__sub" style="display:block">Medical &amp; Health</span></span><span class="stations" style="--line: var(--line-core-b)"><i class="done"></i><i class="here"></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-c)">11</span><span><span class="linerow__title">Weather &amp; Vibes</span><span class="linerow__sub" style="display:block">Small Talk &amp; Opinions</span></span><span class="stations" style="--line: var(--line-core-c)"><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-core-a)">12</span><span><span class="linerow__title">Grammar Survival Kit</span><span class="linerow__sub" style="display:block">Essential Grammar</span></span><span class="stations" style="--line: var(--line-core-a)"><i></i><i></i><i></i></span></a>
+      </div>
+
+      <div class="group"><h3 class="group__name">Going further</h3><span class="tag" style="--swatch: var(--line-further-a)">A1–A2</span></div>
+      <div class="lines lines--2">
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-further-a)">13</span><span><span class="linerow__title">Who Even Are You?</span><span class="linerow__sub" style="display:block">Nationality, Profession &amp; Family</span></span><span class="stations" style="--line: var(--line-further-a)"><i></i><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-further-b)">14</span><span><span class="linerow__title">The Forecast for Awkward Silence</span><span class="linerow__sub" style="display:block">Weather &amp; Seasons</span></span><span class="stations" style="--line: var(--line-further-b)"><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-further-a)">15</span><span><span class="linerow__title">Actually Doing Things</span><span class="linerow__sub" style="display:block">Time, Plans &amp; Reservations</span></span><span class="stations" style="--line: var(--line-further-a)"><i></i><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-further-b)">16</span><span><span class="linerow__title">Vivre à la Française</span><span class="linerow__sub" style="display:block">The Apéro, the Market &amp; the Art of Slowing Down</span></span><span class="stations" style="--line: var(--line-further-b)"><i></i><i></i><i></i></span></a>
+      </div>
+
+      <div class="group"><h3 class="group__name">Bonus</h3><span class="tag" style="--swatch: var(--line-bonus-a)">Bonus</span></div>
+      <div class="lines lines--2">
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-bonus-a)">17</span><span><span class="linerow__title">False Friends Will Betray You</span><span class="linerow__sub" style="display:block">Dangerous Cognates</span></span><span class="stations" style="--line: var(--line-bonus-a)"><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-bonus-b)">18</span><span><span class="linerow__title">Unlocked: The Good Stuff</span><span class="linerow__sub" style="display:block">Slang &amp; Expressions</span></span><span class="stations" style="--line: var(--line-bonus-b)"><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-bonus-c)">19</span><span><span class="linerow__title">The Train Will Leave Without You</span><span class="linerow__sub" style="display:block">SNCF &amp; Rail Travel</span></span><span class="stations" style="--line: var(--line-bonus-c)"><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-bonus-a)">20</span><span><span class="linerow__title">How Not to Be That Tourist</span><span class="linerow__sub" style="display:block">Culture &amp; Etiquette</span></span><span class="stations" style="--line: var(--line-bonus-a)"><i></i><i></i><i></i></span></a>
+        <a class="linerow" href="#"><span class="roundel" style="--line: var(--line-bonus-b)">21</span><span><span class="linerow__title">Culture Vulture</span><span class="linerow__sub" style="display:block">Cinema, Museums &amp; Leisure</span></span><span class="stations" style="--line: var(--line-bonus-b)"><i></i><i></i></span></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<nav class="tabbar" aria-label="Main" style="--tabs: 4">
+  <a href="learn.html" aria-current="page"><svg class="i"><use href="#i-map"/></svg>Learn</a>
+  <a href="practice.html"><svg class="i"><use href="#i-target"/></svg>Practice</a>
+  <a href="#"><svg class="i"><use href="#i-book-open"/></svg>Phrasebook</a>
+  <a href="#"><svg class="i"><use href="#i-circle-user-round"/></svg>Me</a>
+</nav>
+</body>
+</html>

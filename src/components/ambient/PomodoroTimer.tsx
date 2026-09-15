@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useAnimationControls } from 'framer-motion';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Pause, Play, RotateCcw } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { FlipText } from '../ui/FlipText';
 
 type Mode = 'pomodoro' | 'break' | 'long';
 
@@ -10,51 +11,48 @@ const MODES: { id: Mode; label: string; minutes: number }[] = [
   { id: 'long', label: 'Long break', minutes: 15 },
 ];
 
-function fmt(total: number): string {
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+function formatCountdown(total: number): string {
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-/** Soft two-note chime via Web Audio (no asset needed). */
 function chime() {
   try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new Ctx();
-    [660, 880].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.frequency.value = freq;
-      osc.type = 'sine';
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      const t = ctx.currentTime + i * 0.18;
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
-      osc.start(t);
-      osc.stop(t + 0.55);
+    const AudioContextClass =
+      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const context = new AudioContextClass();
+    [660, 880].forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'sine';
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      const start = context.currentTime + index * 0.18;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+      oscillator.start(start);
+      oscillator.stop(start + 0.55);
     });
   } catch {
-    /* audio not available — silently skip */
+    return;
   }
 }
 
-/** Ambient Pomodoro study timer. Calls onComplete when a focus session finishes. */
 export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
   const [mode, setMode] = useState<Mode>('pomodoro');
   const [running, setRunning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(MODES[0].minutes * 60);
   const intervalRef = useRef<number | null>(null);
-  const digitControls = useAnimationControls();
-  const ringControls = useAnimationControls();
 
-  const duration = MODES.find(m => m.id === mode)!.minutes * 60;
+  const duration = MODES.find(candidate => candidate.id === mode)!.minutes * 60;
 
   const selectMode = (next: Mode) => {
     setMode(next);
     setRunning(false);
-    setSecondsLeft(MODES.find(m => m.id === next)!.minutes * 60);
+    setSecondsLeft(MODES.find(candidate => candidate.id === next)!.minutes * 60);
   };
 
   const reset = () => {
@@ -65,20 +63,15 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
   useEffect(() => {
     if (!running) return;
     intervalRef.current = window.setInterval(() => {
-      setSecondsLeft(prev => {
-        if (prev <= 1) {
+      setSecondsLeft(previous => {
+        if (previous <= 1) {
           window.clearInterval(intervalRef.current!);
           setRunning(false);
           chime();
-          digitControls.start({ scale: [1, 1.16, 1], transition: { duration: 0.55, ease: 'easeOut' } });
-          ringControls.start({
-            stroke: ['#ffffff', '#F4A261', '#ffffff'],
-            transition: { duration: 1.3, ease: 'easeInOut' },
-          });
           if (mode === 'pomodoro') onComplete?.();
           return 0;
         }
-        return prev - 1;
+        return previous - 1;
       });
     }, 1000);
     return () => {
@@ -87,85 +80,39 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, mode]);
 
-  const progress = 1 - secondsLeft / duration;
-  const R = 130;
-  const C = 2 * Math.PI * R;
+  const countdown = formatCountdown(secondsLeft);
+  const status = running ? 'Focus' : secondsLeft === 0 ? 'Terminé !' : 'Paused';
 
   return (
-    <div className="flex flex-col items-center gap-6 text-white">
-      {/* Mode segmented control on glass */}
-      <div className="flex gap-1 rounded-full border border-white/15 bg-white/10 p-1 backdrop-blur-md">
-        {MODES.map(m => (
+    <div className="pomodoro">
+      <div role="tablist" aria-label="Timer" className="board-tabs">
+        {MODES.map(candidate => (
           <button
-            key={m.id}
+            key={candidate.id}
             type="button"
-            onClick={() => selectMode(m.id)}
-            aria-pressed={mode === m.id}
-            className="relative rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
-            style={{ color: mode === m.id ? '#1a1a1a' : 'rgba(255,255,255,0.75)' }}
+            role="tab"
+            aria-selected={mode === candidate.id}
+            onClick={() => selectMode(candidate.id)}
           >
-            {mode === m.id && (
-              <motion.span
-                layoutId="pomo-seg"
-                className="absolute inset-0 rounded-full bg-white"
-                transition={{ type: 'spring', damping: 26, stiffness: 380 }}
-              />
-            )}
-            <span className="relative z-10">{m.label}</span>
+            {candidate.label}
           </button>
         ))}
       </div>
-
-      {/* Ring + countdown */}
-      <div className="relative flex items-center justify-center">
-        <svg width="300" height="300" className="-rotate-90">
-          <circle cx="150" cy="150" r={R} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
-          <motion.circle
-            cx="150"
-            cy="150"
-            r={R}
-            fill="none"
-            stroke="white"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={C}
-            strokeDashoffset={C * (1 - progress)}
-            animate={ringControls}
-            style={{ transition: 'stroke-dashoffset 1s linear' }}
-          />
-        </svg>
-        <div className="absolute text-center">
-          <motion.div
-            animate={digitControls}
-            className="text-[3.75rem] font-extralight tabular-nums leading-none"
-            style={{ letterSpacing: '-0.02em' }}
-          >
-            {fmt(secondsLeft)}
-          </motion.div>
-          <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/55">
-            {running ? 'Focus' : secondsLeft === 0 ? 'Terminé !' : 'Paused'}
-          </div>
-        </div>
+      <div className="pomodoro__clock">
+        <FlipText value={countdown} cells label={`${countdown} remaining`} />
+        <p className="board__status mt-3" lang={secondsLeft === 0 ? 'fr' : undefined}>
+          {status}
+        </p>
       </div>
-
-      {/* Controls */}
-      <div className="flex items-center gap-3">
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={() => (secondsLeft === 0 ? reset() : setRunning(r => !r))}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-neutral-900 shadow-lg"
-          aria-label={running ? 'Pause' : 'Start'}
-        >
-          {running ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" className="ml-0.5" />}
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={reset}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/85 backdrop-blur-md"
-          aria-label="Reset"
-        >
-          <RotateCcw size={17} />
-        </motion.button>
+      <div className="flex flex-wrap gap-3 px-[18px] pb-5">
+        <Button variant="primary" onClick={() => (secondsLeft === 0 ? reset() : setRunning(value => !value))}>
+          {running ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}
+          {running ? 'Pause' : 'Start'}
+        </Button>
+        <Button variant="onEnamel" onClick={reset}>
+          <RotateCcw size={20} aria-hidden="true" />
+          Reset
+        </Button>
       </div>
     </div>
   );

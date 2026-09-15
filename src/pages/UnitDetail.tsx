@@ -1,151 +1,155 @@
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock, BookOpen } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
+import { BookOpenText, Bookmark, Check, ChevronLeft } from 'lucide-react';
 import { UNITS } from '../data/units';
-import { hasDeepLesson } from '../content/deepLessons';
+import { lineFor, lineStyle } from '../data/lines';
+import { getDeepLessonPages } from '../content/deepLessons';
 import { useProgressStore } from '../stores/progressStore';
-import { Button } from '../components/ui/Button';
-import { TAP_SPRING } from '../utils/motion';
+import { ButtonLink } from '../components/ui/Button';
+import { Roundel } from '../components/ui/Roundel';
+import { LevelTag } from '../components/ui/Signage';
+import { OhNon } from '../components/ui/Feedback';
+import type { Lesson, Unit } from '../types';
+
+type StopState = 'done' | 'here' | 'next';
+
+function Stop({ unit, lesson, state, saved }: { unit: Unit; lesson: Lesson; state: StopState; saved: boolean }) {
+  const to = `/unit/${unit.slug}/lesson/${lesson.id}`;
+  const pages = getDeepLessonPages(unit.slug, lesson.id)?.length ?? 0;
+  const dotLabel = { done: 'Done', here: 'Current lesson', next: 'Not started' }[state];
+
+  return (
+    <li className={`stop stop--${state}`}>
+      <span className="stop__dot" role="img" aria-label={dotLabel}>
+        {state === 'done' && <Check aria-hidden="true" />}
+      </span>
+      <div className="min-w-0">
+        {state === 'here' && (
+          <p className="youarehere">
+            <span lang="fr">Vous êtes ici</span>
+            <small>You are here</small>
+          </p>
+        )}
+        <h2 className="stop__title">
+          <Link to={to}>{lesson.title}</Link>
+        </h2>
+        <p className="stop__sub">{lesson.subtitle}</p>
+        {state !== 'done' && (
+          <p className="stop__meta num">
+            <span>+{lesson.xpReward} XP</span>
+            {pages > 0 && (
+              <span className="stop__deep">
+                <BookOpenText size={16} aria-hidden="true" />
+                Full lesson, {pages} pages
+              </span>
+            )}
+          </p>
+        )}
+      </div>
+      <div className="stop__end">
+        {state === 'done' && (
+          <span className="stop__earned num">
+            <Check size={16} aria-hidden="true" />+{lesson.xpReward} XP
+          </span>
+        )}
+        {state === 'here' && (
+          <ButtonLink to={to} size="sm">
+            Start
+          </ButtonLink>
+        )}
+        {state === 'next' && saved && <Bookmark size={16} className="text-enamel-text" aria-label="Saved for later" />}
+      </div>
+    </li>
+  );
+}
 
 export function UnitDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const unit = UNITS.find(u => u.slug === slug);
-  const { completedLessons, isUnit12Unlocked } = useProgressStore();
+  const completedLessons = useProgressStore(s => s.completedLessons);
+  const bookmarkedLessons = useProgressStore(s => s.bookmarkedLessons);
+  const slangUnlocked = useProgressStore(s => s.isUnit12Unlocked());
+  const unit = UNITS.find(candidate => candidate.slug === slug);
+
+  const backLink = (
+    <ButtonLink to="/learn" variant="quiet" className="-ml-1.5 mb-3">
+      <ChevronLeft size={20} aria-hidden="true" />
+      Learn
+    </ButtonLink>
+  );
 
   if (!unit) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-muted">Unit not found.</p>
-        <Link to="/learn" className="text-sm mt-2 block" style={{ color: 'var(--accent)' }}>← Back to home</Link>
+      <div className="page page--narrow">
+        {backLink}
+        <OhNon>There is no line at this address. Pick one from Learn.</OhNon>
       </div>
     );
   }
 
-  const isLocked = unit.id === 'slang' && !isUnit12Unlocked();
-
-  if (isLocked) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <span
-          className="w-20 h-20 mx-auto mb-5 rounded-[22px] flex items-center justify-center"
-          style={{ backgroundColor: 'var(--bg-inset)' }}
-        >
-          <Lock size={36} className="text-muted" />
-        </span>
-        <h2 className="text-2xl font-bold mb-2 text-primary">Not yet!</h2>
-        <p className="text-secondary">Complete 2 units to unlock this one.</p>
-        <Link to="/learn">
-          <Button variant="tinted" className="mt-5">Back to Home</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const completedCount = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
+  const line = lineFor(unit);
+  const locked = unit.id === 'slang' && !slangUnlocked;
+  const doneCount = unit.lessons.filter(lesson => completedLessons.includes(lesson.id)).length;
+  const hereIndex = unit.lessons.findIndex(lesson => !completedLessons.includes(lesson.id));
+  const totalXp = unit.lessons.reduce((sum, lesson) => sum + lesson.xpReward, 0);
+  const earnedXp = unit.lessons
+    .filter(lesson => completedLessons.includes(lesson.id))
+    .reduce((sum, lesson) => sum + lesson.xpReward, 0);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* iOS back affordance */}
-      <Link
-        to="/learn"
-        className="inline-flex items-center gap-0.5 text-[0.95rem] font-medium mb-5 no-underline ios-press"
-        style={{ color: 'var(--accent)' }}
-      >
-        <ChevronLeft size={20} strokeWidth={2.4} className="-ml-1.5" /> Units
-      </Link>
+    <div className="page page--narrow">
+      {backLink}
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 24, stiffness: 300 }}>
-        {/* Header */}
-        <div className="card p-6 mb-6 relative overflow-hidden">
-          <div className="flex items-start gap-4">
-            <span
-              className="w-16 h-16 rounded-[18px] flex items-center justify-center text-4xl flex-shrink-0"
-              style={{
-                backgroundColor: `color-mix(in srgb, ${unit.color} 14%, transparent)`,
-                border: `0.5px solid color-mix(in srgb, ${unit.color} 22%, transparent)`,
-              }}
-            >
-              {unit.emoji}
+      <header className="unit-head">
+        <Roundel line={line} size="xl" locked={locked} />
+        <div className="min-w-0">
+          <p className="unit-head__meta">
+            <span>Line {line.number}</span>
+            <LevelTag level={line.level} />
+          </p>
+          <h1 className="h-page">{unit.title}</h1>
+          <p className="t-body mt-1">{unit.tagline}</p>
+        </div>
+      </header>
+
+      {locked ? (
+        <div className="mt-6">
+          <p className="t-body">Finish 2 lines to unlock this one, or open it now in Settings.</p>
+          <ButtonLink to="/learn" variant="secondary" className="mt-4">
+            Back to Learn
+          </ButtonLink>
+        </div>
+      ) : (
+        <>
+          <p className="unit-blurb">{unit.funnyDescription}</p>
+
+          <div className="unit-progress t-small num">
+            <span>
+              {doneCount} of {unit.lessons.length} lessons done
             </span>
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold text-primary">{unit.title}</h1>
-                {unit.isA1 && <span className="a1-tag">A1</span>}
-                {unit.isBeyondA1 && (
-                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-600 dark:text-white">
-                    Bonus
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-muted font-medium mb-2">{unit.tagline}</p>
-              <p className="text-sm text-secondary leading-relaxed">
-                {unit.funnyDescription}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
-              <div
-                className="h-full rounded-full progress-bar-fill"
-                style={{
-                  width: `${Math.round((completedCount / unit.lessons.length) * 100)}%`,
-                  backgroundColor: unit.color,
-                }}
-              />
-            </div>
-            <span className="text-xs text-muted whitespace-nowrap font-medium">
-              {completedCount} / {unit.lessons.length} lessons
+            <span>
+              {earnedXp} of {totalXp} XP
             </span>
           </div>
-        </div>
 
-        {/* Lesson list — iOS grouped inset list */}
-        <p className="section-label">Lessons</p>
-        <div className="inset-group">
-          {unit.lessons.map((lesson, i) => {
-            const done = completedLessons.includes(lesson.id);
-            return (
-              <motion.div
-                key={lesson.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.04 }}
-              >
-                <Link
-                  to={`/unit/${unit.slug}/lesson/${lesson.id}`}
-                  className="no-underline block"
-                >
-                  <motion.div
-                    whileTap={{ scale: 0.98 }}
-                    transition={TAP_SPRING}
-                    className="inset-row transition-colors hover:bg-[var(--bg-card-hover)]"
-                    style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
-                  >
-                    {done
-                      ? <CheckCircle2 size={22} style={{ color: unit.color, flexShrink: 0 }} />
-                      : <Circle size={22} className="flex-shrink-0" style={{ color: 'var(--border)' }} />
-                    }
-                    <div className="flex-1 min-w-0 py-0.5">
-                      <p className="font-semibold text-sm text-primary leading-snug flex items-center gap-1.5">
-                        {lesson.title}
-                        {hasDeepLesson(unit.slug, lesson.id) && (
-                          <BookOpen size={12} aria-label="Full lesson available" style={{ color: unit.color, flexShrink: 0 }} />
-                        )}
-                      </p>
-                      <p className="text-xs text-muted truncate">{lesson.subtitle}</p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="xp-badge">+{lesson.xpReward} XP</span>
-                      <ChevronRight size={16} className="text-muted opacity-60" />
-                    </div>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
+          <ol className="linemap" style={lineStyle(line)}>
+            {unit.lessons.map((lesson, index) => {
+              const state: StopState = completedLessons.includes(lesson.id)
+                ? 'done'
+                : index === hereIndex
+                  ? 'here'
+                  : 'next';
+              return (
+                <Stop
+                  key={lesson.id}
+                  unit={unit}
+                  lesson={lesson}
+                  state={state}
+                  saved={bookmarkedLessons.includes(lesson.id)}
+                />
+              );
+            })}
+          </ol>
+        </>
+      )}
     </div>
   );
 }

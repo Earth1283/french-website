@@ -1,18 +1,15 @@
-import { Eye, Lock, Server, Flag, KeyRound } from 'lucide-react';
+import { Eye, Lock, Server, Flag, KeyRound, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 function Row({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="flex items-start gap-3">
-      <span
-        className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-        style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)' }}
-      >
+    <div className="flex items-start gap-2">
+      <span className="text-enamel-text flex-shrink-0 mt-0.5">
         {icon}
       </span>
       <div>
-        <p className="text-sm font-semibold text-primary">{title}</p>
-        <p className="text-xs text-muted mt-0.5 leading-relaxed">{children}</p>
+        <p className="t-small font-semibold text-ink">{title}</p>
+        <p className="t-small text-ink-3 mt-1">{children}</p>
       </div>
     </div>
   );
@@ -20,7 +17,11 @@ function Row({ icon, title, children }: { icon: ReactNode; title: string; childr
 
 export function ClassroomPrivacyNotice() {
   return (
-    <div className="space-y-4">
+    <div className="sheet p-4 space-y-4">
+      <div className="flex items-center gap-2 mb-3">
+        <ShieldCheck size={16} className="text-enamel-text" />
+        <p className="t-small font-semibold text-ink">Your privacy in the classroom</p>
+      </div>
       <Row icon={<Eye size={13} />} title="Your teacher can see">
         Your name, email, which classes you've joined, and — per assignment — whether you completed it and
         your score. They can also see, for the whole class at once, which questions students commonly get

@@ -1,52 +1,41 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { TAP_SPRING } from '../../utils/motion';
+import { forwardRef } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
+import { Link } from 'react-router-dom';
+import type { LinkProps } from 'react-router-dom';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'tinted' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  children: React.ReactNode;
+export type ButtonVariant = 'primary' | 'secondary' | 'quiet' | 'onEnamel' | 'danger';
+export type ButtonSize = 'md' | 'sm';
+
+interface ButtonLook {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  block?: boolean;
+  iconOnly?: boolean;
 }
 
-// iOS button roles: primary = filled, tinted = accent-tinted fill,
-// secondary = bordered, ghost = plain
-export function Button({ variant = 'primary', size = 'md', className = '', children, ...props }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-full cursor-pointer transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2';
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  primary: 'btn--primary',
+  secondary: 'btn--secondary',
+  quiet: 'btn--quiet',
+  onEnamel: 'btn--on-enamel',
+  danger: 'btn--danger',
+};
 
-  const variants = {
-    primary: 'text-white hover:brightness-95',
-    tinted: 'hover:brightness-95',
-    secondary: 'hover:bg-[var(--bg-card-hover)]',
-    ghost: 'hover:bg-[var(--bg-card-hover)]',
-  };
+export function buttonClass({ variant = 'primary', size = 'md', block, iconOnly }: ButtonLook, extra?: string) {
+  return ['btn', VARIANT_CLASS[variant], size === 'sm' && 'btn--sm', block && 'btn--block', iconOnly && 'btn--icon', extra]
+    .filter(Boolean)
+    .join(' ');
+}
 
-  const variantStyles: Record<string, React.CSSProperties> = {
-    primary: { backgroundColor: 'var(--accent)' },
-    tinted: { backgroundColor: 'var(--accent-tint)', color: 'var(--accent)' },
-    secondary: {
-      backgroundColor: 'var(--bg-card)',
-      color: 'var(--text-primary)',
-      border: '1px solid var(--hairline)',
-      boxShadow: 'var(--shadow-1)',
-    },
-    ghost: { backgroundColor: 'transparent', color: 'var(--text-secondary)' },
-  };
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & ButtonLook;
 
-  const sizes = {
-    sm: 'text-sm px-3.5 py-1.5',
-    md: 'text-sm px-5 py-2.5',
-    lg: 'text-base px-7 py-3',
-  };
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant, size, block, iconOnly, className, ...props },
+  ref,
+) {
+  return <button ref={ref} className={buttonClass({ variant, size, block, iconOnly }, className)} {...props} />;
+});
 
-  return (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
-      transition={TAP_SPRING}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
-      style={variantStyles[variant]}
-      {...(props as React.ComponentProps<typeof motion.button>)}
-    >
-      {children}
-    </motion.button>
-  );
+export function ButtonLink({ variant, size, block, iconOnly, className, ...props }: LinkProps & ButtonLook) {
+  return <Link className={buttonClass({ variant, size, block, iconOnly }, className)} {...props} />;
 }

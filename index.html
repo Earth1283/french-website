@@ -26,74 +26,72 @@
     <meta name="twitter:image" content="https://earth1283.github.io/french-website/og-image.png" />
 
     <!-- PWA / Theme -->
-    <meta name="theme-color" content="#E63946" />
+    <meta name="theme-color" content="#1E3F8A" />
     <link rel="manifest" href="/french-website/manifest.json" />
     <link rel="apple-touch-icon" href="/french-website/apple-touch-icon.png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
 
     <style>
       #boot {
         position: fixed;
         inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: #F2EFE9;
+        z-index: 99999;
+        font-family: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        transition: opacity 0.18s ease;
+      }
+      #boot.boot-dark { background: #0C1222; }
+      #boot.boot-out { opacity: 0; pointer-events: none; }
+      #boot-inner { display: grid; justify-items: center; gap: 28px; width: min(340px, 100%); }
+      #boot-plaque {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 30px 18px;
+        border-radius: 10px;
+        background: #1E3F8A;
+        color: #FFFFFF;
+        box-shadow: inset 0 0 0 6px #1E3F8A, inset 0 0 0 8.5px rgba(255, 255, 255, 0.9);
+        font-stretch: 75%;
+        text-transform: uppercase;
+        line-height: 1;
+      }
+      #boot.boot-dark #boot-plaque { background: #22397A; box-shadow: inset 0 0 0 6px #22397A, inset 0 0 0 8.5px rgba(255, 255, 255, 0.9); }
+      #boot-small { font-size: 15px; font-weight: 600; letter-spacing: 0.3em; }
+      #boot-big { font-size: 44px; font-weight: 800; letter-spacing: 0.03em; margin-top: 4px; }
+      #boot-strip {
+        width: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
-        background: #FAF7F0;
-        z-index: 99999;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-        transition: opacity 0.45s ease;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #243056;
+        background: #10172B;
       }
-      #boot.boot-dark { background: #0f1117; }
-      #boot.boot-out { opacity: 0; pointer-events: none; }
-
-      #boot-inner { text-align: center; width: min(280px, 78vw); }
-
-      #boot-flag { font-size: 2.4rem; margin-bottom: 0.65rem; line-height: 1; }
-
-      #boot-title {
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #1a1f3a;
-        letter-spacing: -0.02em;
-        margin-bottom: 1.75rem;
-      }
-      #boot.boot-dark #boot-title { color: #eef0f7; }
-
-      #boot-track {
-        height: 3px;
-        background: #E8E4DB;
-        border-radius: 9999px;
-        overflow: hidden;
-        margin-bottom: 0.55rem;
-      }
-      #boot.boot-dark #boot-track { background: #2a3050; }
-
-      #boot-fill {
-        height: 100%;
-        border-radius: 9999px;
-        width: 5%;
-        transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-      }
-
-      #boot-status {
-        font-size: 0.7rem;
-        letter-spacing: 0.02em;
-        color: #999;
-        height: 1em;
+      #boot-status { flex: 1; font-size: 16px; font-weight: 600; font-stretch: 88%; color: #FFFFFF; perspective: 400px; }
+      #boot-status.boot-flip { animation: boot-flap 240ms cubic-bezier(0.4, 0, 0.2, 1); }
+      #boot-pct { font-size: 14px; font-weight: 700; font-stretch: 75%; color: #F2B33D; font-variant-numeric: tabular-nums; }
+      #boot-track { width: 100%; height: 3px; margin-top: -18px; border-radius: 2px; background: #E8E3D9; overflow: hidden; }
+      #boot.boot-dark #boot-track { background: #0A0F1C; }
+      #boot-fill { height: 100%; width: 5%; background: #1E3F8A; transition: width 0.5s cubic-bezier(0.2, 0, 0, 1); }
+      #boot.boot-dark #boot-fill { background: #8FAAE6; }
+      @keyframes boot-flap { 50% { transform: rotateX(-88deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-status.boot-flip { animation: none; }
+        #boot-fill { transition: none; }
       }
     </style>
   </head>
   <body>
-    <!-- Loading screen — shown immediately, dismissed by React on first mount -->
-    <div id="boot">
+    <div id="boot" role="status">
       <div id="boot-inner">
-        <div id="boot-flag">🇫🇷</div>
-        <div id="boot-title">Bonjour Survival</div>
-        <div id="boot-track"><div id="boot-fill"></div></div>
-        <div id="boot-status">Starting up…</div>
+        <span id="boot-plaque" role="img" aria-label="Bonjour Survival"><span id="boot-small">Bonjour</span><span id="boot-big">Survival</span></span>
+        <div id="boot-strip"><span id="boot-status">Opening the station…</span><span id="boot-pct">5%</span></div>
+        <div id="boot-track" aria-hidden="true"><div id="boot-fill"></div></div>
       </div>
     </div>
 
@@ -102,34 +100,36 @@
         var boot = document.getElementById('boot');
         var fill = document.getElementById('boot-fill');
         var statusEl = document.getElementById('boot-status');
+        var pctEl = document.getElementById('boot-pct');
         var pct = 5;
 
-        // Read stored preferences so the loading screen matches the user's theme
         var stored = {};
         try { stored = JSON.parse(localStorage.getItem('french-progress') || '{}'); } catch (_) {}
         var state = stored.state || {};
         var dark = !!state.darkMode;
-        var accent = (typeof state.accentColor === 'string' && state.accentColor.startsWith('#'))
-          ? state.accentColor : '#E63946';
 
         if (dark) boot.classList.add('boot-dark');
-        fill.style.backgroundColor = accent;
 
         function advance(p, msg) {
           if (p > pct) {
             pct = p;
             fill.style.width = pct + '%';
+            pctEl.textContent = pct + '%';
           }
-          if (msg) statusEl.textContent = msg;
+          if (msg && msg !== statusEl.textContent) {
+            statusEl.classList.remove('boot-flip');
+            void statusEl.offsetWidth;
+            statusEl.classList.add('boot-flip');
+            statusEl.textContent = msg;
+          }
         }
 
-        // Chunk names → progress milestones (weights ≈ gzip sizes)
         var STEPS = [
-          { key: 'rolldown-runtime', label: 'Initialising runtime…',   pct: 10 },
+          { key: 'rolldown-runtime', label: 'Opening the station…',   pct: 10 },
           { key: 'react-vendor',     label: 'Loading React…',          pct: 45 },
           { key: 'motion',           label: 'Loading animations…',     pct: 75 },
-          { key: 'ui-',              label: 'Loading UI layer…',       pct: 83 },
-          { key: 'index-',           label: 'Wiring app together…',    pct: 94 },
+          { key: 'ui-',              label: 'Loading the signs…',       pct: 83 },
+          { key: 'index-',           label: 'Loading the lines…',    pct: 94 },
         ];
         var seen = {};
 
@@ -150,12 +150,11 @@
           } catch (_) {}
         }
 
-        // Called by React on first mount
         window.__bootReady = function () {
-          advance(100, 'Prêt !');
+          advance(100, 'Prêt\u202F!');
           setTimeout(function () {
             boot.classList.add('boot-out');
-            setTimeout(function () { boot.remove(); }, 500);
+            setTimeout(function () { boot.remove(); }, 200);
           }, 150);
         };
       })();

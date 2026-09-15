@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, XCircle, Volume2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, Volume2, X } from 'lucide-react';
 import type { Exercise } from '../../types';
 import { speak } from '../../utils/speech';
+import { KeyCap } from '../ui/Signage';
+import { Correct, OhNon } from '../ui/Feedback';
 
 interface MultipleChoiceProps {
   exercise: Exercise;
@@ -10,133 +12,106 @@ interface MultipleChoiceProps {
   keyboardSelect?: number | null;
 }
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
+const REVEAL_MS = 800;
+
+function shuffle<T>(items: T[]): T[] {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return a;
+  return shuffled;
+}
+
+function optionState(option: string, selected: string | null, answer: string) {
+  if (selected === null) return '';
+  if (option === answer) return 'option--correct';
+  if (option === selected) return 'option--wrong';
+  return 'option--dim';
 }
 
 export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<string | null>(null);
-  // Authored option order is not reliably randomized (the correct answer is
-  // often first) — shuffle once per question so position carries no signal.
   const [options] = useState(() => shuffle(exercise.options ?? []));
+  const previousKeyboardSelect = useRef<number | null>(null);
   const answered = selected !== null;
-  const prevKeyboardSelect = useRef<number | null>(null);
 
   const handleSelect = (option: string) => {
     if (answered) return;
     setSelected(option);
-    setTimeout(() => {
-      if (option === exercise.answer) onCorrect();
-      else onWrong();
-    }, 800);
+    window.setTimeout(() => (option === exercise.answer ? onCorrect() : onWrong()), REVEAL_MS);
   };
 
   useEffect(() => {
     if (keyboardSelect === null || keyboardSelect === undefined) {
-      prevKeyboardSelect.current = null;
+      previousKeyboardSelect.current = null;
       return;
     }
-    if (keyboardSelect !== prevKeyboardSelect.current) {
-      prevKeyboardSelect.current = keyboardSelect;
+    if (keyboardSelect !== previousKeyboardSelect.current) {
+      previousKeyboardSelect.current = keyboardSelect;
       const option = options[keyboardSelect];
       if (option) handleSelect(option);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyboardSelect]);
 
   return (
-    <div className="w-full max-w-lg mx-auto space-y-4">
-      <div className="card p-5">
-        <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Multiple Choice</p>
-        <p className="text-lg font-semibold text-primary leading-snug">{exercise.prompt}</p>
-        {exercise.hint && (
-          <p className="text-xs text-muted italic mt-1">Hint: {exercise.hint}</p>
-        )}
-      </div>
+    <div>
+      <p className="exercise__prompt">{exercise.prompt}</p>
+      {exercise.hint && <p className="exercise__hint">Hint: {exercise.hint}</p>}
 
-      <div className="grid gap-2.5">
-        {options.map((option, i) => {
-          const isCorrect = option === exercise.answer;
-          const isSelected = option === selected;
-
-          let stateStyle: React.CSSProperties = {
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--hairline)',
-            boxShadow: 'var(--shadow-1)',
-          };
-          if (answered && isCorrect) {
-            stateStyle = {
-              backgroundColor: 'var(--success-light)',
-              border: '1px solid color-mix(in srgb, var(--success) 40%, transparent)',
-            };
-          } else if (answered && isSelected && !isCorrect) {
-            stateStyle = {
-              backgroundColor: 'color-mix(in srgb, var(--danger) 10%, var(--bg-card))',
-              border: '1px solid color-mix(in srgb, var(--danger) 40%, transparent)',
-            };
-          }
-
+      <div className="options mt-5">
+        {options.map((option, index) => {
+          const state = optionState(option, selected, exercise.answer);
           return (
-            <button
-              key={option}
-              onClick={() => handleSelect(option)}
-              disabled={answered}
-              className={`w-full p-4 text-left text-sm font-medium text-primary flex items-center gap-3 transition-all ios-press ${answered ? 'cursor-default' : 'cursor-pointer'}`}
-              style={{ ...stateStyle, borderRadius: 'var(--radius-sm)' }}
-            >
-              <span
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[0.7rem] font-bold flex-shrink-0"
-                style={{ backgroundColor: 'var(--bg-inset)', color: 'var(--text-muted)' }}
-              >
-                {i + 1}
-              </span>
-              <span className="flex-1">{option}</span>
+            <div key={option} className="option-wrap">
               <button
-                onClick={e => { e.stopPropagation(); speak(option); }}
-                tabIndex={answered ? -1 : 0}
-                className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ios-press"
-                style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                aria-label={`Hear ${option}`}
                 type="button"
+                className={state ? `option ${state}` : 'option'}
+                onClick={() => handleSelect(option)}
+                disabled={answered}
               >
-                <Volume2 size={14} />
+                <KeyCap>{index + 1}</KeyCap>
+                <span className="option__text">{option}</span>
+                {state === 'option--correct' && (
+                  <span className="option__mark">
+                    <Check aria-hidden="true" />
+                    <span className="sr-only">Correct answer</span>
+                  </span>
+                )}
+                {state === 'option--wrong' && (
+                  <span className="option__mark">
+                    <X aria-hidden="true" />
+                    <span className="sr-only">Your answer, wrong</span>
+                  </span>
+                )}
               </button>
-              {answered && isCorrect && <CheckCircle2 size={18} className="flex-shrink-0" style={{ color: 'var(--success)' }} />}
-              {answered && isSelected && !isCorrect && <XCircle size={18} className="flex-shrink-0" style={{ color: 'var(--danger)' }} />}
-            </button>
+              <button
+                type="button"
+                className="say say--sm option__say"
+                onClick={() => speak(option)}
+                aria-label={`Hear ${option}`}
+              >
+                <Volume2 aria-hidden="true" />
+              </button>
+            </div>
           );
         })}
       </div>
 
-      {answered && selected !== exercise.answer && (
-        <div
-          className="flex items-center gap-2 p-3"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--danger) 8%, var(--bg-card))',
-            border: '1px solid color-mix(in srgb, var(--danger) 25%, transparent)',
-            borderRadius: 'var(--radius-sm)',
-          }}
-        >
-          <p className="text-sm text-muted flex-1">
-            Correct answer: <strong className="text-primary">{exercise.answer}</strong>
+      <div className="mt-4">
+        {answered && selected !== exercise.answer && (
+          <OhNon>
+            The answer is <b className="fr">{exercise.answer}</b>.
+          </OhNon>
+        )}
+        {answered && selected === exercise.answer && <Correct />}
+        {!answered && (
+          <p className="t-small hidden text-center pointer-fine:block">
+            Press <KeyCap>1</KeyCap> to <KeyCap>{options.length}</KeyCap> to answer
           </p>
-          <button
-            onClick={() => speak(exercise.answer)}
-            className="w-7 h-7 flex items-center justify-center rounded-full ios-press cursor-pointer flex-shrink-0"
-            style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
-            aria-label="Hear correct answer"
-          >
-            <Volume2 size={15} />
-          </button>
-        </div>
-      )}
-
-      <p className="text-center text-xs text-muted">Press 1–{options.length} to select</p>
+        )}
+      </div>
     </div>
   );
 }

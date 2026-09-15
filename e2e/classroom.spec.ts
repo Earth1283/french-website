@@ -21,11 +21,13 @@ test('teacher creates a class, student joins and completes an assignment', async
 
   await expect(page).toHaveURL(/#\/classes\/auth/);
   await page.getByRole('button', { name: "I'm the Teacher" }).click();
-  await page.getByRole('button', { name: 'Create Account' }).click();
+  await page.getByRole('tab', { name: 'Create Account' }).click();
   await page.getByPlaceholder('Name').fill('Playwright Teacher');
   await page.getByPlaceholder('Email').fill(teacherEmail);
   await page.getByPlaceholder('Password').fill('supersecret1');
+  await page.getByPlaceholder('Invite code (only needed after the first teacher)').fill('playwright-invite');
   await page.getByRole('button', { name: 'Create Account' }).click();
+  await page.getByRole('button', { name: "I've saved it — Continue" }).click();
 
   await expect(page).toHaveURL(/#\/classes$/);
   await page.getByPlaceholder('New class name, e.g. Period 1').fill('Playwright Class');
@@ -33,15 +35,16 @@ test('teacher creates a class, student joins and completes an assignment', async
   await expect(page.getByText('Playwright Class')).toBeVisible();
 
   await page.getByText('Playwright Class').click();
-  const joinCode = (await page.locator('span.font-mono').first().innerText()).trim();
+  const joinCode = (await page.getByTestId('join-code').innerText()).trim();
   expect(joinCode).toMatch(/^[A-Z0-9]{4}-[A-Z0-9]{4}$/);
 
   await page.goto('/#/classes/content/new');
-  await page.getByPlaceholder('Title').fill('Greetings');
+  await page.getByPlaceholder('Title', { exact: true }).fill('Greetings');
   await page.getByPlaceholder('Prompt').fill('How do you say hello?');
-  await page.getByPlaceholder('Correct answer').fill('Bonjour');
+  await page.getByPlaceholder('Correct answer', { exact: true }).fill('Bonjour');
   await page.getByPlaceholder('Options, comma-separated (include the correct answer)').fill('Bonjour, Merci, Au revoir');
   await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page).toHaveURL(/#\/classes\/content$/);
 
   await page.goto(`/#/classes`);
   await page.getByText('Playwright Class').click();
@@ -61,11 +64,12 @@ test('teacher creates a class, student joins and completes an assignment', async
   await studentHealthTab.close();
   await studentPage.getByRole('button', { name: "I trusted it — Continue" }).click();
 
-  await studentPage.getByRole('button', { name: 'Create Account' }).click();
+  await studentPage.getByRole('tab', { name: 'Create Account' }).click();
   await studentPage.getByPlaceholder('Name').fill('Playwright Student');
   await studentPage.getByPlaceholder('Email').fill(studentEmail);
   await studentPage.getByPlaceholder('Password').fill('studentpass1');
   await studentPage.getByRole('button', { name: 'Create Account' }).click();
+  await studentPage.getByRole('button', { name: "I've saved it — Continue" }).click();
 
   await expect(studentPage).toHaveURL(/#\/classes$/);
   await studentPage.getByPlaceholder('Join code, e.g. GEZ6-4F4T').fill(joinCode);
@@ -75,13 +79,13 @@ test('teacher creates a class, student joins and completes an assignment', async
 
   await studentPage.getByText('Greetings').click();
   await studentPage.getByRole('button', { name: "Let's go!" }).click();
-  await studentPage.getByText('Bonjour', { exact: true }).click();
+  await studentPage.getByRole('button', { name: 'Bonjour', exact: true }).click();
   await expect(studentPage.getByText('Nice work!')).toBeVisible({ timeout: 5000 });
 
   await page.goto(`/#/classes`);
   await page.getByText('Playwright Class').click();
   await expect(page.getByText('Playwright Student')).toBeVisible();
-  await expect(page.getByText('1/1')).toBeVisible();
+  await expect(page.getByText(/1\s*\/\s*1/)).toBeVisible();
 
   await studentContext.close();
 });

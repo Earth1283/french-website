@@ -1,31 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Users, LogOut, ChevronRight, ChevronDown, BookOpen, Archive, KeyRound } from 'lucide-react';
+import { Archive, BookOpen, ChevronDown, KeyRound, LogOut, Plus } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi } from '../../services/classroom';
-import { Button } from '../../components/ui/Button';
+import { Button, ButtonLink } from '../../components/ui/Button';
 import type { ClassInfo } from '../../types/classroom';
 
-function ClassRow({ cls, index }: { cls: ClassInfo; index: number }) {
+function ClassTable({ classes }: { classes: ClassInfo[] }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 * index }}>
-      <Link to={`/classes/${cls.id}`} className="card p-4 flex items-center justify-between no-underline ios-press">
-        <div className="flex items-center gap-3">
-          <span
-            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: cls.archived_at ? 'var(--bg-inset)' : 'var(--accent-tint)' }}
-          >
-            <Users size={16} style={{ color: cls.archived_at ? 'var(--text-muted)' : 'var(--accent)' }} />
-          </span>
-          <div>
-            <p className="text-sm font-semibold text-primary">{cls.name}</p>
-            <p className="text-xs text-muted mt-0.5 font-mono">{cls.join_code}</p>
-          </div>
-        </div>
-        <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-      </Link>
-    </motion.div>
+    <div className="sheet ledger-wrap">
+      <table className="ledger">
+        <thead><tr><th>Class</th><th>Join code</th><th>Created</th></tr></thead>
+        <tbody>
+          {classes.map((cls) => (
+            <tr key={cls.id}>
+              <td><Link to={`/classes/${cls.id}`} className="who">{cls.name}</Link></td>
+              <td className="font-semibold tracking-wider tabular-nums">{cls.join_code}</td>
+              <td>{new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(cls.created_at))}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -42,9 +38,7 @@ export function TeacherDashboard() {
     setClasses(res.classes);
   }
 
-  useEffect(() => {
-    load().catch(() => setError('Could not load your classes.'));
-  }, []);
+  useEffect(() => { load().catch(() => setError('Could not load your classes.')); }, []);
 
   async function createClass() {
     if (!nameDraft.trim()) return;
@@ -65,90 +59,40 @@ export function TeacherDashboard() {
   const archived = classes?.filter((c) => c.archived_at) ?? [];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-primary mb-1">Your Classes</h1>
-          <p className="text-secondary text-sm">{profile?.name}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <Link
-            to="/classes/content"
-            className="text-xs text-muted hover:underline flex items-center gap-1 no-underline"
-          >
-            <BookOpen size={12} /> Content library
-          </Link>
-          <Link to="/classes/account" className="text-xs text-muted hover:underline flex items-center gap-1 no-underline">
-            <KeyRound size={12} /> Account
-          </Link>
-          <button
-            onClick={disconnect}
-            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-            style={{ background: 'transparent', border: 'none' }}
-          >
-            <LogOut size={12} /> Log out
-          </button>
-        </div>
-      </motion.div>
+    <div className="page">
+      <header className="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div><h1 className="h-page">Your classes</h1><p className="t-small text-ink-2 mt-1">{profile?.name}</p></div>
+        <nav className="flex flex-wrap items-center gap-2" aria-label="Classroom account">
+          <ButtonLink to="/classes/content" variant="secondary" size="sm"><BookOpen size={16} /> Content library</ButtonLink>
+          <ButtonLink to="/classes/account" variant="quiet" size="sm"><KeyRound size={16} /> Account</ButtonLink>
+          <Button variant="quiet" size="sm" onClick={disconnect}><LogOut size={16} /> Log out</Button>
+        </nav>
+      </header>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-4">
-        <div className="flex gap-2">
-          <input
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && createClass()}
-            placeholder="New class name, e.g. Period 1"
-            className="ios-input py-2 text-sm flex-1"
-          />
-          <Button onClick={createClass} disabled={creating || !nameDraft.trim()}>
-            <Plus size={15} /> Create
-          </Button>
+      <section className="sheet p-4 mb-6" aria-labelledby="new-class-title">
+        <h2 id="new-class-title" className="h-section mb-3">Create a class</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && createClass()} placeholder="New class name, e.g. Period 1" className="field flex-1" />
+          <Button onClick={createClass} disabled={creating || !nameDraft.trim()}><Plus size={16} /> Create</Button>
         </div>
-        {error && (
-          <p className="text-xs mt-2" style={{ color: 'var(--danger)' }}>
-            {error}
-          </p>
-        )}
-      </motion.div>
+        {error && <p className="t-small text-signal-text mt-2" role="alert">{error}</p>}
+      </section>
 
-      <div className="space-y-2.5">
-        {classes === null && <p className="text-sm text-muted text-center py-8">Loading…</p>}
-        {classes?.length === 0 && (
-          <p className="text-sm text-muted text-center py-8">No classes yet — create your first one above.</p>
-        )}
-        {active.map((cls, i) => (
-          <ClassRow key={cls.id} cls={cls} index={i} />
-        ))}
-      </div>
+      <section aria-labelledby="active-classes-title">
+        <div className="panel__head"><h2 id="active-classes-title" className="h-section">Classes</h2><span className="t-small text-ink-3">{active.length} active</span></div>
+        {classes === null && <p className="sheet p-6 t-body text-ink-3">Loading…</p>}
+        {classes?.length === 0 && <p className="sheet p-6 t-body text-ink-3">No classes yet — create your first one above.</p>}
+        {active.length > 0 && <ClassTable classes={active} />}
+      </section>
 
       {archived.length > 0 && (
-        <div>
-          <button
-            onClick={() => setShowArchived((v) => !v)}
-            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-            style={{ background: 'transparent', border: 'none' }}
-          >
-            <Archive size={12} />
-            {showArchived ? 'Hide' : 'Show'} {archived.length} archived {archived.length === 1 ? 'class' : 'classes'}
-            <ChevronDown size={12} style={{ transform: showArchived ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-          </button>
-          <AnimatePresence>
-            {showArchived && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="space-y-2.5 pt-2.5">
-                  {archived.map((cls, i) => (
-                    <ClassRow key={cls.id} cls={cls} index={i} />
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <section className="mt-6">
+          <Button variant="quiet" size="sm" onClick={() => setShowArchived((value) => !value)} aria-expanded={showArchived}>
+            <Archive size={16} /> {showArchived ? 'Hide' : 'Show'} {archived.length} archived {archived.length === 1 ? 'class' : 'classes'}
+            <ChevronDown size={16} className={showArchived ? 'rotate-180' : ''} />
+          </Button>
+          {showArchived && <div className="mt-2"><ClassTable classes={archived} /></div>}
+        </section>
       )}
     </div>
   );

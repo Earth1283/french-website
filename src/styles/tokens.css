@@ -1,0 +1,115 @@
+:root {
+  color-scheme: light;
+
+  --paper: #F2EFE9;
+  --sheet: #FBFAF6;
+  --inset: #E8E3D9;
+  --rule: #CFC7B8;
+  --rule-strong: #5C6074;
+
+  --ink: #16213E;
+  --ink-2: #474D63;
+  --ink-3: #5C6074;
+
+  --enamel: #1E3F8A;
+  --enamel-text: #1E3F8A;
+  --on-enamel: #FFFFFF;
+  --on-enamel-2: #B9C8EC;
+  --enamel-edge: transparent;
+
+  --signal: #B91D2A;
+  --signal-text: #B91D2A;
+
+  --amber: #E0A526;
+  --amber-text: #855600;
+
+  --go: #2A6649;
+
+  --board: #10172B;
+  --board-cell: #1A2340;
+  --board-rule: #243056;
+  --board-text: #FFFFFF;
+  --board-dim: #9AA3BD;
+  --board-amber: #F2B33D;
+
+  --line-start-a: #1E7A4F;
+  --line-start-b: #44702A;
+  --line-core-a: #1D5FA6;
+  --line-core-b: #0E6E8C;
+  --line-core-c: #157A74;
+  --line-further-a: #9A6408;
+  --line-further-b: #A8521C;
+  --line-bonus-a: #6B3FA0;
+  --line-bonus-b: #A0327A;
+  --line-bonus-c: #7A3E9A;
+  --roundel-ring: transparent;
+  --line: var(--line-core-a);
+
+  --t-12: 0.75rem;
+  --t-14: 0.875rem;
+  --t-16: 1rem;
+  --t-18: 1.125rem;
+  --t-21: 1.3125rem;
+  --t-24: 1.5rem;
+  --t-36: 2.25rem;
+  --t-48: 3rem;
+  --t-60: 3.75rem;
+  --t-72: 4.5rem;
+  --w-condensed: 75%;
+  --w-semi: 88%;
+  --w-expanded: 125%;
+
+  --r-plaque: 6px;
+  --r-control: 8px;
+  --r-sheet: 12px;
+  --r-ticket: 14px;
+
+  --lift: 0 10px 30px rgba(22, 33, 62, 0.18);
+
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 240ms;
+
+  --gutter: 16px;
+  --row: 52px;
+  --stack: 24px;
+  --tap: 44px;
+}
+
+@media (min-width: 640px) {
+  :root { --gutter: 24px; --row: 48px; --stack: 32px; }
+}
+@media (min-width: 1024px) {
+  :root { --gutter: 32px; --row: 44px; --stack: 40px; --tap: 36px; }
+}
+@media (pointer: coarse) {
+  :root { --tap: 44px; }
+}
+
+.dark {
+  color-scheme: dark;
+
+  --paper: #0C1222;
+  --sheet: #151C30;
+  --inset: #0A0F1C;
+  --rule: #2A3354;
+  --rule-strong: #9094A4;
+
+  --ink: #EEE7D8;
+  --ink-2: #B8B2A6;
+  --ink-3: #9094A4;
+
+  --enamel: #22397A;
+  --enamel-text: #8FAAE6;
+  --enamel-edge: #34509A;
+
+  --signal-text: #FF7A80;
+
+  --amber: #F2B33D;
+  --amber-text: #F2B33D;
+
+  --go: #62C495;
+
+  --roundel-ring: #EEE7D8;
+  --lift: 0 10px 30px rgba(0, 0, 0, 0.5);
+}

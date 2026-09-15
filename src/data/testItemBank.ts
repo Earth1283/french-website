@@ -31,12 +31,12 @@ const SYNTHETIC_TOPIC_META: Record<string, { emoji: string; title: string; color
 };
 
 /** Topic metadata for the results/breakdown UI — real units resolve directly, synthetic B1 topics fall back to a local map. */
-export function getTopicMeta(topicId: string): { emoji: string; title: string; color: string; unitSlug?: string } {
+export function getTopicMeta(topicId: string): { emoji?: string; title: string; color?: string; unitSlug?: string } {
   const unit = UNITS.find(u => u.id === topicId);
-  if (unit) return { emoji: unit.emoji, title: unit.title, color: unit.color, unitSlug: unit.slug };
+  if (unit) return { title: unit.title, unitSlug: unit.slug };
   const synthetic = SYNTHETIC_TOPIC_META[topicId];
   if (synthetic) return synthetic;
-  return { emoji: '📌', title: topicId, color: 'var(--accent)' };
+  return { title: topicId };
 }
 
 // Existing lesson content has no true B1/B2 material — isBeyondA1 units

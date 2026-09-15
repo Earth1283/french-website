@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lesson · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .lessonbar { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .lessonbar__count { font: 600 var(--t-14)/1 var(--font-sign); color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .iconbtn { display: grid; place-items: center; width: var(--tap); height: var(--tap); border-radius: var(--r-control); color: var(--ink-2); flex: none; }
+  .iconbtn:hover { background: var(--inset); }
+  .iconbtn[aria-pressed="true"] { color: var(--enamel-text); }
+  .iconbtn[aria-pressed="true"] .i { fill: currentColor; }
+
+  .ex__count { margin-bottom: 8px; }
+  .ex__prompt { font: 600 var(--t-21)/1.3 var(--font-sign); color: var(--ink); margin-bottom: 22px; max-width: 34ch; }
+  .option .say { width: 36px; height: 36px; box-shadow: none; color: var(--ink-3); }
+  .option .say:hover { color: var(--enamel-text); }
+  .feedback { margin-top: 18px; }
+  .feedback .ohnon__msg .fr { font-size: 1.05em; }
+  .feedback__row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .continue { margin-top: 20px; }
+  .keys { margin-top: 18px; display: flex; align-items: center; gap: 8px; }
+  @media (pointer: coarse) { .keys { display: none; } }
+
+  .card__caption { margin-bottom: 14px; }
+  .card__row { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .card__example { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule); }
+  .card__example .fr-solo { font-size: var(--t-21); line-height: 1.3; }
+  .card__nav { display: flex; justify-content: space-between; margin-top: 20px; }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js"></script>
+
+<main class="page page--narrow" style="--line: var(--line-core-b); max-width: 600px">
+  <div class="lessonbar">
+    <a class="iconbtn" href="unit.html" aria-label="Leave lesson, back to Line 4"><svg class="i"><use href="#i-x"/></svg></a>
+    <div class="trip" style="--n: 9" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-valuenow="8" aria-label="Lesson progress">
+      <div class="trip__done" data-trip style="width: 88.9%"></div>
+    </div>
+    <span class="lessonbar__count" data-count>8 / 9</span>
+    <button class="iconbtn" aria-pressed="true" aria-label="Saved for later"><svg class="i"><use href="#i-bookmark"/></svg></button>
+  </div>
+
+  <!-- Exercise: multiple choice -->
+  <section id="view-mc">
+    <p class="small ex__count">Exercise 2 of 3</p>
+    <h1 class="ex__prompt">You're vegetarian. What do you say to the waiter?</h1>
+
+    <div class="options" data-options data-answer="Je suis végétarien" data-feedback="fb">
+      <button class="option" data-value="Je mange pas viande"><span class="key">1</span><span class="option__text" lang="fr">Je mange pas viande</span><span class="say" role="img" aria-label="Hear it"><svg class="i i--sm"><use href="#i-volume-2"/></svg></span></button>
+      <button class="option" data-value="Je suis végétarien"><span class="key">2</span><span class="option__text" lang="fr">Je suis végétarien</span><span class="say" role="img" aria-label="Hear it"><svg class="i i--sm"><use href="#i-volume-2"/></svg></span></button>
+      <button class="option" data-value="Pas de viande, merci"><span class="key">3</span><span class="option__text" lang="fr">Pas de viande, merci</span><span class="say" role="img" aria-label="Hear it"><svg class="i i--sm"><use href="#i-volume-2"/></svg></span></button>
+      <button class="option" data-value="Je ne veux pas meat"><span class="key">4</span><span class="option__text" lang="fr">Je ne veux pas meat</span><span class="say" role="img" aria-label="Hear it"><svg class="i i--sm"><use href="#i-volume-2"/></svg></span></button>
+    </div>
+
+    <div id="fb" class="feedback" hidden>
+      <div class="ohnon" role="status">
+        <p class="ohnon__cry" lang="fr">Oh non&#8239;!</p>
+        <p class="ohnon__msg"><span class="fr" lang="fr">Pas de viande, merci</span> turns down meat, but it doesn't tell the waiter why. To say you're vegetarian: <b lang="fr">Je suis végétarien</b>.</p>
+        <div class="feedback__row">
+          <button class="say" aria-label="Hear: Je suis végétarien"><svg class="i"><use href="#i-volume-2"/></svg></button>
+          <span class="small">zhuh swee vay-zhay-tah-ryan</span>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--block continue">Continue</button>
+    </div>
+
+    <p class="keys small"><span class="key">1</span>–<span class="key">4</span> choose an answer</p>
+  </section>
+
+  <!-- Flashcard -->
+  <section id="view-card" hidden>
+    <p class="small card__caption">Card 1 of 6. Tap or swipe to flip.</p>
+    <div class="flashcard" data-face="front">
+      <p class="flashcard__word" lang="fr">Je voudrais…</p>
+      <div class="card__row">
+        <button class="say" aria-label="Hear: Je voudrais"><svg class="i"><use href="#i-volume-2"/></svg></button>
+        <span class="flashcard__say">ʒə vudʁɛ</span>
+      </div>
+    </div>
+    <div class="flashcard" data-face="back" hidden>
+      <p class="flashcard__en">I would like…</p>
+      <div class="card__example">
+        <p class="fr-solo" lang="fr">Je voudrais le poulet, s’il vous plaît.</p>
+        <p class="small" style="margin-top: 4px">I would like the chicken, please.</p>
+      </div>
+      <p class="flashcard__note">More polite than <span class="fr" lang="fr">je veux</span> (I want). Don't use <span class="fr" lang="fr">je veux</span> with strangers unless you want them to judge you silently.</p>
+    </div>
+    <div class="card__nav">
+      <button class="btn btn--secondary" disabled><svg class="i"><use href="#i-chevron-left"/></svg>Previous</button>
+      <button class="btn btn--secondary">Next card<svg class="i"><use href="#i-chevron-right"/></svg></button>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var p = new URLSearchParams(location.search);
+    var view = p.get('view');
+    if (view === 'card' || view === 'back') {
+      document.getElementById('view-mc').hidden = true;
+      document.getElementById('view-card').hidden = false;
+      document.querySelector('[data-trip]').style.width = '11.1%';
+      document.querySelector('[data-count]').textContent = '1 / 9';
+      if (view === 'back') {
+        document.querySelector('[data-face="front"]').hidden = true;
+        document.querySelector('[data-face="back"]').hidden = false;
+      }
+      document.querySelectorAll('.flashcard').forEach(function (c) {
+        c.addEventListener('click', function (e) {
+          if (e.target.closest('button')) return;
+          document.querySelectorAll('.flashcard').forEach(function (x) { x.hidden = !x.hidden; });
+        });
+      });
+    }
+    if (p.get('state') === 'wrong') {
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelector('.option[data-value="Pas de viande, merci"]').click();
+      });
+    }
+  })();
+</script>
+</body>
+</html>

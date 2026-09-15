@@ -3,9 +3,10 @@ import { useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useProgressStore } from './stores/progressStore';
 import { useIdlePreload } from './hooks/useIdlePreload';
-import { Navbar } from './components/layout/Navbar';
-import { BottomNav } from './components/layout/BottomNav';
-import { PageTransition } from './components/layout/PageTransition';
+import { AppBar } from './components/layout/AppBar';
+import { TabBar } from './components/layout/TabBar';
+import { PageTransition, TransitionDirectionProvider, useTransitionDirection } from './components/layout/PageTransition';
+import { isLessonRoute } from './components/layout/navigation';
 import { ErrorBoundary } from './components/ErrorBoundary';
 // Landing is the root front door — eager so it paints with no Suspense flash.
 import { Landing } from './pages/Landing';
@@ -13,6 +14,7 @@ import { Landing } from './pages/Landing';
 // Import thunks are shared between lazy() and the idle preloader so a
 // preloaded chunk is already in the module cache when the route renders.
 const loadHome = () => import('./pages/Home');
+const loadPractice = () => import('./pages/Practice');
 const loadUnitDetail = () => import('./pages/UnitDetail');
 const loadLesson = () => import('./pages/Lesson');
 const loadPhrasebook = () => import('./pages/Phrasebook');
@@ -33,6 +35,7 @@ const loadAssignment = () => import('./pages/classroom/Assignment');
 const loadAssignmentResults = () => import('./pages/classroom/AssignmentResults');
 
 const Home = lazy(() => loadHome().then(m => ({ default: m.Home })));
+const Practice = lazy(() => loadPractice().then(m => ({ default: m.Practice })));
 const Focus = lazy(() => loadFocus().then(m => ({ default: m.Focus })));
 const UnitDetail = lazy(() => loadUnitDetail().then(m => ({ default: m.UnitDetail })));
 const Lesson = lazy(() => loadLesson().then(m => ({ default: m.Lesson })));
@@ -56,6 +59,7 @@ const AssignmentResults = lazy(() => loadAssignmentResults().then(m => ({ defaul
 // from the landing front door, so warm it early).
 const IDLE_PRELOAD_ORDER = [
   loadHome,
+  loadPractice,
   loadUnitDetail,
   loadLesson,
   loadPhrasebook,
@@ -66,15 +70,6 @@ const IDLE_PRELOAD_ORDER = [
   loadSettings,
   loadClassesHome,
 ];
-
-const ACCENT_HOVER: Record<string, string> = {
-  '#E63946': '#cc2f3b',
-  '#3B82F6': '#2563eb',
-  '#8B5CF6': '#7c3aed',
-  '#F59E0B': '#d97706',
-  '#EC4899': '#db2777',
-  '#0EA5E9': '#0284c7',
-};
 
 // Full-bleed ambient pages (Landing "/", Focus "/focus") are rendered OUTSIDE
 // the AnimatePresence `mode="wait"` transition system. They don't use the iOS
@@ -97,32 +92,36 @@ function AmbientRoutes() {
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const direction = useTransitionDirection(location.pathname);
   return (
     <ErrorBoundary>
       <Suspense fallback={null}>
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/learn" element={<PageTransition keyProp="/learn"><Home /></PageTransition>} />
-            <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
-            <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
-            <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
-            <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
-            <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
-            <Route path="/classes/connect" element={<PageTransition keyProp="classes-connect"><Connect /></PageTransition>} />
-            <Route path="/classes/auth" element={<PageTransition keyProp="classes-auth"><ClassroomAuth /></PageTransition>} />
-            <Route path="/classes/account" element={<PageTransition keyProp="classes-account"><AccountSettings /></PageTransition>} />
-            <Route path="/classes/content" element={<PageTransition keyProp="content-library"><ContentLibrary /></PageTransition>} />
-            <Route path="/classes/content/new" element={<PageTransition keyProp="content-new"><ContentEditor /></PageTransition>} />
-            <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
-            <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />
-            <Route path="/classes/:classId/assignments/:assignmentId/results" element={<PageTransition keyProp="assignment-results"><AssignmentResults /></PageTransition>} />
-            <Route path="/classes/:classId" element={<PageTransition keyProp="class-detail"><ClassDetail /></PageTransition>} />
-            <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
-            <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
-            <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
-            <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
-          </Routes>
-        </AnimatePresence>
+        <TransitionDirectionProvider value={direction}>
+          <AnimatePresence mode="wait" custom={direction}>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/learn" element={<PageTransition><Home /></PageTransition>} />
+              <Route path="/practice" element={<PageTransition><Practice /></PageTransition>} />
+              <Route path="/unit/:slug" element={<PageTransition><UnitDetail /></PageTransition>} />
+              <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition><Lesson /></PageTransition>} />
+              <Route path="/phrasebook" element={<PageTransition><Phrasebook /></PageTransition>} />
+              <Route path="/converse" element={<PageTransition><Conversation /></PageTransition>} />
+              <Route path="/test" element={<PageTransition><AdaptiveTest /></PageTransition>} />
+              <Route path="/classes/connect" element={<PageTransition><Connect /></PageTransition>} />
+              <Route path="/classes/auth" element={<PageTransition><ClassroomAuth /></PageTransition>} />
+              <Route path="/classes/account" element={<PageTransition><AccountSettings /></PageTransition>} />
+              <Route path="/classes/content" element={<PageTransition><ContentLibrary /></PageTransition>} />
+              <Route path="/classes/content/new" element={<PageTransition><ContentEditor /></PageTransition>} />
+              <Route path="/classes/content/:contentId/edit" element={<PageTransition><ContentEditor /></PageTransition>} />
+              <Route path="/classes/assignment/:assignmentId" element={<PageTransition><Assignment /></PageTransition>} />
+              <Route path="/classes/:classId/assignments/:assignmentId/results" element={<PageTransition><AssignmentResults /></PageTransition>} />
+              <Route path="/classes/:classId" element={<PageTransition><ClassDetail /></PageTransition>} />
+              <Route path="/classes" element={<PageTransition><ClassesHome /></PageTransition>} />
+              <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+              <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+              <Route path="/review" element={<PageTransition><Review /></PageTransition>} />
+            </Routes>
+          </AnimatePresence>
+        </TransitionDirectionProvider>
       </Suspense>
     </ErrorBoundary>
   );
@@ -130,18 +129,13 @@ function AnimatedRoutes() {
 
 function AppContent() {
   const darkMode = useProgressStore(s => s.darkMode);
-  const accentColor = useProgressStore(s => s.accentColor);
-  const appleMode = useProgressStore(s => s.appleMode);
-  const reducedGpu = useProgressStore(s => s.reducedGpu);
   const { pathname } = useLocation();
 
-  // Ambient full-bleed surfaces hide the app chrome and the padded layout.
   const isAmbient = pathname === '/' || pathname === '/focus';
+  const isLesson = isLessonRoute(pathname);
 
-  // After a few seconds of inactivity, warm the remaining route chunks
   useIdlePreload(IDLE_PRELOAD_ORDER);
 
-  // Dismiss the HTML loading screen once the app shell is mounted
   useEffect(() => {
     (window as unknown as { __bootReady?: () => void }).__bootReady?.();
   }, []);
@@ -150,32 +144,21 @@ function AppContent() {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--accent', accentColor);
-    document.documentElement.style.setProperty('--accent-hover', ACCENT_HOVER[accentColor] ?? accentColor);
-  }, [accentColor]);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('apple-mode', appleMode);
-  }, [appleMode]);
-
-  // Ambient pages get a bare, chrome-less shell; everything else gets the app
-  // chrome (nav + padded main) with the animated route transitions.
   if (isAmbient) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+      <div className="min-h-screen bg-paper">
         <AmbientRoutes />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      <Navbar />
-      <main className={reducedGpu ? 'pb-16 sm:pb-0' : 'pb-28 sm:pb-0'}>
+    <div className="min-h-screen bg-paper">
+      {!isLesson && <AppBar />}
+      <main className={isLesson ? undefined : 'pb-[calc(62px+env(safe-area-inset-bottom))] md:pb-0'}>
         <AnimatedRoutes />
       </main>
-      <BottomNav />
+      {!isLesson && <TabBar />}
     </div>
   );
 }

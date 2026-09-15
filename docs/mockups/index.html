@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide de survie · Bonjour Survival mockups</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<script src="assets/mockup.js"></script>
+<style>
+  .gallery { max-width: 1440px; margin: 0 auto; padding: 32px var(--gutter) 80px; }
+  .intro { display: grid; gap: 20px; align-items: end; margin-bottom: 40px; }
+  @media (min-width: 900px) { .intro { grid-template-columns: auto 1fr; gap: 40px; } }
+  .intro h1 { font: 500 var(--t-48)/1.05 var(--font-read); letter-spacing: -0.015em; }
+  .intro p { max-width: 64ch; margin-top: 10px; }
+  .intro kbd { font: 700 var(--t-12)/1 var(--font-sign); padding: 3px 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--rule-strong); }
+
+  .screen { padding-top: 28px; margin-top: 28px; border-top: 1px solid var(--rule); }
+  .screen__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 4px; }
+  .screen__note { max-width: 72ch; margin-bottom: 16px; }
+  .frames { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; align-items: flex-start; }
+  .frame { flex: none; }
+  .frame__box { position: relative; overflow: hidden; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); }
+  .frame iframe { border: 0; display: block; transform-origin: 0 0; }
+  .frame--phone .frame__box { width: 312px; height: 675px; }
+  .frame--phone iframe { width: 390px; height: 844px; transform: scale(0.8); }
+  .frame--desk .frame__box { width: 768px; height: 480px; }
+  .frame--desk iframe { width: 1280px; height: 800px; transform: scale(0.6); }
+  .frame figcaption { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font: 400 var(--t-14)/1.3 var(--font-sign); color: var(--ink-3); }
+  .frame figcaption a { color: var(--enamel-text); font-weight: 600; }
+</style>
+</head>
+<body>
+<main class="gallery">
+  <header class="intro">
+    <span class="wordmark wordmark--lg" role="img" aria-label="Bonjour Survival"><span class="wordmark__small">Bonjour</span><span class="wordmark__big">Survival</span></span>
+    <div>
+      <h1>Guide de survie</h1>
+      <p class="body">Signs guide, the magazine teaches. Mockups for the redesign described in <b>docs/DESIGN.md</b>. Frames are live pages: click "Open" to use one at full size, and press <kbd>d</kbd> inside any page to switch light and dark.</p>
+    </div>
+  </header>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Landing</h2><span class="small">route /, also Focus</span></div>
+    <p class="body screen__note">The departure board is the one bold object. The flip clock runs live (frozen at 21:14 here). The phrase of the day moves onto a postcard.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Landing, phone, light" src="screens/landing.html?time=21:14"></iframe></div><figcaption>Phone, light <a href="screens/landing.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Landing, phone, dark" src="screens/landing.html?theme=dark&time=21:14"></iframe></div><figcaption>Phone, dark <a href="screens/landing.html?theme=dark">Open</a></figcaption></figure>
+      <figure class="frame frame--desk"><div class="frame__box"><iframe loading="lazy" title="Landing, desktop" src="screens/landing.html?time=21:14"></iframe></div><figcaption>Desktop, light <a href="screens/landing.html">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Learn</h2><span class="small">route /learn</span></div>
+    <p class="body screen__note">Today's ticket, then Revisit, then the network of lines grouped by level. Colour tells the level; the number tells the unit.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Learn, phone, light" src="screens/learn.html"></iframe></div><figcaption>Phone, light <a href="screens/learn.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Learn, phone, dark" src="screens/learn.html?theme=dark"></iframe></div><figcaption>Phone, dark <a href="screens/learn.html?theme=dark">Open</a></figcaption></figure>
+      <figure class="frame frame--desk"><div class="frame__box"><iframe loading="lazy" title="Learn, desktop" src="screens/learn.html"></iframe></div><figcaption>Desktop, light <a href="screens/learn.html">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Unit detail</h2><span class="small">route /unit/food</span></div>
+    <p class="body screen__note">The line diagram: lessons are stations, and the current one carries the "Vous êtes ici" plaque.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Unit, phone, light" src="screens/unit.html"></iframe></div><figcaption>Phone, light <a href="screens/unit.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Unit, phone, dark" src="screens/unit.html?theme=dark"></iframe></div><figcaption>Phone, dark <a href="screens/unit.html?theme=dark">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Lesson</h2><span class="small">restyle only</span></div>
+    <p class="body screen__note">French answer options in Newsreader, key caps for 1–4, "Oh non !" on a wrong answer. Flashcards use a cahier card with Seyès ruling. Click an option or a card to try it.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Lesson, wrong answer" src="screens/lesson.html?state=wrong"></iframe></div><figcaption>Wrong answer, light <a href="screens/lesson.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Lesson, wrong answer, dark" src="screens/lesson.html?state=wrong&theme=dark"></iframe></div><figcaption>Wrong answer, dark <a href="screens/lesson.html?theme=dark">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Flashcard front" src="screens/lesson.html?view=card"></iframe></div><figcaption>Flashcard, front <a href="screens/lesson.html?view=card">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Flashcard back" src="screens/lesson.html?view=back"></iframe></div><figcaption>Flashcard, back <a href="screens/lesson.html?view=back">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Reader</h2><span class="small">long-form lessons</span></div>
+    <p class="body screen__note">Newsreader at 18/1.7 and a 64-character measure. French inside English is set in red italic.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Reader, phone" src="screens/reader.html"></iframe></div><figcaption>Phone, light <a href="screens/reader.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Reader, phone, dark" src="screens/reader.html?theme=dark"></iframe></div><figcaption>Phone, dark <a href="screens/reader.html?theme=dark">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Practice</h2><span class="small">new hub, route /practice</span></div>
+    <p class="body screen__note">Converse, Find your level and Focus share one tab as rows on a board.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Practice, phone" src="screens/practice.html"></iframe></div><figcaption>Phone, light <a href="screens/practice.html">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Class detail</h2><span class="small">teacher, remade</span></div>
+    <p class="body screen__note">Ledger density: the roster is a real table, and the join code sits on a ticket.</p>
+    <div class="frames">
+      <figure class="frame frame--desk"><div class="frame__box"><iframe loading="lazy" title="Class detail, desktop" src="screens/class.html"></iframe></div><figcaption>Desktop, light <a href="screens/class.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Class detail, phone" src="screens/class.html"></iframe></div><figcaption>Phone, light <a href="screens/class.html">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Assignment results</h2><span class="small">teacher, remade</span></div>
+    <p class="body screen__note">Missed questions as one enamel series, never red. Student flags sit alongside with a resolve action.</p>
+    <div class="frames">
+      <figure class="frame frame--desk"><div class="frame__box"><iframe loading="lazy" title="Results, desktop" src="screens/results.html"></iframe></div><figcaption>Desktop, light <a href="screens/results.html">Open</a></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head"><h2 class="h-section">Loading screen</h2><span class="small">index.html boot</span></div>
+    <p class="body screen__note">The large plaque, with a board strip whose status text flips as chunks load.</p>
+    <div class="frames">
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Loading, light" src="screens/boot.html"></iframe></div><figcaption>Phone, light <a href="screens/boot.html">Open</a></figcaption></figure>
+      <figure class="frame frame--phone"><div class="frame__box"><iframe loading="lazy" title="Loading, dark" src="screens/boot.html?theme=dark"></iframe></div><figcaption>Phone, dark <a href="screens/boot.html?theme=dark">Open</a></figcaption></figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

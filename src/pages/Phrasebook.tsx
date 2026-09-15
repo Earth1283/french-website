@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Volume2, Copy, Check, Zap } from 'lucide-react';
+import { Search, Volume2, Copy, Check } from 'lucide-react';
 import { UNITS, getAllVocab } from '../data/units';
+import { lineFor } from '../data/lines';
+import { Roundel } from '../components/ui/Roundel';
+import { Button } from '../components/ui/Button';
 import { speak } from '../utils/speech';
-import { TAP_SPRING } from '../utils/motion';
 
 const PAGE_SIZE = 60;
 
@@ -45,155 +46,106 @@ export function Phrasebook() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-        <h1 className="text-3xl font-bold text-primary mb-1">Phrasebook</h1>
-        <p className="text-secondary">
-          Every phrase from every lesson, searchable. {allVocab.length} phrases total.
-        </p>
-      </motion.div>
+    <div className="page">
+      <h1 className="h-page">Phrasebook</h1>
 
-      {/* Search & filters */}
-      <div className="mb-6 space-y-3">
+      <div className="mb-6 space-y-4">
         <div className="relative">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-3 pointer-events-none" aria-hidden="true" />
           <input
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search phrases, translations, or pronunciation"
-            className="ios-input pl-10"
-            style={{ borderRadius: 99 }}
+            className="field pl-10"
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center">
-          <motion.button
-            whileTap={{ scale: 0.94 }}
-            transition={TAP_SPRING}
-            onClick={() => setEmergencyOnly(v => !v)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors"
-            style={emergencyOnly
-              ? { backgroundColor: 'var(--danger)', color: '#fff', border: '1px solid transparent' }
-              : { backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--hairline)' }
-            }
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            aria-pressed={unitFilter === 'all' && !emergencyOnly}
+            onClick={() => setUnitFilter('all')}
           >
-            <Zap size={12} /> I need this NOW
-          </motion.button>
-
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              onClick={() => setUnitFilter('all')}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ios-press"
-              style={unitFilter === 'all' && !emergencyOnly
-                ? { backgroundColor: 'var(--accent)', color: '#fff', border: '1px solid transparent' }
-                : { backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--hairline)' }
-              }
+            All
+          </Button>
+          {UNITS.map(u => (
+            <Button
+              key={u.id}
+              variant="secondary"
+              size="sm"
+              aria-pressed={unitFilter === u.id && !emergencyOnly}
+              onClick={() => { setUnitFilter(u.id); setEmergencyOnly(false); }}
+              className="flex-shrink-0"
             >
-              All
-            </button>
-            {UNITS.map(u => (
-              <button
-                key={u.id}
-                onClick={() => { setUnitFilter(u.id); setEmergencyOnly(false); }}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ios-press"
-                style={unitFilter === u.id && !emergencyOnly
-                  ? { backgroundColor: u.color, color: '#fff', border: '1px solid transparent' }
-                  : { backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--hairline)' }
-                }
-              >
-                {u.emoji} {u.tagline.split(/[,&]/)[0].trim()}
-              </button>
-            ))}
-          </div>
+              <Roundel line={lineFor(u.id)} size="sm" />
+              {u.tagline.split(/[,&]/)[0].trim()}
+            </Button>
+          ))}
         </div>
       </div>
 
-      {/* Results */}
-      <p className="section-label">{filtered.length} phrases</p>
+      {filtered.length > 0 && (
+        <div className="sheet rows">
+          {filtered.slice(0, displayCount).map((v) => {
+            const id = `${v.unitId}-${v.lessonId}-${v.french}`;
+            return (
+              <div key={id} className="row flex items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  <span className="fr-solo text-21" lang="fr">
+                    {v.french}
+                  </span>
+                  <p className="t-body mt-1">{v.english}</p>
+                  {v.pronunciation && (
+                    <p className="say-guide mt-1">/{v.pronunciation}/</p>
+                  )}
+                </div>
 
-      {filtered.length > 0 && <div className="inset-group">
-        {filtered.slice(0, displayCount).map((v) => {
-          const id = `${v.unitId}-${v.lessonId}-${v.french}`;
-          return (
-            <motion.div
-              key={id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.015 }}
-              className="phrasebook-row p-4 flex items-start gap-4"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-bold font-display" style={{ color: 'var(--accent)' }}>
-                  {v.french}
-                </p>
-                <p className="text-sm text-primary mt-0.5">{v.english}</p>
-                {v.pronunciation && (
-                  <p className="text-xs text-muted italic mt-0.5">/{v.pronunciation}/</p>
-                )}
-                {v.funnyNote && (
-                  <p className="text-xs text-secondary italic mt-1 line-clamp-2">
-                    💬 {v.funnyNote}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-1.5 flex-shrink-0">
-                <button
-                  onClick={() => speak(v.french)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full ios-press cursor-pointer"
-                  style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
-                  title="Play pronunciation"
-                  aria-label="Play pronunciation"
-                >
-                  <Volume2 size={14} />
-                </button>
-                <button
-                  onClick={() => copyPhrase(v.french, id)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full ios-press cursor-pointer"
-                  style={{
-                    backgroundColor: copiedId === id ? 'var(--success-light)' : 'var(--bg-inset)',
-                    color: copiedId === id ? 'var(--success)' : 'var(--text-muted)',
-                    border: 'none',
-                  }}
-                  title="Copy phrase"
-                  aria-label="Copy phrase"
-                >
-                  <AnimatePresence mode="wait" initial={false}>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => speak(v.french)}
+                    className="say say--sm"
+                    aria-label={`Hear ${v.french}`}
+                  >
+                    <Volume2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => copyPhrase(v.french, id)}
+                    className="p-2 rounded-control flex items-center justify-center"
+                    title="Copy phrase"
+                    aria-label="Copy phrase"
+                  >
                     {copiedId === id ? (
-                      <motion.span key="check" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={TAP_SPRING} className="flex">
-                        <Check size={14} />
-                      </motion.span>
+                      <Check size={16} className="text-go" />
                     ) : (
-                      <motion.span key="copy" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={TAP_SPRING} className="flex">
-                        <Copy size={13} />
-                      </motion.span>
+                      <Copy size={16} className="text-ink-3" />
                     )}
-                  </AnimatePresence>
-                </button>
+                  </button>
+                </div>
               </div>
-            </motion.div>
-          );
-        })}
-      </div>}
+            );
+          })}
+        </div>
+      )}
 
       {filtered.length > displayCount && (
-        <div className="text-center mt-4">
-          <button
+        <div className="text-center mt-6">
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setDisplayCount(c => c + PAGE_SIZE)}
-            className="px-5 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-colors ios-press"
-            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--hairline)' }}
           >
             Show more ({filtered.length - displayCount} remaining)
-          </button>
+          </Button>
         </div>
       )}
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-muted">
-          <p className="text-4xl mb-3">🔍</p>
-          <p className="font-medium">No phrases found</p>
-          <p className="text-sm mt-1">Try a different search term</p>
+        <div className="sheet mt-[var(--stack)] p-8 text-center">
+          <p className="t-body text-ink-2">
+            No phrases match "{query}". Try an English word or clear the filter.
+          </p>
         </div>
       )}
     </div>

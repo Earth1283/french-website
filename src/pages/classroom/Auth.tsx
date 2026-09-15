@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { LogIn, ShieldQuestion, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
+import { Tabs } from '../../components/ui/Controls';
+import { Wordmark } from '../../components/ui/Signage';
 import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
 import { RecoveryCodeReveal } from '../../components/classroom/RecoveryCodeReveal';
 
@@ -92,229 +93,196 @@ export function ClassroomAuth() {
 
   if (view === 'recovery-reveal') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="text-3xl font-bold text-primary mb-1">Almost there</h1>
-          <p className="text-secondary text-sm font-display italic">One thing before you go in.</p>
-        </motion.div>
-        <RecoveryCodeReveal
-          code={revealCode}
-          email={email}
-          backendUrl={backendUrl}
-          onDone={() => navigate('/classes')}
-          doneLabel="I've saved it — Continue"
-        />
+      <div className="page page--form">
+        <div className="mb-6 flex justify-center">
+          <Wordmark size="lg" />
+        </div>
+        <h1 className="h-page text-center">Almost there</h1>
+        <div className="sheet p-6">
+          <RecoveryCodeReveal
+            code={revealCode}
+            email={email}
+            backendUrl={backendUrl}
+            onDone={() => navigate('/classes')}
+            doneLabel="I've saved it — Continue"
+          />
+        </div>
       </div>
     );
   }
 
   if (view === 'forgot-password') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-3xl font-bold text-primary mb-1">Reset Password</h1>
-          <p className="text-secondary text-sm font-display italic truncate">{backendUrl}</p>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="card p-5 mt-6 space-y-3"
-        >
-          <p className="text-xs text-muted">
+      <div className="page page--form">
+        <div className="mb-6 flex justify-center">
+          <Wordmark size="lg" />
+        </div>
+        <h1 className="h-page text-center">Reset Password</h1>
+        <div className="sheet p-6 space-y-5">
+          <p className="t-small">
             Use the recovery code you saved when you created your account.
           </p>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            type="email"
-            className="ios-input py-2.5 text-sm"
-          />
-          <input
-            value={recoveryCodeInput}
-            onChange={(e) => setRecoveryCodeInput(e.target.value)}
-            placeholder="Recovery code"
-            className="ios-input py-2.5 text-sm font-mono"
-          />
-          <input
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New password"
-            type="password"
-            className="ios-input py-2.5 text-sm"
-          />
+          <div className="field">
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              type="email"
+            />
+          </div>
+          <div className="field">
+            <input
+              value={recoveryCodeInput}
+              onChange={(e) => setRecoveryCodeInput(e.target.value)}
+              placeholder="Recovery code"
+            />
+          </div>
+          <div className="field">
+            <input
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New password"
+              type="password"
+            />
+          </div>
           {error && (
-            <p className="text-xs" style={{ color: 'var(--danger)' }}>
+            <p className="t-small text-signal-text" role="alert">
               {error}
             </p>
           )}
           <Button
             onClick={submitRecovery}
             disabled={submitting || !email.trim() || !recoveryCodeInput.trim() || !newPassword.trim()}
-            className="w-full"
+            variant="primary"
+            block
           >
             <KeyRound size={16} /> Reset Password
           </Button>
           <button
             onClick={() => { setView('form'); setError(null); }}
-            className="text-xs text-muted hover:underline cursor-pointer"
-            style={{ background: 'transparent', border: 'none' }}
+            className="btn btn--quiet btn--sm self-start"
           >
             Back to log in
           </button>
-          <p className="text-xs text-muted">
+          <p className="t-small text-ink-3">
             {role === 'student'
               ? "Lost your recovery code too? Ask your teacher to reset your password from the class roster."
               : "Lost your recovery code too? See the server's README for the recovery script (needs access to the machine it runs on)."}
           </p>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold text-primary mb-1">Sign In</h1>
-        <p className="text-secondary text-sm font-display italic truncate">{backendUrl}</p>
-      </motion.div>
+    <div className="page page--form">
+      <div className="mb-6 flex justify-center">
+        <Wordmark size="lg" />
+      </div>
+      <h1 className="h-page text-center">Sign In</h1>
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-        className="card p-5 mt-6 space-y-5"
-      >
-        <div className="seg-control">
-          {(['student', 'teacher'] as Role[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              aria-pressed={role === r}
-              className="seg-item"
-              style={{ position: 'relative' }}
-            >
-              {role === r && (
-                <motion.span
-                  layoutId="classroom-role-seg"
-                  className="absolute inset-0 rounded-[10px]"
-                  style={{ backgroundColor: 'var(--bg-card)', boxShadow: 'var(--shadow-1)', zIndex: 0 }}
-                  transition={{ type: 'spring', damping: 26, stiffness: 380 }}
-                />
-              )}
-              <span style={{ position: 'relative', zIndex: 1 }}>
-                {r === 'student' ? "I'm a Student" : "I'm the Teacher"}
-              </span>
-            </button>
-          ))}
+      <div className="sheet p-6 space-y-5">
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setRole('student')}
+            aria-pressed={role === 'student'}
+            variant="secondary"
+            className={role === 'student' ? 'shadow-[inset_0_0_0_2px_var(--enamel-text)]' : ''}
+          >
+            I'm a Student
+          </Button>
+          <Button
+            onClick={() => setRole('teacher')}
+            aria-pressed={role === 'teacher'}
+            variant="secondary"
+            className={role === 'teacher' ? 'shadow-[inset_0_0_0_2px_var(--enamel-text)]' : ''}
+          >
+            I'm the Teacher
+          </Button>
         </div>
 
-        <div className="flex gap-4 text-sm">
-          <button
-            onClick={() => setMode('login')}
-            className="cursor-pointer font-semibold"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: mode === 'login' ? 'var(--accent)' : 'var(--text-muted)',
-            }}
-          >
-            Log In
-          </button>
-          <button
-            onClick={() => setMode('register')}
-            className="cursor-pointer font-semibold"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: mode === 'register' ? 'var(--accent)' : 'var(--text-muted)',
-            }}
-          >
-            Create Account
-          </button>
-        </div>
+        <Tabs
+          items={[
+            { value: 'login' as const, label: 'Log In' },
+            { value: 'register' as const, label: 'Create Account' }
+          ]}
+          value={mode}
+          onChange={setMode}
+          label="Account"
+        />
 
         {role === 'student' && (
-          <div style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', overflow: 'hidden' }}>
+          <div className="rounded-control border border-rule-strong overflow-hidden">
             <button
               onClick={() => setPrivacyOpen((v) => !v)}
-              className="w-full p-3 flex items-center justify-between text-left cursor-pointer"
-              style={{ background: 'var(--bg-inset)', border: 'none' }}
+              className="w-full p-3 flex items-center justify-between text-left cursor-pointer bg-inset"
             >
-              <span className="flex items-center gap-2 text-sm font-semibold text-primary">
-                <ShieldQuestion size={15} style={{ color: 'var(--accent)' }} />
+              <span className="flex items-center gap-2 t-small font-semibold text-ink">
+                <ShieldQuestion size={16} className="text-enamel-text" />
                 What data do I share?
               </span>
               {privacyOpen ? (
-                <ChevronUp size={14} style={{ color: 'var(--text-muted)' }} />
+                <ChevronUp size={16} className="text-ink-3" />
               ) : (
-                <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} />
+                <ChevronDown size={16} className="text-ink-3" />
               )}
             </button>
-            <AnimatePresence>
-              {privacyOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
-                    <ClassroomPrivacyNotice />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {privacyOpen && (
+              <div className="border-t border-rule-strong p-4 bg-sheet">
+                <ClassroomPrivacyNotice />
+              </div>
+            )}
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {mode === 'register' && (
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Name"
-              className="ios-input py-2.5 text-sm"
-            />
+            <div className="field">
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name"
+              />
+            </div>
           )}
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            type="email"
-            className="ios-input py-2.5 text-sm"
-          />
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            type="password"
-            className="ios-input py-2.5 text-sm"
-          />
-          {mode === 'register' && role === 'teacher' && (
+          <div className="field">
             <input
-              value={signupCode}
-              onChange={(e) => setSignupCode(e.target.value)}
-              placeholder="Invite code (only needed after the first teacher)"
-              className="ios-input py-2.5 text-sm"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              type="email"
             />
+          </div>
+          <div className="field">
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              type="password"
+            />
+          </div>
+          {mode === 'register' && role === 'teacher' && (
+            <div className="field">
+              <input
+                value={signupCode}
+                onChange={(e) => setSignupCode(e.target.value)}
+                placeholder="Invite code (only needed after the first teacher)"
+              />
+            </div>
           )}
         </div>
 
         {mode === 'login' && (
           <button
             onClick={() => { setView('forgot-password'); setError(null); }}
-            className="text-xs text-muted hover:underline cursor-pointer -mt-2"
-            style={{ background: 'transparent', border: 'none' }}
+            className="btn btn--quiet btn--sm self-start"
           >
             Forgot password?
           </button>
         )}
 
         {error && (
-          <p className="text-xs" style={{ color: 'var(--danger)' }}>
+          <p className="t-small text-signal-text" role="alert">
             {error}
           </p>
         )}
@@ -322,11 +290,12 @@ export function ClassroomAuth() {
         <Button
           onClick={submit}
           disabled={submitting || !email.trim() || !password.trim() || (mode === 'register' && !name.trim())}
-          className="w-full"
+          variant="primary"
+          block
         >
           <LogIn size={16} /> {mode === 'login' ? 'Log In' : 'Create Account'}
         </Button>
-      </motion.div>
+      </div>
     </div>
   );
 }

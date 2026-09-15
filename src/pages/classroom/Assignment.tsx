@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, PartyPopper, Flag, Check } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, Flag, Check } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { FlashCard } from '../../components/lesson/FlashCard';
 import { MultipleChoice } from '../../components/lesson/MultipleChoice';
 import { FillInBlank } from '../../components/lesson/FillInBlank';
 import { TranslationChallenge } from '../../components/lesson/TranslationChallenge';
 import { DeepLessonReader } from '../../components/lesson/DeepLessonReader';
-import { ProgressBar } from '../../components/layout/ProgressBar';
-import { Button } from '../../components/ui/Button';
+import { TripProgress } from '../../components/ui/Signage';
+import { Button, ButtonLink } from '../../components/ui/Button';
 import { bodyToExercises } from '../../types/classroom';
 import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { AssignmentDetailResponse, AttemptResponseEntry } from '../../types/classroom';
@@ -23,6 +22,7 @@ export function Assignment() {
   const [cardIndex, setCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [exerciseIndex, setExerciseIndex] = useState(0);
+  const [readingPage, setReadingPage] = useState(0);
   const [responses, setResponses] = useState<AttemptResponseEntry[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [flaggedIndices, setFlaggedIndices] = useState<Set<number>>(new Set());
@@ -41,7 +41,7 @@ export function Assignment() {
   }, [exerciseIndex]);
 
   if (!data) {
-    return <div className="max-w-xl mx-auto px-4 py-16 text-center text-muted">Loading…</div>;
+    return <div className="page text-center text-ink-3 py-16">Loading…</div>;
   }
 
   const { content } = data;
@@ -111,64 +111,64 @@ export function Assignment() {
 
   if (phase === 'intro') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-10 text-center">
-        <Link to="/classes" className="inline-flex items-center gap-0.5 text-[0.95rem] font-medium mb-8 no-underline" style={{ color: 'var(--accent)' }}>
-          <ChevronLeft size={20} strokeWidth={2.4} className="-ml-1.5" /> My Classes
-        </Link>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 280 }} className="space-y-6">
+      <div className="page page--narrow">
+        <ButtonLink to="/classes" variant="quiet" className="-ml-1.5 mb-4">
+          <ChevronLeft size={20} aria-hidden="true" />
+        </ButtonLink>
+        <div className="sheet p-6 text-center space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-primary">{content.title}</h1>
-            {content.subtitle && <p className="text-secondary mt-2">{content.subtitle}</p>}
+            <h1 className="h-page">{content.title}</h1>
+            {content.subtitle && <p className="t-body text-ink-2 mt-2">{content.subtitle}</p>}
           </div>
-          <div className="flex items-center justify-center gap-2 flex-wrap">
-            {isReading && <span className="chip">📄 {readingPages.length} pages</span>}
-            {!isReading && vocab.length > 0 && <span className="chip">📖 {vocab.length} vocab items</span>}
-            {!isReading && <span className="chip">✏️ {exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>}
-            {(!isReading || readingGradable) && <span className="xp-badge text-sm px-3 py-1.5">+{content.body.xpReward} XP</span>}
+          <div className="flex flex-col items-center gap-2 text-ink-2 t-small">
+            {isReading && <span>{readingPages.length} pages</span>}
+            {!isReading && vocab.length > 0 && <span>{vocab.length} vocab items</span>}
+            {!isReading && <span>{exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>}
+            {(!isReading || readingGradable) && <span className="text-amber-text font-semibold">+{content.body.xpReward} XP</span>}
           </div>
           {data.previousAttempt && (
-            <p className="text-xs text-muted">
+            <p className="t-small text-ink-3">
               {data.previousAttempt.score === null
                 ? "You've already read this. Doing it again just re-marks it as read."
                 : `You already completed this — scored ${data.previousAttempt.score}%. Doing it again replaces that score.`}
             </p>
           )}
           <Button
-            size="lg"
             onClick={() => setPhase(isReading ? 'reading' : vocab.length > 0 ? 'flashcards' : 'exercises')}
-            className="w-full max-w-xs mx-auto"
+            variant="primary"
           >
-            {data.previousAttempt ? 'Retake' : isReading ? 'Start Reading' : "Let's go!"} <ArrowRight size={17} />
+            {data.previousAttempt ? 'Retake' : isReading ? 'Start reading' : "Let's go!"} <ArrowRight size={17} />
           </Button>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   if (phase === 'reading') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-6">
+      <div className="page page--narrow">
         <div className="flex items-center gap-3 mb-6">
-          <Link
+          <ButtonLink
             to="/classes"
-            aria-label="Back to My Classes"
-            className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
-            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+            aria-label="Back to my classes"
+            variant="quiet"
           >
-            <ChevronLeft size={20} strokeWidth={2.4} />
-          </Link>
-          <p className="text-sm font-semibold text-primary flex-1 truncate">{content.title}</p>
+            <ChevronLeft size={20} aria-hidden="true" />
+          </ButtonLink>
+          <p className="t-title text-ink flex-1 truncate">{content.title}</p>
         </div>
         {submitting ? (
-          <div className="text-center py-16 text-muted flex flex-col items-center gap-2">
+          <div className="text-center py-16 text-ink-3 flex flex-col items-center gap-2">
             <CheckCircle2 size={24} />
-            <p className="text-sm">Saving…</p>
+            <p className="t-small">Saving…</p>
           </div>
         ) : (
           <DeepLessonReader
             pages={readingPages}
+            pageIndex={readingPage}
+            onPageChange={setReadingPage}
             onComplete={finishReading}
-            completeLabel={readingGradable ? 'Finish for XP' : 'Mark as Read'}
+            completeLabel={readingGradable ? 'Finish for XP' : 'Mark as read'}
           />
         )}
       </div>
@@ -179,131 +179,124 @@ export function Assignment() {
     const correct = responses.filter((r) => r.correct).length;
     const score = responses.length ? Math.round((correct / responses.length) * 100) : null;
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-5">
-        <span className="w-16 h-16 mx-auto rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--accent-tint)' }}>
-          <PartyPopper size={26} style={{ color: 'var(--accent)' }} />
-        </span>
-        <h1 className="text-2xl font-bold text-primary">Nice work!</h1>
-        <p className="text-secondary">
-          {isReading
-            ? readingGradable
-              ? `Lesson complete · +${content.body.xpReward} XP`
-              : 'Marked as read'
-            : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
-        </p>
-        <Link to="/classes">
-          <Button className="mt-2">Back to My Classes</Button>
-        </Link>
+      <div className="page page--narrow">
+        <div className="sheet p-6 text-center space-y-4">
+          <div>
+            <h1 className="h-page">Nice work!</h1>
+            <p className="t-body text-ink-2 mt-2">
+              {isReading
+                ? readingGradable
+                  ? `Lesson complete · +${content.body.xpReward} XP`
+                  : 'Marked as read'
+                : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
+            </p>
+          </div>
+          <ButtonLink to="/classes" variant="primary">
+            Back to my classes
+          </ButtonLink>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 relative">
+    <div className="page page--narrow">
       <div className="flex items-center gap-3 mb-6">
-        <Link
+        <ButtonLink
           to="/classes"
-          aria-label="Back to My Classes"
-          className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
-          style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+          aria-label="Back to my classes"
+          variant="quiet"
         >
-          <ChevronLeft size={20} strokeWidth={2.4} />
-        </Link>
-        <ProgressBar value={currentStep} max={totalSteps} height={8} className="flex-1" />
-        <span className="text-xs text-muted whitespace-nowrap font-medium">
+          <ChevronLeft size={20} aria-hidden="true" />
+        </ButtonLink>
+        <TripProgress step={currentStep} total={totalSteps} label="" />
+        <span className="t-micro text-ink-3 whitespace-nowrap tabular-nums">
           {currentStep}/{totalSteps}
         </span>
       </div>
 
-      <AnimatePresence mode="popLayout">
-        {phase === 'flashcards' && (
-          <motion.div key={`card-${cardIndex}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ type: 'spring', damping: 26, stiffness: 320 }}>
-            <FlashCard item={vocab[cardIndex]} index={cardIndex} total={vocab.length} flipped={flipped} onFlipToggle={() => setFlipped((f) => !f)} />
-            <div className="flex items-center justify-between mt-6">
-              <Button variant="secondary" onClick={() => { setFlipped(false); setCardIndex((i) => i - 1); }} disabled={cardIndex === 0}>
-                <ChevronLeft size={16} /> Prev
+      {phase === 'flashcards' && (
+        <div>
+          <FlashCard item={vocab[cardIndex]} index={cardIndex} total={vocab.length} flipped={flipped} onFlipToggle={() => setFlipped((f) => !f)} />
+          <div className="flex items-center justify-between mt-6 gap-2">
+            <Button variant="secondary" onClick={() => { setFlipped(false); setCardIndex((i) => i - 1); }} disabled={cardIndex === 0} size="sm">
+              <ChevronLeft size={16} /> Prev
+            </Button>
+            {cardIndex < vocab.length - 1 ? (
+              <Button onClick={() => { setFlipped(false); setCardIndex((i) => i + 1); }} size="sm">
+                Next <ChevronRight size={16} />
               </Button>
-              {cardIndex < vocab.length - 1 ? (
-                <Button onClick={() => { setFlipped(false); setCardIndex((i) => i + 1); }}>
-                  Next <ChevronRight size={16} />
-                </Button>
-              ) : (
-                <Button onClick={() => { setFlipped(false); setPhase('exercises'); }}>
-                  Start <ArrowRight size={16} />
-                </Button>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {phase === 'exercises' && !submitting && (
-          <motion.div key={`exercise-${exerciseIndex}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ type: 'spring', damping: 26, stiffness: 320 }} className="space-y-4">
-            <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">
-              {exerciseIndex + 1} of {exercises.length}
-            </p>
-            {(() => {
-              const ex = exercises[exerciseIndex];
-              const onCorrect = () => advanceExercise({ index: exerciseIndex, correct: true });
-              const onWrong = () => advanceExercise({ index: exerciseIndex, correct: false });
-              if (ex.type === 'multiple-choice') return <MultipleChoice key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
-              if (ex.type === 'fill-blank') return <FillInBlank key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
-              if (ex.type === 'translation') return <TranslationChallenge key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
-              return null;
-            })()}
-
-            <div className="max-w-lg mx-auto text-center">
-              {flaggedIndices.has(exerciseIndex) ? (
-                <p className="text-xs text-muted flex items-center justify-center gap-1">
-                  <Check size={12} /> Flagged for your teacher
-                </p>
-              ) : !flagFormOpen ? (
-                <button
-                  onClick={() => setFlagFormOpen(true)}
-                  className="text-xs text-muted hover:underline cursor-pointer inline-flex items-center gap-1"
-                  style={{ background: 'transparent', border: 'none' }}
-                >
-                  <Flag size={11} /> Something wrong with this question?
-                </button>
-              ) : (
-                <div className="text-left space-y-2 p-3" style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', backgroundColor: 'var(--bg-card)' }}>
-                  <p className="text-xs text-muted">Let your teacher know what's off (optional).</p>
-                  <input
-                    value={flagReason}
-                    onChange={(e) => setFlagReason(e.target.value)}
-                    placeholder="e.g. the correct answer looks wrong"
-                    className="ios-input py-1.5 text-sm"
-                    maxLength={500}
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={submitFlag}
-                      disabled={flagSubmitting}
-                      className="chip cursor-pointer"
-                      style={{ border: 'none' }}
-                    >
-                      {flagSubmitting ? 'Sending…' : 'Send to teacher'}
-                    </button>
-                    <button
-                      onClick={() => setFlagFormOpen(false)}
-                      className="text-xs text-muted hover:underline cursor-pointer"
-                      style={{ background: 'transparent', border: 'none' }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {submitting && (
-          <div className="text-center py-16 text-muted flex flex-col items-center gap-2">
-            <CheckCircle2 size={24} />
-            <p className="text-sm">Saving your results…</p>
+            ) : (
+              <Button onClick={() => { setFlipped(false); setPhase('exercises'); }} size="sm">
+                Start <ArrowRight size={16} />
+              </Button>
+            )}
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+
+      {phase === 'exercises' && !submitting && (
+        <div className="space-y-4">
+          {(() => {
+            const ex = exercises[exerciseIndex];
+            const onCorrect = () => advanceExercise({ index: exerciseIndex, correct: true });
+            const onWrong = () => advanceExercise({ index: exerciseIndex, correct: false });
+            if (ex.type === 'multiple-choice') return <MultipleChoice key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
+            if (ex.type === 'fill-blank') return <FillInBlank key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
+            if (ex.type === 'translation') return <TranslationChallenge key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
+            return null;
+          })()}
+
+          <div className="text-center">
+            {flaggedIndices.has(exerciseIndex) ? (
+              <p className="t-small text-go flex items-center justify-center gap-1">
+                <Check size={14} /> Flagged for your teacher
+              </p>
+            ) : !flagFormOpen ? (
+              <button
+                onClick={() => setFlagFormOpen(true)}
+                className="t-small text-enamel-text hover:underline"
+              >
+                <Flag size={14} /> Something wrong with this question?
+              </button>
+            ) : (
+              <div className="sheet p-3 text-left space-y-2">
+                <p className="t-small text-ink-2">Let your teacher know what's off (optional).</p>
+                <input
+                  value={flagReason}
+                  onChange={(e) => setFlagReason(e.target.value)}
+                  placeholder="e.g. the correct answer looks wrong"
+                  className="field text-sm"
+                  maxLength={500}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={submitFlag}
+                    disabled={flagSubmitting}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    {flagSubmitting ? 'Sending…' : 'Send to teacher'}
+                  </Button>
+                  <button
+                    onClick={() => setFlagFormOpen(false)}
+                    className="t-small text-ink-3 hover:underline"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {submitting && (
+        <div className="text-center py-16 text-ink-3 flex flex-col items-center gap-2">
+          <CheckCircle2 size={24} />
+          <p className="t-small">Saving your results…</p>
+        </div>
+      )}
     </div>
   );
 }

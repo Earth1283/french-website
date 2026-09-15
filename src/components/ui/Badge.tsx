@@ -1,39 +1,31 @@
+import type { LucideIcon } from 'lucide-react';
+
 interface BadgeProps {
-  emoji: string;
+  icon: LucideIcon;
   name: string;
   description: string;
   earned: boolean;
+  tilt: number;
 }
 
-export function Badge({ emoji, name, description, earned }: BadgeProps) {
+function getTiltClass(tilt: number, earned: boolean): string {
+  if (!earned) return '';
+  if (tilt <= -4) return '-rotate-6';
+  if (tilt === -3 || tilt === -2) return '-rotate-3';
+  if (tilt === 2 || tilt === 3) return 'rotate-3';
+  if (tilt >= 4) return 'rotate-6';
+  return '';
+}
+
+export function Badge({ icon: Icon, name, description, earned, tilt }: BadgeProps) {
+  const tiltClass = getTiltClass(tilt, earned);
+
   return (
-    <div
-      className={`flex items-center gap-3 p-3.5 transition-all ${earned ? '' : 'opacity-45 grayscale'}`}
-      style={{
-        backgroundColor: earned ? 'var(--bg-card)' : 'var(--bg-inset)',
-        border: earned ? '1px solid var(--hairline)' : '1px dashed var(--border)',
-        borderRadius: 'var(--radius-sm)',
-        boxShadow: earned ? 'var(--shadow-1)' : 'none',
-      }}
-    >
-      <span
-        className="text-2xl w-11 h-11 flex items-center justify-center rounded-full flex-shrink-0"
-        style={{ backgroundColor: earned ? 'var(--accent-tint)' : 'transparent' }}
-      >
-        {emoji}
-      </span>
-      <div className="min-w-0">
-        <p className="font-semibold text-sm text-primary">{name}</p>
-        <p className="text-xs text-muted">{description}</p>
-      </div>
-      {earned && (
-        <span
-          className="ml-auto w-5 h-5 rounded-full flex items-center justify-center text-[0.65rem] font-bold text-white flex-shrink-0"
-          style={{ backgroundColor: 'var(--success)' }}
-        >
-          ✓
-        </span>
-      )}
+    <div className={['pstamp', !earned && 'pstamp--locked', tiltClass].filter(Boolean).join(' ')}>
+      <Icon size={24} aria-hidden="true" />
+      <p className="pstamp__name">{name}</p>
+      <p className="pstamp__desc">{description}</p>
+      <span className="sr-only">{earned ? 'Earned' : 'Not yet earned'}</span>
     </div>
   );
 }

@@ -1,0 +1,45 @@
+@layer components {
+  .lessonbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding-top: env(safe-area-inset-top);
+  }
+  .lessonbar__inner {
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 56px;
+    padding: 0 var(--gutter);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .lessonbar__inner .btn--quiet { padding: 0; width: var(--tap); }
+  .lessonbar .lucide-bookmark.is-saved { fill: currentColor; }
+
+  .exercise__prompt { font: 600 var(--t-21)/1.3 var(--font-sign); color: var(--ink); }
+  .exercise__hint { font: 400 var(--t-14)/1.4 var(--font-sign); color: var(--ink-3); margin-top: 6px; }
+
+  .option-wrap { position: relative; }
+  .option-wrap .option { padding-right: 60px; }
+  .option__say { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+
+  .field--correct { border-color: var(--go); box-shadow: inset 4px 0 0 var(--go); }
+  .field--wrong { border-color: var(--signal-text); box-shadow: inset 4px 0 0 var(--signal-text); }
+
+  .flip3d { perspective: 1200px; cursor: grab; touch-action: pan-y; }
+  .flip3d:active { cursor: grabbing; }
+  .flip3d__inner {
+    display: grid;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.5, 1);
+  }
+  .flip3d__inner.is-flipped { transform: rotateY(180deg); }
+  .flip3d__face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .flip3d__back { transform: rotateY(180deg); }
+
+  .reader-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 64ch; margin: 0 auto 24px; }
+  .reader-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 64ch; margin: 32px auto 0; }
+}

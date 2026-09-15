@@ -1,45 +1,38 @@
-import { motion } from 'framer-motion';
-import { Backdrop } from '../components/ambient/Backdrop';
-import { AmbientClock } from '../components/ambient/AmbientClock';
-import { Greeting } from '../components/ambient/Greeting';
-import { PhraseOfDay } from '../components/ambient/PhraseOfDay';
-import { Launcher } from '../components/ambient/Launcher';
+import { useProgressStore } from '../stores/progressStore';
+import { useClock } from '../hooks/useClock';
+import { phraseOfDay } from '../data/phrases';
+import { DepartureBoard } from '../components/ambient/DepartureBoard';
+import { Postcard } from '../components/ambient/Postcard';
+import { ButtonLink } from '../components/ui/Button';
+import { StatChip, Wordmark } from '../components/ui/Signage';
 
-/**
- * Ambient front door (route "/"). Full-bleed backdrop with the giant clock,
- * a time-aware French greeting, the phrase of the day, and a glass launcher
- * into the rest of the app.
- */
 export function Landing() {
+  const now = useClock(1000);
+  const streak = useProgressStore(s => s.streak);
+  const xp = useProgressStore(s => s.xp);
+
   return (
-    <div className="relative flex min-h-[100dvh] flex-col items-center justify-between overflow-hidden px-5 py-10 sm:py-14">
-      <Backdrop />
+    <div className="landing">
+      <header className="flex items-center justify-between gap-4">
+        <Wordmark />
+        <ButtonLink to="/learn" variant="quiet">
+          Open the app
+        </ButtonLink>
+      </header>
 
-      {/* Top: clock + greeting */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 24, stiffness: 220 }}
-        className="relative z-10 flex flex-col items-center gap-5 pt-6"
-      >
-        <AmbientClock size="lg" />
-        <Greeting />
-      </motion.div>
+      <div className="landing__grid">
+        <DepartureBoard now={now} />
 
-      {/* Middle: phrase of the day */}
-      <div className="relative z-10 flex flex-1 items-center justify-center py-8">
-        <PhraseOfDay />
+        <aside className="landing__side">
+          <Postcard phrase={phraseOfDay(now)} label="Phrase du jour" now={now} />
+          {(streak > 0 || xp > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {streak > 0 && <StatChip kind="streak">{streak}-day streak</StatChip>}
+              {xp > 0 && <StatChip kind="xp">{xp} XP</StatChip>}
+            </div>
+          )}
+        </aside>
       </div>
-
-      {/* Bottom: launcher */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: 'spring', damping: 24, stiffness: 220 }}
-        className="relative z-10 w-full pb-[env(safe-area-inset-bottom)]"
-      >
-        <Launcher />
-      </motion.div>
     </div>
   );
 }

@@ -1,317 +1,97 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Volume2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, ChevronLeft, ChevronRight, RotateCcw, X } from 'lucide-react';
 import { UNITS } from '../data/units';
+import { lineFor } from '../data/lines';
 import { useProgressStore } from '../stores/progressStore';
-import { vocabKey, defaultCard, isDue } from '../utils/srs';
-import { speak } from '../utils/speech';
-import { Button } from '../components/ui/Button';
+import { defaultCard, isDue, vocabKey } from '../utils/srs';
+import { Button, ButtonLink } from '../components/ui/Button';
+import { FlashCard } from '../components/lesson/FlashCard';
+import { StationDots, StatChip, TripProgress } from '../components/ui/Signage';
+import { Roundel } from '../components/ui/Roundel';
 import type { VocabItem } from '../types';
-import { TAP_SPRING } from '../utils/motion';
 
-interface ReviewCard extends VocabItem {
-  key: string;
-  lessonTitle: string;
-  unitEmoji: string;
-}
+interface ReviewCard extends VocabItem { key: string; lessonTitle: string; }
 
 export function Review() {
-  const completedLessons = useProgressStore(s => s.completedLessons);
-  const srsData = useProgressStore(s => s.srsData);
-  const updateSRS = useProgressStore(s => s.updateSRS);
-  const addXP = useProgressStore(s => s.addXP);
+  const completedLessons = useProgressStore((state) => state.completedLessons);
+  const srsData = useProgressStore((state) => state.srsData);
+  const updateSRS = useProgressStore((state) => state.updateSRS);
+  const addXP = useProgressStore((state) => state.addXP);
 
   const dueCards = useMemo<ReviewCard[]>(() => {
     const cards: ReviewCard[] = [];
-    for (const unit of UNITS) {
-      for (const lesson of unit.lessons) {
-        if (!completedLessons.includes(lesson.id)) continue;
-        lesson.vocab.forEach((v, idx) => {
-          const key = vocabKey(lesson.id, idx);
-          const card = srsData[key] ?? defaultCard();
-          if (isDue(card)) {
-            cards.push({ ...v, key, lessonTitle: lesson.title, unitEmoji: unit.emoji });
-          }
-        });
-      }
+    for (const unit of UNITS) for (const lesson of unit.lessons) {
+      if (!completedLessons.includes(lesson.id)) continue;
+      lesson.vocab.forEach((item, index) => {
+        const key = vocabKey(lesson.id, index);
+        if (isDue(srsData[key] ?? defaultCard())) cards.push({ ...item, key, lessonTitle: lesson.title });
+      });
     }
-    // Shuffle
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
+    for (let index = cards.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(Math.random() * (index + 1));
+      [cards[index], cards[swap]] = [cards[swap], cards[index]];
     }
     return cards;
-  // Only recompute at mount — srsData changes as we review, but we don't want the deck to shift mid-session
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Keep the deck stable while review updates its own SRS records.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [idx, setIdx] = useState(0);
-  const [showing, setShowing] = useState<'front' | 'back'>('front');
+  const [index, setIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
   const [tally, setTally] = useState({ correct: 0, wrong: 0 });
   const [sessionXP, setSessionXP] = useState(0);
 
-  const handleReveal = () => {
-    setShowing('back');
-    if (dueCards[idx]) speak(dueCards[idx].french);
-  };
-
-  const handleRate = (correct: boolean) => {
-    if (idx >= dueCards.length) return;
-    updateSRS(dueCards[idx].key, correct);
-    setTally(t => correct ? { ...t, correct: t.correct + 1 } : { ...t, wrong: t.wrong + 1 });
-    if (correct) {
-      addXP(2);
-      setSessionXP(x => x + 2);
-    }
-    setIdx(i => i + 1);
-    setShowing('front');
-  };
+  function rate(correct: boolean) {
+    const card = dueCards[index];
+    if (!card) return;
+    updateSRS(card.key, correct);
+    setTally((value) => correct ? { ...value, correct: value.correct + 1 } : { ...value, wrong: value.wrong + 1 });
+    if (correct) { addXP(2); setSessionXP((value) => value + 2); }
+    setIndex((value) => value + 1);
+    setFlipped(false);
+  }
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (idx >= dueCards.length) return;
-      if (showing === 'front') {
-        if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') {
-          e.preventDefault();
-          handleReveal();
-        }
-      } else {
-        if (e.key === 'ArrowRight' || e.key === 'y' || e.key === 'Y') {
-          e.preventDefault();
-          handleRate(true);
-        } else if (e.key === 'ArrowLeft' || e.key === 'n' || e.key === 'N') {
-          e.preventDefault();
-          handleRate(false);
-        }
-      }
+    const handleKey = (event: KeyboardEvent) => {
+      if (!dueCards[index]) return;
+      if (!flipped && [' ', 'Enter', 'ArrowDown'].includes(event.key)) { event.preventDefault(); setFlipped(true); }
+      else if (flipped && ['ArrowRight', 'y', 'Y'].includes(event.key)) { event.preventDefault(); rate(true); }
+      else if (flipped && ['ArrowLeft', 'n', 'N'].includes(event.key)) { event.preventDefault(); rate(false); }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showing, idx, dueCards]);
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipped, index]);
 
   const nextLessons = useMemo(() => {
-    const items: { unit: (typeof UNITS)[0]; lesson: (typeof UNITS)[0]['lessons'][0] }[] = [];
-    for (const unit of UNITS) {
-      for (const lesson of unit.lessons) {
-        if (!completedLessons.includes(lesson.id)) {
-          items.push({ unit, lesson });
-          if (items.length >= 3) return items;
-        }
-      }
-    }
-    return items;
+    const result: { unit: (typeof UNITS)[number]; lesson: (typeof UNITS)[number]['lessons'][number] }[] = [];
+    for (const unit of UNITS) for (const lesson of unit.lessons) if (!completedLessons.includes(lesson.id) && result.length < 3) result.push({ unit, lesson });
+    return result;
   }, [completedLessons]);
 
   if (dueCards.length === 0) {
     return (
-      <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 300 }} className="space-y-5">
-          <div className="text-5xl">✅</div>
-          <h1 className="text-2xl font-bold text-primary">All caught up!</h1>
-          <p className="text-secondary">
-            No cards due right now.{completedLessons.length > 0 ? ' Come back tomorrow — or keep going with a new lesson.' : ' Complete some lessons to grow your review deck.'}
-          </p>
-
-          {nextLessons.length > 0 && (
-            <div className="text-left mt-2">
-              <p className="section-label text-left">Up next</p>
-              <div className="inset-group">
-                {nextLessons.map(({ unit, lesson }, i) => (
-                  <Link
-                    key={lesson.id}
-                    to={`/unit/${unit.slug}/lesson/${lesson.id}`}
-                    className="no-underline flex items-center gap-3 p-3.5 transition-colors hover:bg-[var(--bg-card-hover)]"
-                    style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
-                  >
-                    <span
-                      className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
-                      style={{ backgroundColor: `color-mix(in srgb, ${unit.color} 14%, transparent)` }}
-                    >
-                      {unit.emoji}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-primary leading-snug">{lesson.title}</p>
-                      <p className="text-xs text-muted">{unit.title}</p>
-                    </div>
-                    <ChevronRight size={16} className="text-muted opacity-50 flex-shrink-0" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Link to="/learn" className="inline-block">
-            <Button variant="tinted">Back to Home</Button>
-          </Link>
-        </motion.div>
+      <div className="page page--narrow">
+        <div className="sheet p-6 text-center"><Check size={32} className="mx-auto text-go mb-3" /><h1 className="h-page">All caught up</h1><p className="t-body text-ink-2 mt-2">No cards are due now. {completedLessons.length ? 'Come back tomorrow, or keep going.' : 'Complete lessons to grow your review deck.'}</p></div>
+        {nextLessons.length > 0 && <section className="mt-6"><h2 className="h-section mb-3">Up next</h2><div className="sheet">{nextLessons.map(({ unit, lesson }) => { const line = lineFor(unit); return <ButtonLink key={lesson.id} to={`/unit/${unit.slug}/lesson/${lesson.id}`} variant="quiet" className="w-full justify-start border-b border-rule last:border-0 rounded-none py-3"><Roundel line={line} size="sm" /><span className="text-left flex-1"><span className="block font-semibold text-ink">{lesson.title}</span><span className="block t-small text-ink-3">{unit.title}</span></span><StationDots line={line} done={0} total={unit.lessons.length} /><ChevronRight size={16} /></ButtonLink>; })}</div></section>}
+        <ButtonLink to="/learn" variant="secondary" className="mt-6"><ChevronLeft size={16} /> Back to Learn</ButtonLink>
       </div>
     );
   }
 
-  if (idx >= dueCards.length) {
+  if (index >= dueCards.length) {
     const total = tally.correct + tally.wrong;
-    const pct = total > 0 ? Math.round((tally.correct / total) * 100) : 0;
-    return (
-      <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', damping: 18, stiffness: 280 }} className="space-y-4">
-          <div className="text-5xl">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
-          <h1 className="text-2xl font-bold text-primary">Session complete!</h1>
-          <p className="text-secondary">
-            {tally.correct} correct out of {total} · {pct}%
-          </p>
-          {sessionXP > 0 && (
-            <div className="inline-flex items-center gap-1.5 xp-badge text-sm px-3 py-1.5">
-              ⚡ +{sessionXP} XP earned
-            </div>
-          )}
-          <div className="mt-6">
-            <Link to="/learn"><Button variant="tinted">Back to Home</Button></Link>
-          </div>
-        </motion.div>
-      </div>
-    );
+    const percent = total ? Math.round((tally.correct / total) * 100) : 0;
+    return <div className="page page--form"><div className="sheet p-6 text-center"><Check size={32} className="mx-auto text-go mb-3" /><h1 className="h-page">Session complete</h1><p className="t-body text-ink-2 mt-2">{tally.correct} correct out of {total} · {percent}%</p>{sessionXP > 0 && <div className="mt-4"><StatChip kind="xp">+{sessionXP} XP earned</StatChip></div>}<ButtonLink to="/learn" variant="secondary" className="mt-6">Back to Learn</ButtonLink></div></div>;
   }
 
-  const card = dueCards[idx];
-
+  const card = dueCards[index];
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 relative">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link
-          to="/learn"
-          aria-label="Back to home"
-          className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline"
-          style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
-        >
-          <ChevronLeft size={20} strokeWidth={2.4} />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center justify-between text-xs text-muted mb-1 font-medium">
-            <span>Review session</span>
-            <span>{idx + 1} / {dueCards.length}</span>
-          </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
-            <motion.div
-              className="h-full rounded-full"
-              style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
-              animate={{ scaleX: idx / dueCards.length }}
-              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <AnimatePresence mode="popLayout">
-        {showing === 'front' ? (
-          <motion.div
-            key={`front-${idx}`}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="space-y-4"
-          >
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              transition={TAP_SPRING}
-              className="card p-8 text-center min-h-[240px] flex flex-col items-center justify-center gap-3 cursor-pointer select-none"
-              style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
-              onClick={handleReveal}
-            >
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                {card.unitEmoji} {card.lessonTitle}
-              </p>
-              <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>
-                {card.french}
-              </p>
-              {card.pronunciation && (
-                <p className="text-sm text-muted italic">/{card.pronunciation}/</p>
-              )}
-              <button
-                onClick={e => { e.stopPropagation(); speak(card.french); }}
-                className="mt-1 w-10 h-10 flex items-center justify-center rounded-full ios-press cursor-pointer"
-                style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
-                aria-label="Play pronunciation"
-              >
-                <Volume2 size={18} />
-              </button>
-            </motion.div>
-
-            <motion.button
-              onClick={handleReveal}
-              whileTap={{ scale: 0.97 }}
-              transition={TAP_SPRING}
-              className="w-full py-3.5 text-sm font-medium text-muted rounded-2xl cursor-pointer transition-colors hover:text-primary"
-              style={{ border: '1.5px dashed var(--border)', background: 'transparent' }}
-            >
-              Tap to reveal · Space / Enter
-            </motion.button>
-          </motion.div>
-        ) : (
-          <motion.div
-            key={`back-${idx}`}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className="space-y-4"
-          >
-            <div
-              className="card p-8 min-h-[240px] flex flex-col items-center justify-center gap-3 text-center"
-              style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
-            >
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider">English</p>
-              <p className="text-2xl font-bold text-primary">{card.english}</p>
-
-              {card.example && (
-                <div className="mt-2 p-3 text-left w-full" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
-                  <p className="text-sm italic font-medium font-display" style={{ color: 'var(--accent)' }}>{card.example}</p>
-                  <p className="text-xs text-muted mt-0.5">{card.exampleTranslation}</p>
-                </div>
-              )}
-
-              {card.funnyNote && (
-                <p className="text-xs text-secondary italic pt-2" style={{ borderTop: '0.5px solid var(--hairline)' }}>
-                  💬 {card.funnyNote}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                transition={TAP_SPRING}
-                onClick={() => handleRate(false)}
-                className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--danger) 10%, transparent)',
-                  color: 'var(--danger)',
-                  border: 'none',
-                }}
-              >
-                <XCircle size={20} /> Not quite
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                transition={TAP_SPRING}
-                onClick={() => handleRate(true)}
-                className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--success-light)',
-                  color: 'var(--success)',
-                  border: 'none',
-                }}
-              >
-                <CheckCircle2 size={20} /> Got it
-              </motion.button>
-            </div>
-            <p className="text-center text-xs text-muted">← Not quite · Got it →</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="page page--narrow">
+      <header className="flex items-center gap-3 mb-6"><ButtonLink to="/learn" variant="quiet" iconOnly aria-label="Back to Learn"><ChevronLeft size={20} /></ButtonLink><div className="flex-1"><div className="flex justify-between t-small text-ink-3 mb-2"><span>Review · {card.lessonTitle}</span><span className="tabular-nums">{index + 1} / {dueCards.length}</span></div><TripProgress step={index} total={dueCards.length} label={`${index} of ${dueCards.length} reviewed`} /></div></header>
+      <FlashCard item={card} index={index} total={dueCards.length} flipped={flipped} onFlipToggle={() => setFlipped((value) => !value)} />
+      {!flipped ? <Button block variant="secondary" className="mt-5" onClick={() => setFlipped(true)}><RotateCcw size={17} /> Reveal answer</Button> : <div className="grid grid-cols-2 gap-3 mt-5"><Button variant="secondary" onClick={() => rate(false)}><X size={18} /> Not quite</Button><Button onClick={() => rate(true)}><Check size={18} /> Got it</Button></div>}
+      <p className="t-small text-ink-3 text-center mt-3">{flipped ? '← Not quite · Got it →' : 'Space or Enter to reveal'}</p>
     </div>
   );
 }

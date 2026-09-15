@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bold, GripVertical, Heading1, Heading2, Heading3, Italic, Link2, Quote, Table, X } from 'lucide-react';
+import { Button } from '../ui/Button';
 import { getCaretCoordinates } from '../../utils/caretCoordinates';
 
 const HEADING_LEVELS = [
@@ -209,30 +210,27 @@ export function MarkdownField({ value, onChange, placeholder, rows = 8 }: Markdo
         onBlur={handleBlur}
         placeholder={placeholder}
         rows={rows}
-        className="ios-input py-2 text-sm font-mono resize-y"
+        className="field font-sign resize-y"
       />
       {position &&
         createPortal(
           <div
-            className="fixed z-50 flex items-center gap-0.5 px-1.5 py-1 rounded-full"
+            className="fixed z-50 flex items-center gap-0.5 px-1.5 py-1 rounded-control sheet border border-rule"
             style={{
               top: position.top,
               left: position.left,
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--hairline)',
-              boxShadow: 'var(--shadow-2)',
             }}
           >
             <button
               onPointerDown={handleDragStart}
               aria-label="Move toolbar"
               title="Drag to pin the toolbar here"
-              className="w-5 h-5 flex items-center justify-center cursor-grab active:cursor-grabbing flex-shrink-0"
-              style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none', touchAction: 'none' }}
+              className="w-5 h-5 flex items-center justify-center cursor-grab active:cursor-grabbing flex-shrink-0 text-ink-3"
+              style={{ touchAction: 'none' }}
             >
               <GripVertical size={13} />
             </button>
-            <div className="w-px h-4 flex-shrink-0" style={{ backgroundColor: 'var(--hairline)' }} />
+            <div className="w-px h-4 flex-shrink-0 bg-rule" />
             {preHeadingButtons.map(({ icon: Icon, label, onClick }) => (
               <button
                 key={label}
@@ -240,8 +238,7 @@ export function MarkdownField({ value, onChange, placeholder, rows = 8 }: Markdo
                 onClick={onClick}
                 aria-label={label}
                 title={label}
-                className="w-7 h-7 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0 hover:bg-[var(--bg-card-hover)]"
-                style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none' }}
+                className="btn btn--quiet btn--sm"
               >
                 <Icon size={14} />
               </button>
@@ -256,23 +253,20 @@ export function MarkdownField({ value, onChange, placeholder, rows = 8 }: Markdo
                 onClick={() => applyHeading('##')}
                 aria-label="Heading (hover for H1–H3)"
                 title="Heading — hover for levels"
-                className="w-7 h-7 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0 hover:bg-[var(--bg-card-hover)]"
-                style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none' }}
+                className="btn btn--quiet btn--sm"
               >
                 <Heading2 size={14} />
               </button>
               {headingMenuOpen && (
                 <div
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-1 flex flex-col gap-0.5 p-1 rounded-xl z-10"
-                  style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-2)' }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-1 flex flex-col gap-0.5 p-1 rounded-control sheet border border-rule z-10"
                 >
                   {HEADING_LEVELS.map(({ hashes, icon: Icon, label }) => (
                     <button
                       key={label}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => applyHeading(hashes)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer whitespace-nowrap hover:bg-[var(--bg-card-hover)]"
-                      style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none' }}
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-control t-small text-ink-2 cursor-pointer whitespace-nowrap hover:bg-inset"
                     >
                       <Icon size={13} /> {label}
                     </button>
@@ -287,15 +281,14 @@ export function MarkdownField({ value, onChange, placeholder, rows = 8 }: Markdo
                 onClick={onClick}
                 aria-label={label}
                 title={label}
-                className="w-7 h-7 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0 hover:bg-[var(--bg-card-hover)]"
-                style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none' }}
+                className="btn btn--quiet btn--sm"
               >
                 <Icon size={14} />
               </button>
             ))}
             {pinned && (
               <>
-                <div className="w-px h-4 flex-shrink-0" style={{ backgroundColor: 'var(--hairline)' }} />
+                <div className="w-px h-4 flex-shrink-0 bg-rule" />
                 <button
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
@@ -304,8 +297,7 @@ export function MarkdownField({ value, onChange, placeholder, rows = 8 }: Markdo
                   }}
                   aria-label="Unpin toolbar"
                   title="Unpin — go back to following the cursor"
-                  className="w-6 h-6 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0 hover:bg-[var(--bg-card-hover)]"
-                  style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
+                  className="btn btn--quiet btn--sm"
                 >
                   <X size={12} />
                 </button>

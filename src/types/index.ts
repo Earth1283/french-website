@@ -37,11 +37,8 @@ export interface Unit {
   id: string;
   slug: string;
   title: string;
-  emoji: string;
   tagline: string;
   funnyDescription: string;
-  color: string;
-  accentColor: string;
   lessons: Lesson[];
   isPreA1?: boolean;
   isA1: boolean;
@@ -126,9 +123,6 @@ export interface ProgressState {
   darkMode: boolean;
   unit12Mode: 'full-freedom' | 'earned-reward' | null;
   onboardingDone: boolean;
-  accentColor: string;
-  appleMode: boolean;
-  reducedGpu: boolean;
   bookmarkedLessons: string[];
   srsData: Record<string, SRSCard>;
 }

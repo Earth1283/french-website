@@ -1,29 +1,29 @@
-==============================
-🥖 Oh Non! Le French Website
-==============================
+================
+Bonjour Survival
+================
 
 *Survival French for the Brave, the Hungry, and the Chronically Confused.*
 
 ------------------------------------------------------------------------
 
-Welcome to **Oh Non!**, the only French learning platform that assumes you've just been teleported to the middle of Paris with nothing but a smartphone and a deep-seated fear of being judged by a waiter.
+Welcome to **Bonjour Survival**, the French learning platform that assumes you've just been teleported to the middle of Paris with nothing but a smartphone and a deep-seated fear of being judged by a waiter.
 
 Why this app?
 =============
 
 Because most language apps spend three weeks teaching you how to say "The apple is red." In the real world, you don't need to know the color of the apple; you need to know how to:
 
-*   **🚨 Survive an Emergency:** "Oh Non, I'm in France" (Unit 1).
-*   **🥐 Secure a Croissant:** "Feed Me or I'll Cry" (Unit 2).
-*   **💶 Avoid Bankruptcy:** €4.50 for an espresso? You need "Money Talks (Poorly)" (Unit 4).
-*   **🪤 Dodge Betrayal:** "False Friends Will Betray You" (Unit 10).
+*   **🚨 Survive an Emergency:** "Oh Non, I'm in France" (Line 3).
+*   **🥐 Secure a Croissant:** "Feed Me or I'll Cry" (Line 4).
+*   **💶 Avoid Bankruptcy:** €4.50 for an espresso? You need "Money Talks (Poorly)" (Line 6).
+*   **🪤 Dodge Betrayal:** "False Friends Will Betray You" (Line 17).
 
 Features
 ========
 
-*   **Ambient Landing & Focus Mode:** The front door is a calm, full-bleed ambient screen — a giant live clock, a time-aware French greeting (*Bonjour* / *Bon après-midi* / *Bonsoir*), a *phrase du jour* with audio, and a glass launcher into the app. The date shows in French and morphs to English on hover. A dedicated **Focus mode** (``/#/focus``) adds a Pomodoro study timer with a rotating French *mot du moment*. Backdrops are fetched live from Unsplash — French scenes by day, a cosmic night sky in the small hours (1–4:30 AM) — and gracefully fall back to gradient skins when no key is set.
+*   **Departure Board & Focus Mode:** The front door is a French departure board with a flip clock, time-aware greeting, destinations into the app, and a postcard carrying the *phrase du jour*. **Focus mode** (``/#/focus``) turns the board into a study timer with a rotating French *mot du moment*. Postcard photos are fetched from Unsplash and fall back to a built-in illustration when no key is set.
 *   **Interactive Lessons:** Flashcards, multiple choice, and translation challenges that actually matter.
-*   **Unit-Based Learning:** From A1 basics to "Unlocked: The Good Stuff" (slang).
+*   **Métro-Line Learning:** Twenty-one numbered lines take you from pre-A1 foundations through survival French and bonus material.
 *   **Spaced Repetition Review:** SM-2 algorithm schedules vocab reviews at the optimal moment — 1 day, then 3, then a week, then longer. A review banner on the home screen tells you when cards are due.
 *   **Audio Pronunciation:** Tap any 🔊 button to hear French spoken aloud. Available on flashcards, phrasebook, and on answer reveals in exercises. Uses the Web Speech API — no API key, works offline.
 *   **Lesson Bookmarks:** Save any lesson for later with the bookmark icon in the lesson header. Bookmarked lessons appear as quick-links on the home screen.

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { ITEM_BANK, resolveTestItemExercise } from '../data/testItemBank';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { FillInBlank } from '../components/lesson/FillInBlank';
@@ -44,26 +43,25 @@ function AttemptRow({ result, delta, expanded, onToggle }: AttemptRowProps) {
     <div>
       <button
         onClick={onToggle}
-        className="w-full p-3 flex items-center justify-between text-left cursor-pointer transition-colors hover:bg-[var(--bg-card-hover)]"
-        style={{ background: 'transparent', border: 'none' }}
+        className="w-full px-4 py-3 flex items-center justify-between text-left cursor-pointer bg-transparent border-0"
       >
         <div>
-          <p className="text-sm font-semibold text-primary">{result.cefrLevel}</p>
-          <p className="text-xs text-muted">
+          <p className="t-title font-semibold text-ink">{result.cefrLevel}</p>
+          <p className="t-small text-ink-3 mt-1">
             {new Date(result.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {delta !== null && (
-            <span className="text-xs font-semibold" style={{ color: delta >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+            <span className="t-small font-semibold text-ink-2">
               {delta >= 0 ? '+' : ''}{delta.toFixed(2)}
             </span>
           )}
-          {expanded ? <ChevronUp size={15} className="text-muted" /> : <ChevronDown size={15} className="text-muted" />}
+          {expanded ? <ChevronUp size={20} className="text-ink-3" /> : <ChevronDown size={20} className="text-ink-3" />}
         </div>
       </button>
       {expanded && (
-        <div className="px-3 pb-4">
+        <div className="px-4 pb-4">
           <TestResultBreakdown result={result} compact />
         </div>
       )}
@@ -206,50 +204,24 @@ export function AdaptiveTest() {
     setCurrentItem(selectNextItem(candidates, est.theta, recentTopicsFrom(newResponses)));
   }
 
-  // ─── Intro view ─────────────────────────────────────────────────────────────
   if (view === 'intro') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-          className="space-y-6"
-        >
-          <span
-            className="w-20 h-20 mx-auto rounded-[22px] flex items-center justify-center text-5xl"
-            style={{ backgroundColor: 'var(--accent-tint)' }}
-          >
-            🎯
-          </span>
-          <div>
-            <h1 className="text-3xl font-bold text-primary">Find Your Level</h1>
-            <p className="text-secondary mt-2">
-              An adaptive test that gets harder or easier based on how you're doing — 25 to 40 questions, untimed.
-              Answer honestly; there's no studying for this one.
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-2 flex-wrap">
-            <span className="chip">🧠 Adapts to you</span>
-            <span className="chip">⏱️ Untimed</span>
-            <span className="xp-badge text-sm px-3 py-1.5">+30 XP</span>
-          </div>
-          <Button size="lg" onClick={startTest} className="w-full max-w-xs mx-auto">
-            Start Test <ArrowRight size={17} />
-          </Button>
-        </motion.div>
+      <div className="page page--narrow">
+        <h1 className="h-page">Find your level</h1>
+        <p className="t-body mt-2 mb-6">
+          An adaptive test that gets harder or easier based on how you're doing — 25 to 40 questions, untimed.
+          Answer honestly; there's no studying for this one.
+        </p>
+        <Button onClick={startTest} variant="primary" className="w-full mb-6">
+          Start test
+        </Button>
 
         {history.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-10 text-left"
-          >
-            <p className="section-label" style={{ paddingLeft: 0 }}>Past attempts</p>
-            <div className="inset-group">
-              {reversedAttempts.map((a, i) => (
-                <div key={a.result.id} style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}>
+          <div className="mt-8">
+            <h2 className="h-section">Past attempts</h2>
+            <div className="sheet rows mt-4">
+              {reversedAttempts.map((a) => (
+                <div key={a.result.id} className="row">
                   <AttemptRow
                     result={a.result}
                     delta={a.delta}
@@ -259,65 +231,56 @@ export function AdaptiveTest() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     );
   }
 
-  // ─── Testing view ───────────────────────────────────────────────────────────
   if (view === 'testing' && currentItem) {
     const exercise = resolveTestItemExercise(currentItem);
     return (
-      <div className="max-w-xl mx-auto px-4 py-6">
-        <div className="mb-6">
+      <div className="page page--narrow">
+        <div className="mb-8">
           <ConfidenceMeter se={se} questionNumber={responses.length + 1} />
         </div>
 
-        <motion.div
-          key={currentItem.id}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-        >
-          {exercise.type === 'multiple-choice' && (
-            <MultipleChoice
-              key={currentItem.id}
-              exercise={exercise}
-              onCorrect={() => submitResponse(true)}
-              onWrong={() => submitResponse(false)}
-              keyboardSelect={keyboardSelect}
-            />
-          )}
-          {exercise.type === 'fill-blank' && (
-            <FillInBlank
-              key={currentItem.id}
-              exercise={exercise}
-              onCorrect={() => submitResponse(true)}
-              onWrong={() => submitResponse(false)}
-            />
-          )}
-          {exercise.type === 'translation' && (
-            <TranslationChallenge
-              key={currentItem.id}
-              exercise={exercise}
-              onCorrect={() => submitResponse(true)}
-              onWrong={() => submitResponse(false)}
-            />
-          )}
-        </motion.div>
+        {exercise.type === 'multiple-choice' && (
+          <MultipleChoice
+            key={currentItem.id}
+            exercise={exercise}
+            onCorrect={() => submitResponse(true)}
+            onWrong={() => submitResponse(false)}
+            keyboardSelect={keyboardSelect}
+          />
+        )}
+        {exercise.type === 'fill-blank' && (
+          <FillInBlank
+            key={currentItem.id}
+            exercise={exercise}
+            onCorrect={() => submitResponse(true)}
+            onWrong={() => submitResponse(false)}
+          />
+        )}
+        {exercise.type === 'translation' && (
+          <TranslationChallenge
+            key={currentItem.id}
+            exercise={exercise}
+            onCorrect={() => submitResponse(true)}
+            onWrong={() => submitResponse(false)}
+          />
+        )}
       </div>
     );
   }
 
-  // ─── Results view ───────────────────────────────────────────────────────────
   const result = completedResult ?? history[history.length - 1];
 
   if (!result) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <p className="text-muted">No result to show.</p>
-        <Button className="mt-4" onClick={() => setView('intro')}>Back</Button>
+      <div className="page page--narrow text-center py-16">
+        <p className="text-ink-3">No result to show.</p>
+        <Button className="mt-8" onClick={() => setView('intro')} variant="secondary">Back</Button>
       </div>
     );
   }
@@ -325,29 +288,27 @@ export function AdaptiveTest() {
   const otherAttempts = reversedAttempts.filter(a => a.result.id !== result.id);
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary">Your Level</h1>
-        <p className="text-secondary text-sm mt-1">This is an informal estimate, not a certified placement.</p>
-      </motion.div>
+    <div className="page page--narrow">
+      <h1 className="h-page">Your level</h1>
+      <p className="t-small text-ink-3 mt-2 mb-8">This is an informal estimate, not a certified placement.</p>
 
       <TestResultBreakdown result={result} />
 
-      <div className="flex gap-3 justify-center flex-wrap mt-8">
-        <Button variant="secondary" onClick={startTest}>
-          <RotateCcw size={15} /> Retake
+      <div className="flex gap-3 flex-col mt-8 mb-8">
+        <Button variant="primary" onClick={startTest} className="w-full">
+          <RotateCcw size={16} /> Retake test
         </Button>
-        <Link to="/learn" className="flex flex-col">
-          <Button variant="primary">Back to Home</Button>
+        <Link to="/learn" className="w-full">
+          <Button variant="secondary" className="w-full">Back to Learn</Button>
         </Link>
       </div>
 
       {otherAttempts.length > 0 && (
-        <div className="mt-10">
-          <p className="section-label" style={{ paddingLeft: 0 }}>Past attempts</p>
-          <div className="inset-group">
-            {otherAttempts.map((a, i) => (
-              <div key={a.result.id} style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}>
+        <div className="mt-8">
+          <h2 className="h-section">Past attempts</h2>
+          <div className="sheet rows mt-4">
+            {otherAttempts.map((a) => (
+              <div key={a.result.id} className="row">
                 <AttemptRow
                   result={a.result}
                   delta={a.delta}

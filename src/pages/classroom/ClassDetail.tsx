@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen, BarChart3, Flag, Archive, ArchiveRestore, KeyRound } from 'lucide-react';
+import { Archive, ArchiveRestore, BarChart3, Check, ChevronLeft, ChevronRight, Ellipsis, Flag, KeyRound, Plus, Trash2 } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
-import { Button } from '../../components/ui/Button';
+import { JoinTicket } from '../../components/classroom/JoinTicket';
+import { Meter } from '../../components/ui/Meter';
+import { Button, ButtonLink } from '../../components/ui/Button';
 import type { AssignmentInfo, ClassInfo, ClassroomContent, RosterStudent } from '../../types/classroom';
 
 export function ClassDetail() {
@@ -12,7 +13,6 @@ export function ClassDetail() {
   const [roster, setRoster] = useState<RosterStudent[] | null>(null);
   const [assignments, setAssignments] = useState<AssignmentInfo[] | null>(null);
   const [content, setContent] = useState<ClassroomContent[] | null>(null);
-  const [copied, setCopied] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [resetPasswordFor, setResetPasswordFor] = useState<string | null>(null);
@@ -28,29 +28,13 @@ export function ClassDetail() {
       classroomApi.get<{ assignments: AssignmentInfo[] }>(`/api/teacher/classes/${classId}/assignments`),
       classroomApi.get<{ content: ClassroomContent[] }>('/api/teacher/content'),
     ]);
-    setCls(classesRes.classes.find((c) => c.id === classId) ?? null);
+    setCls(classesRes.classes.find((item) => item.id === classId) ?? null);
     setRoster(rosterRes.roster);
     setAssignments(assignmentsRes.assignments);
     setContent(contentRes.content);
   }
 
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classId]);
-
-  async function rotateCode() {
-    if (!classId) return;
-    await classroomApi.post(`/api/teacher/classes/${classId}/rotate-join-code`);
-    await load();
-  }
-
-  async function copyJoinCode() {
-    if (!cls) return;
-    await navigator.clipboard.writeText(cls.join_code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }
+  useEffect(() => { load(); }, [classId]);
 
   async function assignContent(contentId: string) {
     if (!classId) return;
@@ -68,13 +52,11 @@ export function ClassDetail() {
     if (!classId || newPasswordDraft.trim().length < 8) return;
     setResetSubmitting(true);
     try {
-      await classroomApi.post(`/api/teacher/classes/${classId}/students/${studentId}/reset-password`, {
-        newPassword: newPasswordDraft.trim(),
-      });
+      await classroomApi.post(`/api/teacher/classes/${classId}/students/${studentId}/reset-password`, { newPassword: newPasswordDraft.trim() });
       setResetPasswordFor(null);
       setNewPasswordDraft('');
       setResetSuccessFor(studentId);
-      setTimeout(() => setResetSuccessFor(null), 4000);
+      window.setTimeout(() => setResetSuccessFor(null), 4000);
     } finally {
       setResetSubmitting(false);
     }
@@ -87,231 +69,99 @@ export function ClassDetail() {
     await load();
   }
 
-  const assignedContentIds = new Set(assignments?.map((a) => a.content_id));
-  const availableToAssign = content?.filter((c) => !assignedContentIds.has(c.id)) ?? [];
+  const assignedIds = new Set(assignments?.map((item) => item.content_id));
+  const available = content?.filter((item) => !assignedIds.has(item.id)) ?? [];
 
-  if (!cls) {
-    return <div className="max-w-2xl mx-auto px-4 py-16 text-center text-muted">Loading…</div>;
-  }
+  if (!cls) return <div className="page text-center text-ink-3 py-16">Loading…</div>;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-        <Link
-          to="/classes"
-          className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
-          style={{ color: 'var(--accent)' }}
-        >
-          <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Classes
-        </Link>
-        <h1 className="text-3xl font-bold text-primary">{cls.name}</h1>
-      </motion.div>
+    <div className="page">
+      <ButtonLink to="/classes" variant="quiet" size="sm" className="-ml-2 mb-2"><ChevronLeft size={18} /> Classes</ButtonLink>
+      <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h1 className="h-page">{cls.name}</h1>
+        <Button onClick={() => setPickerOpen(true)}><Plus size={16} /> Assign content</Button>
+      </header>
 
       {cls.archived_at && (
-        <div
-          className="flex items-center justify-between gap-3 p-3.5"
-          style={{
-            borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'var(--bg-inset)',
-            border: '1px solid var(--hairline)',
-          }}
-        >
-          <p className="text-xs text-muted flex items-center gap-2">
-            <Archive size={13} /> This class is archived — students can no longer join with its code.
-          </p>
-          <button onClick={() => setArchived(false)} className="chip cursor-pointer flex-shrink-0" style={{ border: 'none' }}>
-            <ArchiveRestore size={11} /> Unarchive
-          </button>
+        <div className="sheet p-4 mb-5 flex flex-wrap items-center justify-between gap-3">
+          <p className="t-small text-ink-2 inline-flex items-center gap-2"><Archive size={16} /> This class is archived — students can no longer join.</p>
+          <Button variant="secondary" size="sm" onClick={() => setArchived(false)}><ArchiveRestore size={16} /> Unarchive</Button>
         </div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-5">
-        <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Join code — share with students</p>
-        <div className="flex items-center gap-2">
-          <span
-            className="flex-1 text-center text-xl font-mono font-bold tracking-widest py-3"
-            style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)' }}
-          >
-            {cls.join_code}
-          </span>
-          <Button variant="tinted" size="sm" onClick={copyJoinCode}>
-            {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy'}
-          </Button>
-        </div>
-        <button
-          onClick={rotateCode}
-          className="text-xs text-muted hover:underline cursor-pointer mt-2.5 flex items-center gap-1"
-          style={{ background: 'transparent', border: 'none' }}
-        >
-          <RefreshCw size={11} /> Generate a new code (invalidates the old one)
-        </button>
-      </motion.div>
+      <div className="class-grid">
+        <aside className="class-side">
+          <JoinTicket code={cls.join_code} onRotate={async () => { if (classId) { await classroomApi.post(`/api/teacher/classes/${classId}/rotate-join-code`); await load(); } }} />
 
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <div className="section-label">Assignments</div>
-        <div className="inset-group">
-          {assignments?.length === 0 && (
-            <p className="p-4 text-sm text-muted">Nothing assigned yet.</p>
-          )}
-          {assignments?.map((a) => (
-            <div key={a.id} className="inset-row justify-between">
-              <Link to={`/classes/${classId}/assignments/${a.id}/results`} className="flex items-center gap-2.5 no-underline">
-                <BookOpen size={14} style={{ color: 'var(--text-muted)' }} />
-                <div>
-                  <p className="text-sm font-semibold text-primary">{a.title}</p>
-                  <p className="text-xs text-muted capitalize">{a.kind}</p>
-                </div>
-                {!!a.unresolvedFlagCount && (
-                  <span
-                    className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-                    style={{ backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)', color: 'var(--danger)' }}
-                  >
-                    <Flag size={10} /> {a.unresolvedFlagCount}
-                  </span>
-                )}
-              </Link>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Link
-                  to={`/classes/${classId}/assignments/${a.id}/results`}
-                  aria-label="View results"
-                  className="p-1.5 rounded-full"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  <BarChart3 size={14} />
+          <section className="sheet" aria-labelledby="assignments-title">
+            <div className="panel__head"><h2 id="assignments-title" className="h-section">Assignments</h2><span className="t-small text-ink-3">{assignments?.length ?? 0}</span></div>
+            {assignments?.length === 0 && <p className="p-4 border-t border-rule t-small text-ink-3">Nothing assigned yet.</p>}
+            {assignments?.map((assignment) => (
+              <div key={assignment.id} className="asg">
+                <Link to={`/classes/${classId}/assignments/${assignment.id}/results`} className="contents">
+                  <span className="asg__title">{assignment.title}</span>
+                  <span className="asg__meta capitalize">{assignment.kind}</span>
                 </Link>
-                <button
-                  onClick={() => removeAssignment(a.id)}
-                  aria-label="Remove assignment"
-                  className="p-1.5 rounded-full cursor-pointer"
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-                >
-                  <Trash2 size={14} />
-                </button>
+                <span className="asg__end">
+                  {!!assignment.unresolvedFlagCount && <span className="flagcount"><Flag size={13} />{assignment.unresolvedFlagCount}</span>}
+                  <Link to={`/classes/${classId}/assignments/${assignment.id}/results`} aria-label={`View results for ${assignment.title}`}><BarChart3 size={16} /></Link>
+                  <button type="button" onClick={() => removeAssignment(assignment.id)} aria-label={`Remove ${assignment.title}`}><Trash2 size={16} /></button>
+                </span>
               </div>
-            </div>
-          ))}
-          <div className="p-4 inset-divider space-y-3">
-            {!pickerOpen ? (
-              <Button variant="secondary" size="sm" onClick={() => setPickerOpen(true)}>
-                <Plus size={14} /> Assign content
-              </Button>
-            ) : availableToAssign.length === 0 ? (
-              <p className="text-xs text-muted">
-                No unassigned content yet.{' '}
-                <Link to="/classes/content/new" style={{ color: 'var(--accent)' }}>
-                  Create a lesson or quiz
-                </Link>{' '}
-                first.
-              </p>
-            ) : (
-              <div className="space-y-1.5">
-                {availableToAssign.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => assignContent(c.id)}
-                    className="w-full text-left p-2.5 text-sm cursor-pointer ios-press"
-                    style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--bg-card)' }}
-                  >
-                    {c.title} <span className="text-xs text-muted capitalize">· {c.kind}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <div className="section-label">Roster</div>
-        <div className="inset-group">
-          {roster?.length === 0 && <p className="p-4 text-sm text-muted">No students enrolled yet.</p>}
-          {roster?.map((s) => (
-            <div key={s.id} className="inset-divider">
-              <div className="inset-row justify-between" style={{ borderTop: 'none' }}>
-                <div>
-                  <p className="text-sm font-semibold text-primary">{s.name}</p>
-                  <p className="text-xs text-muted">{s.email}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-primary">
-                    {s.completedAssignments}/{s.totalAssignments}
-                  </p>
-                  <p className="text-xs text-muted">{Math.round(s.averageScore)}% avg</p>
-                </div>
-              </div>
-
-              <div className="px-4 pb-3 -mt-1.5">
-                {resetSuccessFor === s.id ? (
-                  <p className="text-xs flex items-center gap-1" style={{ color: 'var(--success)' }}>
-                    <Check size={11} /> Password reset — let {s.name.split(' ')[0]} know their new password.
-                  </p>
-                ) : resetPasswordFor === s.id ? (
-                  <div className="flex gap-2">
-                    <input
-                      value={newPasswordDraft}
-                      onChange={(e) => setNewPasswordDraft(e.target.value)}
-                      placeholder="New password (min. 8 characters)"
-                      className="ios-input py-1.5 text-sm flex-1"
-                    />
-                    <button
-                      onClick={() => resetStudentPassword(s.id)}
-                      disabled={resetSubmitting || newPasswordDraft.trim().length < 8}
-                      className="chip cursor-pointer flex-shrink-0"
-                      style={{ border: 'none' }}
-                    >
-                      Set
+            ))}
+            {pickerOpen && <div className="panel__foot">
+              {pickerOpen && (
+                <div className="space-y-2 mb-3">
+                  {available.length === 0 ? <p className="t-small text-ink-3">No unassigned content. <Link to="/classes/content/new" className="text-enamel-text underline">Create content</Link> first.</p> : available.map((item) => (
+                    <button key={item.id} type="button" onClick={() => assignContent(item.id)} className="field w-full text-left">
+                      <span className="font-semibold">{item.title}</span> <span className="t-small text-ink-3 capitalize">· {item.kind}</span>
                     </button>
-                    <button
-                      onClick={() => { setResetPasswordFor(null); setNewPasswordDraft(''); }}
-                      className="text-xs text-muted hover:underline cursor-pointer flex-shrink-0"
-                      style={{ background: 'transparent', border: 'none' }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setResetPasswordFor(s.id)}
-                    className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-                    style={{ background: 'transparent', border: 'none' }}
-                  >
-                    <KeyRound size={11} /> Reset password
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </motion.section>
+                  ))}
+                  <Button variant="quiet" size="sm" onClick={() => setPickerOpen(false)}>Cancel</Button>
+                </div>
+              )}
+            </div>}
+          </section>
 
-      {!cls.archived_at && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          {!confirmArchive ? (
-            <button
-              onClick={() => setConfirmArchive(true)}
-              className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-              style={{ background: 'transparent', border: 'none' }}
-            >
-              <Archive size={11} /> Archive this class
-            </button>
-          ) : (
-            <div className="p-3.5 space-y-2" style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)' }}>
-              <p className="text-xs text-primary">
-                Archiving stops new students from joining. Existing students, assignments, and results are kept —
-                you can unarchive anytime.
-              </p>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={() => setConfirmArchive(false)}>
-                  Cancel
-                </Button>
-                <Button variant="tinted" size="sm" onClick={() => setArchived(true)}>
-                  <Archive size={12} /> Archive
-                </Button>
+          {!cls.archived_at && (
+            <div>
+              {!confirmArchive ? <Button variant="quiet" size="sm" onClick={() => setConfirmArchive(true)}><Archive size={16} /> Archive this class</Button> : (
+                <div className="sheet p-4 space-y-3"><p className="t-small text-ink-2">Archiving stops new students joining. Existing work is kept.</p><div className="flex gap-2"><Button variant="secondary" size="sm" onClick={() => setConfirmArchive(false)}>Cancel</Button><Button variant="danger" size="sm" onClick={() => setArchived(true)}>Archive</Button></div></div>
+              )}
+            </div>
+          )}
+        </aside>
+
+        <section className="sheet" aria-labelledby="roster-title">
+          <div className="panel__head"><h2 id="roster-title" className="h-section">Roster</h2><span className="t-small text-ink-3">{roster?.length ?? 0} students</span></div>
+          {roster?.length === 0 && <p className="p-4 border-t border-rule t-small text-ink-3">No students enrolled yet.</p>}
+          {!!roster?.length && (
+            <div className="ledger-wrap"><table className="ledger"><thead><tr><th>Name</th><th>Email</th><th className="n">Assignments done</th><th className="n">Average score</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>
+              {roster.map((student) => (
+                <tr key={student.id}>
+                  <td className="who">{student.name}{resetSuccessFor === student.id && <span className="block text-go font-normal"><Check size={12} className="inline" /> Password reset</span>}</td>
+                  <td className="mail">{student.email}</td>
+                  <td className="n">{student.completedAssignments} / {student.totalAssignments}</td>
+                  <td className="n">{Math.round(student.averageScore)}% <Meter percent={student.averageScore} label={`${Math.round(student.averageScore)} percent average`} /></td>
+                  <td>
+                    <button type="button" className="rowmenu" aria-label={`Reset password for ${student.name}`} onClick={() => { setResetPasswordFor(student.id); setNewPasswordDraft(''); }}><KeyRound size={16} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody></table></div>
+          )}
+          {resetPasswordFor && (
+            <div className="panel__foot">
+              <label className="field-label" htmlFor="student-password">New password</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input id="student-password" type="password" value={newPasswordDraft} onChange={(e) => setNewPasswordDraft(e.target.value)} placeholder="New password (min. 8 characters)" className="field flex-1" />
+                <Button variant="secondary" size="sm" onClick={() => resetStudentPassword(resetPasswordFor)} disabled={resetSubmitting || newPasswordDraft.trim().length < 8}>Set password</Button>
+                <Button variant="quiet" size="sm" onClick={() => setResetPasswordFor(null)}>Cancel</Button>
               </div>
             </div>
           )}
-        </motion.section>
-      )}
+        </section>
+      </div>
     </div>
   );
 }

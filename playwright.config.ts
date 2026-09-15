@@ -3,6 +3,9 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: 'e2e',
   timeout: 30_000,
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
+  },
   webServer: [
     {
       command: 'npm run dev',
@@ -11,7 +14,7 @@ export default defineConfig({
       timeout: 30_000,
     },
     {
-      command: 'npm run dev',
+      command: 'TEACHER_SIGNUP_CODE=playwright-invite npm run dev',
       cwd: 'server',
       url: 'https://localhost:8443/api/health',
       ignoreHTTPSErrors: true,
@@ -23,4 +26,8 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     ignoreHTTPSErrors: true,
   },
+  projects: [
+    { name: 'e2e', testIgnore: /visual\// },
+    { name: 'visual', testMatch: /visual\/.*\.spec\.ts/ },
+  ],
 });

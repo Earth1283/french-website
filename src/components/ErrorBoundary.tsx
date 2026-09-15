@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import type { ReactNode, ErrorInfo } from 'react';
-import { FrenchFlag } from './ui/FrenchFlag';
+import { OH_NON } from './ui/Feedback';
+import { Button } from './ui/Button';
 
 interface Props {
   children: ReactNode;
@@ -29,45 +30,14 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '60vh',
-            padding: '2rem',
-            textAlign: 'center',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            <FrenchFlag size={48} />
-          </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary, #1a1f3a)' }}>
-            Oh non, quelque chose a planté
-          </h2>
-          <p style={{ color: 'var(--text-secondary, #6b7280)', marginBottom: '0.25rem', fontSize: '0.95rem' }}>
-            Something went wrong. The error has been logged.
-          </p>
-          <p style={{ color: 'var(--text-muted, #9aa0b2)', fontSize: '0.78rem', marginBottom: '1.5rem', fontFamily: 'monospace' }}>
-            {this.state.error.message}
-          </p>
-          <button
-            onClick={this.handleReset}
-            style={{
-              padding: '0.6rem 1.4rem',
-              borderRadius: '999px',
-              backgroundColor: 'var(--accent, #E63946)',
-              color: '#fff',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            Réessayer — Try again
-          </button>
+        <div className="page page--narrow">
+          <p className="ohnon__cry" lang="fr">{OH_NON}</p>
+          <h2 className="h-section mt-2">This screen stopped working.</h2>
+          <p className="t-body mt-2">Try again. If it keeps happening, reload the app.</p>
+          <p className="t-small mt-4">{this.state.error.message}</p>
+          <Button variant="primary" className="mt-6" onClick={this.handleReset}>
+            Try again
+          </Button>
         </div>
       );
     }

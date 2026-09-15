@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Results · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .back { margin-left: -6px; margin-bottom: 8px; }
+  .res__sub { margin: 6px 0 24px; }
+  .res__grid { display: grid; gap: 20px; }
+  @media (min-width: 1024px) { .res__grid { grid-template-columns: 7fr 5fr; gap: 28px; align-items: start; } }
+  .panel { padding: 16px 16px 20px; }
+  .panel .h-section { font-size: var(--t-21); margin-bottom: 4px; }
+  .panel .small { margin-bottom: 18px; }
+  .flag { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; padding: 14px 0; border-top: 1px solid var(--rule); }
+  .flag .i { margin-top: 2px; }
+  .flag__who { font: 600 var(--t-16)/1.3 var(--font-sign); }
+  .flag__q { font: 400 var(--t-14)/1.4 var(--font-sign); color: var(--ink-3); grid-column: 2; }
+  .flag__why { font: 400 var(--t-14)/1.45 var(--font-sign); color: var(--ink-2); grid-column: 2; margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--rule); }
+  .flag__act { grid-column: 2; margin-top: 10px; }
+  .flag--done .flag__who { color: var(--ink-3); }
+  .resolved { display: inline-flex; align-items: center; gap: 5px; font: 600 var(--t-14)/1 var(--font-sign); color: var(--go); }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js"></script>
+
+<header class="appbar">
+  <div class="appbar__inner">
+    <a class="wordmark" href="landing.html" aria-label="Bonjour Survival, home"><span class="wordmark__small">Bonjour</span><span class="wordmark__big">Survival</span></a>
+    <nav class="appbar__nav" aria-label="Main">
+      <a href="learn.html"><svg class="i"><use href="#i-map"/></svg>Learn</a>
+      <a href="practice.html"><svg class="i"><use href="#i-target"/></svg>Practice</a>
+      <a href="#"><svg class="i"><use href="#i-book-open"/></svg>Phrasebook</a>
+      <a href="#"><svg class="i"><use href="#i-circle-user-round"/></svg>Me</a>
+      <a href="class.html" aria-current="page"><svg class="i"><use href="#i-graduation-cap"/></svg>Class</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <a class="btn btn--quiet back" href="class.html"><svg class="i"><use href="#i-chevron-left"/></svg>Period 2 French</a>
+  <h1 class="h-page">Greetings quiz</h1>
+  <p class="small res__sub">Quiz assigned 8 September. 21 of 24 students submitted.</p>
+
+  <div class="res__grid">
+    <section class="sheet panel" aria-labelledby="missed">
+      <h2 class="h-section" id="missed">Most missed questions</h2>
+      <p class="small">Share of submissions that got each question wrong</p>
+      <div class="bars">
+        <div class="bar"><span class="bar__label">1. Which greeting do you use with a shopkeeper at 7 pm?</span><span class="bar__track"><i style="width:62%"></i></span><span class="bar__pct">62%</span></div>
+        <div class="bar"><span class="bar__label">4. Your teacher asks how you are. Tu or vous?</span><span class="bar__track"><i style="width:48%"></i></span><span class="bar__pct">48%</span></div>
+        <div class="bar"><span class="bar__label">2. Translate: “See you tomorrow”</span><span class="bar__track"><i style="width:33%"></i></span><span class="bar__pct">33%</span></div>
+        <div class="bar"><span class="bar__label">5. What does “enchanté” mean?</span><span class="bar__track"><i style="width:19%"></i></span><span class="bar__pct">19%</span></div>
+        <div class="bar"><span class="bar__label">3. Pick the reply to “Ça va ?”</span><span class="bar__track"><i style="width:5%"></i></span><span class="bar__pct">5%</span></div>
+      </div>
+    </section>
+
+    <section class="sheet panel" aria-labelledby="flags">
+      <h2 class="h-section" id="flags">Flagged by students</h2>
+      <p class="small">2 open, 1 resolved</p>
+
+      <div class="flag">
+        <svg class="i i--sm" style="color: var(--signal-text)"><use href="#i-flag"/></svg>
+        <span class="flag__who">Diego Ramírez, question 1</span>
+        <span class="flag__q">Which greeting do you use with a shopkeeper at 7 pm?</span>
+        <span class="flag__why">Isn't bonjour still OK at 7? My host family says it.</span>
+        <span class="flag__act"><button class="btn btn--secondary btn--sm">Mark resolved</button></span>
+      </div>
+      <div class="flag">
+        <svg class="i i--sm" style="color: var(--signal-text)"><use href="#i-flag"/></svg>
+        <span class="flag__who">Farah Siddiqui, question 4</span>
+        <span class="flag__q">Your teacher asks how you are. Tu or vous?</span>
+        <span class="flag__why">The answer key accepts only “vous” but the lesson said it depends.</span>
+        <span class="flag__act"><button class="btn btn--secondary btn--sm">Mark resolved</button></span>
+      </div>
+      <div class="flag flag--done">
+        <svg class="i i--sm" style="color: var(--ink-3)"><use href="#i-flag"/></svg>
+        <span class="flag__who">Ben Okafor, question 2</span>
+        <span class="flag__q">Translate: “See you tomorrow”</span>
+        <span class="flag__act"><span class="resolved"><svg class="i i--sm"><use href="#i-check"/></svg>Resolved</span></span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<nav class="tabbar" aria-label="Main">
+  <a href="learn.html"><svg class="i"><use href="#i-map"/></svg>Learn</a>
+  <a href="practice.html"><svg class="i"><use href="#i-target"/></svg>Practice</a>
+  <a href="#"><svg class="i"><use href="#i-book-open"/></svg>Phrasebook</a>
+  <a href="#"><svg class="i"><use href="#i-circle-user-round"/></svg>Me</a>
+  <a href="class.html" aria-current="page"><svg class="i"><use href="#i-graduation-cap"/></svg>Class</a>
+</nav>
+</body>
+</html>

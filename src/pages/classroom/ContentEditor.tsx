@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronLeft, Plus, Trash2, Save, Eye, Pencil } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Eye, Pencil } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { classroomApi } from '../../services/classroom';
-import { Button } from '../../components/ui/Button';
+import { Button, ButtonLink } from '../../components/ui/Button';
+import { Tabs } from '../../components/ui/Controls';
 import { MarkdownField } from '../../components/classroom/MarkdownField';
 import { MarkdownFormattingGuide } from '../../components/classroom/MarkdownFormattingGuide';
 import { parseMarkdownPage } from '../../utils/markdownPage';
@@ -147,7 +147,7 @@ export function ContentEditor() {
       } else {
         await classroomApi.post('/api/teacher/content', { title: title.trim(), subtitle: subtitle.trim(), body });
       }
-      navigate(-1);
+      navigate('/classes/content');
     } catch {
       setError('Could not save this content.');
     } finally {
@@ -156,205 +156,227 @@ export function ContentEditor() {
   }
 
   if (!loaded) {
-    return <div className="max-w-2xl mx-auto px-4 py-16 text-center text-muted">Loading…</div>;
+    return <div className="page text-center text-ink-3 py-16">Loading…</div>;
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-        <Link
-          to="/classes"
-          className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
-          style={{ color: 'var(--accent)' }}
-        >
-          <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Classes
-        </Link>
-        <h1 className="text-3xl font-bold text-primary">{isEditing ? 'Edit Content' : 'New Content'}</h1>
-      </motion.div>
+    <div className="page page--narrow">
+      <ButtonLink
+        to="/classes"
+        variant="quiet"
+        className="-ml-1.5 mb-2"
+      >
+        <ChevronLeft size={20} aria-hidden="true" />
+      </ButtonLink>
+      <h1 className="h-page">{isEditing ? 'Edit content' : 'New content'}</h1>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
-        <div className="p-4 space-y-3">
-          <div className="seg-control">
-            {(['lesson', 'quiz', 'reading'] as const).map((k) => (
-              <button key={k} onClick={() => setKind(k)} aria-pressed={kind === k} className="seg-item capitalize">
-                {k}
-              </button>
-            ))}
-          </div>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="ios-input py-2 text-sm" />
-          <input
-            value={subtitle}
-            onChange={(e) => setSubtitle(e.target.value)}
-            placeholder="Subtitle (optional)"
-            className="ios-input py-2 text-sm"
+      <div className="sheet p-4 mt-6">
+        <div className="space-y-3">
+          <Tabs
+            items={[
+              { value: 'lesson', label: 'Lesson' },
+              { value: 'quiz', label: 'Quiz' },
+              { value: 'reading', label: 'Reading' }
+            ]}
+            value={kind}
+            onChange={(v) => setKind(v as ContentKind)}
+            label="Content type"
           />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted">XP reward</span>
+          <div>
+            <label className="field-label">Title</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="field" />
+          </div>
+          <div>
+            <label className="field-label">Subtitle</label>
+            <input
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              placeholder="Subtitle (optional)"
+              className="field"
+            />
+          </div>
+          <div>
+            <label className="field-label">XP reward</label>
             <input
               type="number"
               min={0}
               value={xpReward}
               onChange={(e) => setXpReward(Math.max(0, parseInt(e.target.value) || 0))}
-              className="ios-input py-1.5 text-sm w-24"
+              className="field w-24"
             />
           </div>
           {kind === 'reading' && (
-            <label className="flex items-center gap-2 text-sm text-secondary cursor-pointer pt-1">
+            <label className="flex items-center gap-2 t-small text-ink cursor-pointer pt-1">
               <input type="checkbox" checked={gradable} onChange={(e) => setGradable(e.target.checked)} />
               Counts toward XP and grades
-              <span className="text-xs text-muted">— uncheck for supplementary reading students just mark as read</span>
+              <span className="text-ink-3">— uncheck for supplementary reading students just mark as read</span>
             </label>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {kind === 'lesson' && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="section-label">Vocabulary</div>
-          <div className="inset-group">
+        <section className="mt-6">
+          <h2 className="h-section">Vocabulary</h2>
+          <div className="sheet p-4">
             {vocab.map((v, i) => (
-              <div key={i} className="p-4 inset-divider grid grid-cols-3 gap-2 items-start">
-                <input
-                  value={v.french}
-                  onChange={(e) => setVocab((rows) => rows.map((r, j) => (j === i ? { ...r, french: e.target.value } : r)))}
-                  placeholder="French"
-                  className="ios-input py-1.5 text-sm"
-                />
-                <input
-                  value={v.english}
-                  onChange={(e) => setVocab((rows) => rows.map((r, j) => (j === i ? { ...r, english: e.target.value } : r)))}
-                  placeholder="English"
-                  className="ios-input py-1.5 text-sm"
-                />
-                <div className="flex gap-1">
+              <div key={i} className="grid grid-cols-3 gap-2 items-start pb-3 mb-3 border-b border-rule last:border-0 last:pb-0 last:mb-0">
+                <div>
+                  <label className="field-label">French</label>
                   <input
-                    value={v.pronunciation}
-                    onChange={(e) => setVocab((rows) => rows.map((r, j) => (j === i ? { ...r, pronunciation: e.target.value } : r)))}
-                    placeholder="Pronunciation"
-                    className="ios-input py-1.5 text-sm flex-1"
+                    value={v.french}
+                    onChange={(e) => setVocab((rows) => rows.map((r, j) => (j === i ? { ...r, french: e.target.value } : r)))}
+                    placeholder="French"
+                    className="field text-14"
                   />
-                  <button
-                    onClick={() => setVocab((rows) => rows.filter((_, j) => j !== i))}
-                    aria-label="Remove vocab item"
-                    className="p-1.5 cursor-pointer flex-shrink-0"
-                    style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                </div>
+                <div>
+                  <label className="field-label">English</label>
+                  <input
+                    value={v.english}
+                    onChange={(e) => setVocab((rows) => rows.map((r, j) => (j === i ? { ...r, english: e.target.value } : r)))}
+                    placeholder="English"
+                    className="field text-14"
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Pronunciation</label>
+                  <div className="flex gap-1">
+                    <input
+                      value={v.pronunciation}
+                      onChange={(e) => setVocab((rows) => rows.map((r, j) => (j === i ? { ...r, pronunciation: e.target.value } : r)))}
+                      placeholder="Pronunciation"
+                      className="field text-14 flex-1"
+                    />
+                    <button
+                      onClick={() => setVocab((rows) => rows.filter((_, j) => j !== i))}
+                      aria-label="Remove vocab item"
+                      className="btn btn--quiet btn--sm"
+                    >
+                      <Trash2 size={14} aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
-            <div className="p-3 inset-divider">
-              <Button variant="ghost" size="sm" onClick={() => setVocab((rows) => [...rows, blankVocab()])}>
-                <Plus size={14} /> Add word
-              </Button>
-            </div>
+            <Button variant="quiet" size="sm" onClick={() => setVocab((rows) => [...rows, blankVocab()])} className="mt-3">
+              <Plus size={14} /> Add word
+            </Button>
           </div>
-        </motion.section>
+        </section>
       )}
 
       {kind !== 'reading' && (
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <div className="section-label">{kind === 'lesson' ? 'Exercises' : 'Questions'}</div>
-        <div className="inset-group">
-          {exercises.map((ex, i) => (
-            <div key={i} className="p-4 inset-divider space-y-2">
-              <div className="flex items-center gap-2">
-                <select
-                  value={ex.type}
-                  onChange={(e) =>
-                    setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, type: e.target.value as ExerciseType } : r)))
-                  }
-                  className="ios-input py-1.5 text-sm flex-1"
-                >
-                  {EXERCISE_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setExercises((rows) => rows.filter((_, j) => j !== i))}
-                  aria-label="Remove exercise"
-                  className="p-1.5 cursor-pointer flex-shrink-0"
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-                >
-                  <Trash2 size={14} />
-                </button>
+        <section className="mt-6">
+          <h2 className="h-section">{kind === 'lesson' ? 'Exercises' : 'Questions'}</h2>
+          <div className="sheet p-4">
+            {exercises.map((ex, i) => (
+              <div key={i} className="pb-4 mb-4 border-b border-rule last:border-0 last:pb-0 last:mb-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <select
+                    value={ex.type}
+                    onChange={(e) =>
+                      setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, type: e.target.value as ExerciseType } : r)))
+                    }
+                    className="field flex-1"
+                  >
+                    {EXERCISE_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setExercises((rows) => rows.filter((_, j) => j !== i))}
+                    aria-label="Remove exercise"
+                    className="btn btn--quiet btn--sm"
+                  >
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="field-label">Prompt</label>
+                    <input
+                      value={ex.prompt}
+                      onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, prompt: e.target.value } : r)))}
+                      placeholder="Prompt"
+                      className="field"
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label">Correct answer</label>
+                    <input
+                      value={ex.answer}
+                      onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, answer: e.target.value } : r)))}
+                      placeholder="Correct answer"
+                      className="field"
+                    />
+                  </div>
+                  {ex.type === 'multiple-choice' && (
+                    <div>
+                      <label className="field-label">Options</label>
+                      <input
+                        value={ex.optionsCsv}
+                        onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, optionsCsv: e.target.value } : r)))}
+                        placeholder="Options, comma-separated (include the correct answer)"
+                        className="field"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <label className="field-label">Hint</label>
+                    <input
+                      value={ex.hint}
+                      onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, hint: e.target.value } : r)))}
+                      placeholder="Hint (optional)"
+                      className="field"
+                    />
+                  </div>
+                </div>
               </div>
-              <input
-                value={ex.prompt}
-                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, prompt: e.target.value } : r)))}
-                placeholder="Prompt"
-                className="ios-input py-1.5 text-sm"
-              />
-              <input
-                value={ex.answer}
-                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, answer: e.target.value } : r)))}
-                placeholder="Correct answer"
-                className="ios-input py-1.5 text-sm"
-              />
-              {ex.type === 'multiple-choice' && (
-                <input
-                  value={ex.optionsCsv}
-                  onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, optionsCsv: e.target.value } : r)))}
-                  placeholder="Options, comma-separated (include the correct answer)"
-                  className="ios-input py-1.5 text-sm"
-                />
-              )}
-              <input
-                value={ex.hint}
-                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, hint: e.target.value } : r)))}
-                placeholder="Hint (optional)"
-                className="ios-input py-1.5 text-sm"
-              />
-            </div>
-          ))}
-          <div className="p-3">
-            <Button variant="ghost" size="sm" onClick={() => setExercises((rows) => [...rows, blankExercise()])}>
+            ))}
+            <Button variant="quiet" size="sm" onClick={() => setExercises((rows) => [...rows, blankExercise()])} className="mt-3">
               <Plus size={14} /> Add {kind === 'lesson' ? 'exercise' : 'question'}
             </Button>
           </div>
-        </div>
-      </motion.section>
+        </section>
       )}
 
       {kind === 'reading' && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <div className="flex items-center justify-between mb-1">
-            <div className="section-label !mb-0">Pages</div>
+        <section className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="h-section">Pages</h2>
             <button
               onClick={() => setPreviewOn((p) => !p)}
-              className="text-xs font-medium flex items-center gap-1 cursor-pointer mr-1"
-              style={{ background: 'transparent', border: 'none', color: 'var(--accent)' }}
+              className="t-small text-enamel-text hover:underline"
             >
-              {previewOn ? <><Pencil size={12} /> Edit</> : <><Eye size={12} /> Preview</>}
+              {previewOn ? <>Edit</> : <>Preview</>}
             </button>
           </div>
-          <div className="mb-3">
+          <div className="mb-6">
             <MarkdownFormattingGuide />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {pages.map((pageText, i) => {
               const parsed = parseMarkdownPage(pageText);
               return (
-                <div key={i} className="card p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted uppercase tracking-wider">Page {i + 1}</span>
+                <div key={i} className="sheet p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="t-micro text-ink-2">Page {i + 1}</span>
                     <button
                       onClick={() => setPages((rows) => rows.filter((_, j) => j !== i))}
                       aria-label="Remove page"
-                      className="p-1.5 cursor-pointer flex-shrink-0"
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                      className="btn btn--quiet btn--sm"
                       disabled={pages.length === 1}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={14} aria-hidden="true" />
                     </button>
                   </div>
                   {previewOn ? (
                     <div>
-                      {parsed.title && <h3 className="font-display text-xl font-bold mb-2 text-primary">{parsed.title}</h3>}
-                      <div className="prose-reading text-sm">
+                      {parsed.title && <h3 className="text-21 font-semibold text-ink mb-2">{parsed.title}</h3>}
+                      <div className="prose-reading">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{parsed.body}</ReactMarkdown>
                       </div>
                     </div>
@@ -369,21 +391,21 @@ export function ContentEditor() {
                 </div>
               );
             })}
-            <Button variant="ghost" size="sm" onClick={() => setPages((rows) => [...rows, blankPage()])}>
+            <Button variant="quiet" size="sm" onClick={() => setPages((rows) => [...rows, blankPage()])}>
               <Plus size={14} /> Add page
             </Button>
           </div>
-        </motion.section>
+        </section>
       )}
 
       {error && (
-        <p className="text-sm" style={{ color: 'var(--danger)' }}>
+        <p className="t-small text-signal-text mt-6">
           {error}
         </p>
       )}
 
-      <Button onClick={save} disabled={saving} className="w-full">
-        <Save size={16} /> {saving ? 'Saving…' : 'Save'}
+      <Button onClick={save} disabled={saving} className="w-full mt-6" variant="primary">
+        {saving ? 'Saving…' : 'Save'}
       </Button>
     </div>
   );

@@ -1,0 +1,36 @@
+@layer components {
+  .h-page {
+    font: 700 var(--t-36)/1.08 var(--font-sign);
+    font-stretch: var(--w-semi);
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .h-section {
+    font: 650 var(--t-24)/1.15 var(--font-sign);
+    font-stretch: var(--w-semi);
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }
+  .t-title { font: 600 var(--t-18)/1.25 var(--font-sign); color: var(--ink); }
+  .t-body { font: 400 var(--t-16)/1.5 var(--font-sign); color: var(--ink-2); }
+  .t-small { font: 400 var(--t-14)/1.4 var(--font-sign); color: var(--ink-3); }
+  .t-micro { font: 600 var(--t-12)/1.2 var(--font-sign); color: var(--ink-3); }
+  .read-display {
+    font: 500 var(--t-36)/1.1 var(--font-read);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .fr { font-family: var(--font-read); font-style: italic; color: var(--signal-text); }
+  .fr-solo { font-family: var(--font-read); font-style: italic; color: var(--ink); }
+  .say-guide { font: 400 var(--t-14)/1.4 var(--font-sign); color: var(--ink-3); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--stack) var(--gutter) calc(var(--stack) * 2);
+  }
+  .page--narrow { max-width: 720px; }
+  .page--form { max-width: 480px; }
+}

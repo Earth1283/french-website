@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Landing · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .landing { max-width: 1120px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; gap: 20px; padding: calc(16px + env(safe-area-inset-top)) var(--gutter) calc(24px + env(safe-area-inset-bottom)); }
+  .landing__grid { display: grid; gap: 20px; }
+  @media (min-width: 1024px) {
+    .landing { justify-content: center; gap: 32px; }
+    .landing__grid { grid-template-columns: 7fr 5fr; gap: 32px; align-items: start; }
+  }
+  .landing__clock { padding: 26px 18px 18px; text-align: left; }
+  .landing__date {
+    display: inline-block; margin-top: 12px;
+    font: 600 var(--t-18)/1 var(--font-sign); font-stretch: var(--w-semi);
+    color: var(--board-dim); text-transform: none;
+  }
+  .landing__date:hover, .landing__date:focus-visible { color: var(--board-text); }
+  .landing__side { display: grid; gap: 16px; }
+  .postcard__label { font: 400 var(--t-14)/1 var(--font-sign); color: var(--ink-3); }
+  .postcard__phrase { margin-top: 76px; }
+  .postcard__say-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js"></script>
+
+<main class="landing">
+  <header class="split">
+    <a class="wordmark" href="#" aria-label="Bonjour Survival"><span class="wordmark__small">Bonjour</span><span class="wordmark__big">Survival</span></a>
+    <a class="btn btn--quiet" href="learn.html">Open the app</a>
+  </header>
+
+  <div class="landing__grid">
+    <section class="board" aria-labelledby="board-title">
+      <div class="landing__clock">
+        <div class="flaps" data-flap-clock aria-hidden="true">
+          <span class="flap">2</span><span class="flap">1</span><span class="flaps__colon">:</span><span class="flap">1</span><span class="flap">4</span>
+        </div>
+        <span class="sr-only" data-clock-sr></span>
+        <button class="landing__date" type="button" data-date lang="fr">mardi 15 septembre</button>
+      </div>
+
+      <div class="board__head">
+        <h1 class="board__title" id="board-title"><span data-greeting-fr lang="fr">Bonsoir</span><span class="board__title-en" data-greeting-en>Good evening</span></h1>
+        <span class="board__status" lang="fr">Départs</span>
+      </div>
+
+      <a class="board__row" href="lesson.html">
+        <span class="roundel" style="--line: var(--line-core-b)" aria-label="Line 4">4</span>
+        <span><span class="board__dest" style="display:block">Continue: At the Restaurant</span><span class="board__via" style="display:block">Feed Me or I'll Cry, lesson 2 of 3</span></span>
+        <span class="board__status board__status--now">Now</span>
+      </a>
+      <a class="board__row" href="#">
+        <span class="board__glyph"><svg class="i i--sm"><use href="#i-book-open"/></svg></span>
+        <span><span class="board__dest" style="display:block">Phrasebook</span><span class="board__via" style="display:block">Every phrase, with audio</span></span>
+        <span class="board__status">Open</span>
+      </a>
+      <a class="board__row" href="practice.html">
+        <span class="board__glyph"><svg class="i i--sm"><use href="#i-target"/></svg></span>
+        <span><span class="board__dest" style="display:block">Practice</span><span class="board__via" style="display:block">Converse, or find your level</span></span>
+        <span class="board__status">Last: A1</span>
+      </a>
+      <a class="board__row" href="#">
+        <span class="board__glyph"><svg class="i i--sm"><use href="#i-timer"/></svg></span>
+        <span><span class="board__dest" style="display:block">Focus</span><span class="board__via" style="display:block">A study timer with a new word every 30 seconds</span></span>
+        <span class="board__status">25 min</span>
+      </a>
+    </section>
+
+    <aside class="landing__side">
+      <article class="postcard" aria-labelledby="phrase">
+        <div class="postcard__photo" role="img" aria-label="Paris rooftops at dusk">
+          <svg viewBox="0 0 400 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <path fill="#3A3550" d="M0 150V92h14v-9h5v9h22l16-24h44l16 24h10V66h5v-7h8v7h5v26h26l12-18h56l12 18h12V76h5v-7h6v7h5v16h36l18-28h40l18 28h8V58h7v-8h6v8h7v92z"/>
+            <path fill="#27243A" d="M0 150v-38h56l12-14h54l12 14h36l14-16h66l14 16h50l12-12h44l12 12h28v38z"/>
+            <g fill="#F2B33D" opacity="0.9"><rect x="30" y="122" width="6" height="9"/><rect x="84" y="118" width="6" height="9"/><rect x="176" y="120" width="6" height="9"/><rect x="232" y="116" width="6" height="9"/><rect x="330" y="122" width="6" height="9"/><rect x="118" y="80" width="5" height="7"/><rect x="286" y="82" width="5" height="7"/></g>
+          </svg>
+          <span class="postcard__credit">Photo by a photographer on Unsplash</span>
+        </div>
+        <div class="postcard__back">
+          <div class="stamp" aria-hidden="true"><span>!</span></div>
+          <div class="postmark" aria-hidden="true">PARIS<br><span data-postmark-date>15.09.26</span></div>
+          <p class="postcard__label" lang="fr">Phrase du jour</p>
+          <p class="postcard__phrase" id="phrase" lang="fr">Petit à petit, l’oiseau fait son nid.</p>
+          <p class="postcard__en">Little by little, the bird builds its nest.</p>
+          <div class="postcard__say-row">
+            <button class="say" aria-label="Hear: Petit à petit, l’oiseau fait son nid"><svg class="i"><use href="#i-volume-2"/></svg></button>
+            <span class="postcard__say">puh-tee ah puh-tee, lwah-zoh feh son nee</span>
+          </div>
+        </div>
+      </article>
+
+      <div class="cluster">
+        <span class="stat"><svg class="i"><use href="#i-flame"/></svg>12-day streak</span>
+        <span class="stat"><svg class="i"><use href="#i-zap"/></svg>240 XP</span>
+      </div>
+    </aside>
+  </div>
+</main>
+</body>
+</html>

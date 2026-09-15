@@ -1,3 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <text y=".9em" font-size="90">🇫🇷</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="29" fill="#FFFFFF" stroke="#1E3F8A" stroke-width="6"/>
+  <polygon points="26.5,13 37.5,13 35,38 29,38" fill="#B91D2A"/>
+  <circle cx="32" cy="46" r="5" fill="#B91D2A"/>
 </svg>

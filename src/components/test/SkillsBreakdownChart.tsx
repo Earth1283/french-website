@@ -24,14 +24,14 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: Tooltip
     <div
       className="px-3 py-2 text-xs"
       style={{
-        backgroundColor: 'var(--bg-card)',
-        border: '0.5px solid var(--hairline)',
-        borderRadius: 'var(--radius-sm)',
-        boxShadow: 'var(--shadow-2)',
+        background: 'var(--sheet)',
+        border: '1px solid var(--rule)',
+        borderRadius: 8,
+        color: 'var(--ink)',
       }}
     >
-      <p className="font-bold text-primary text-sm">{d.pct}%</p>
-      <p className="text-muted">{d.name} · {d.correct}/{d.total}</p>
+      <p className="font-bold text-sm">{d.pct}%</p>
+      <p className="text-ink-2">{d.name} · {d.correct}/{d.total}</p>
     </div>
   );
 }
@@ -52,12 +52,12 @@ export function SkillsBreakdownChart({ topics }: SkillsBreakdownChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 36, bottom: 4, left: 4 }} barCategoryGap={10}>
-        <CartesianGrid horizontal={false} stroke="var(--hairline)" />
+        <CartesianGrid horizontal={false} stroke="var(--rule)" />
         <XAxis
           type="number"
           domain={[0, 100]}
           tickFormatter={(v: number) => `${v}%`}
-          tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+          tick={{ fill: 'var(--ink-3)', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
@@ -65,17 +65,17 @@ export function SkillsBreakdownChart({ topics }: SkillsBreakdownChartProps) {
           type="category"
           dataKey="name"
           width={168}
-          tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+          tick={{ fill: 'var(--ink-2)', fontSize: 12 }}
           axisLine={false}
           tickLine={false}
         />
-        <Tooltip content={<ChartTooltip />} cursor={{ fill: 'var(--bg-inset)' }} />
-        <Bar dataKey="pct" fill="var(--accent)" radius={[0, 4, 4, 0]} maxBarSize={20}>
+        <Tooltip content={<ChartTooltip />} cursor={{ fill: 'var(--inset)' }} />
+        <Bar dataKey="pct" fill="var(--enamel-text)" radius={[0, 4, 4, 0]} maxBarSize={20}>
           <LabelList
             dataKey="pct"
             position="right"
             formatter={(v: ReactNode) => `${v}%`}
-            style={{ fill: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}
+            style={{ fill: 'var(--ink)', fontSize: 12, fontWeight: 600 }}
           />
         </Bar>
       </BarChart>

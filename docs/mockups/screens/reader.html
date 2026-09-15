@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reader · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .lessonbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .lessonbar__title { flex: 1; min-width: 0; font: 600 var(--t-14)/1.2 var(--font-sign); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .iconbtn { display: grid; place-items: center; width: var(--tap); height: var(--tap); border-radius: var(--r-control); color: var(--ink-2); }
+  .iconbtn:hover { background: var(--inset); }
+  .reader__meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 64ch; margin: 0 auto 18px; }
+  .reader__title { max-width: 64ch; margin: 0 auto 24px; }
+  .reader__nav { display: flex; justify-content: space-between; max-width: 64ch; margin: 40px auto 0; }
+  .read { margin: 0 auto; }
+  .read .tablewrap { overflow-x: auto; }
+  .stations i.done, .stations i.here { }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js"></script>
+
+<main class="page page--narrow" style="--line: var(--line-core-b)">
+  <div class="lessonbar">
+    <a class="iconbtn" href="unit.html" aria-label="Back to Line 4"><svg class="i"><use href="#i-chevron-left"/></svg></a>
+    <span class="roundel roundel--sm" aria-label="Line 4">4</span>
+    <span class="lessonbar__title">At the Restaurant: Ordering &amp; Surviving</span>
+    <button class="iconbtn" aria-label="Save for later"><svg class="i"><use href="#i-bookmark"/></svg></button>
+  </div>
+
+  <div class="reader__meta">
+    <span class="small">Page 2 of 4, about 3 minutes</span>
+    <span class="stations" aria-hidden="true"><i class="done"></i><i class="here"></i><i></i><i></i></span>
+  </div>
+
+  <h1 class="read-display reader__title">Order politely and handle the follow-up</h1>
+
+  <article class="read" lang="en">
+    <p>The safest ordering frame is <em lang="fr">Je voudrais…</em> (“I would like…”). It is polite, complete, and works for one item or a whole meal.</p>
+    <blockquote>
+      <p><em lang="fr">Je voudrais le poulet, s’il vous plaît.</em> I would like the chicken, please.</p>
+      <p><em lang="fr">Pour moi, ce sera le poisson.</em> For me, it will be the fish.</p>
+    </blockquote>
+    <p><em lang="fr">Je veux</em> literally means “I want.” It is grammatically correct but can sound abrupt when directed at staff. Use <em lang="fr">je voudrais</em> until casual context gives you a reason to shorten it.</p>
+
+    <h2>Questions a server may ask</h2>
+    <p>Ordering triggers predictable follow-ups. Learn them as complete chunks:</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>You hear</th><th>They are asking</th></tr></thead>
+        <tbody>
+          <tr><td lang="fr">Vous avez choisi&#8239;?</td><td>Have you chosen?</td></tr>
+          <tr><td lang="fr">Et comme boisson&#8239;?</td><td>And to drink?</td></tr>
+          <tr><td lang="fr">Quelle cuisson&#8239;?</td><td>How would you like it cooked?</td></tr>
+          <tr><td lang="fr">Sur place ou à emporter&#8239;?</td><td>For here or to go?</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>If you need time, say <em lang="fr">Pas encore, merci</em> (“Not yet, thank you”). If you missed the question, use <em lang="fr">Pardon, pouvez-vous répéter&#8239;?</em></p>
+
+    <h2>Steak doneness</h2>
+    <ul>
+      <li><em lang="fr">bleu</em>: very rare</li>
+      <li><em lang="fr">saignant</em>: rare</li>
+      <li><em lang="fr">à point</em>: medium to medium-well, depending on the restaurant</li>
+      <li><em lang="fr">bien cuit</em>: well done</li>
+    </ul>
+  </article>
+
+  <div class="reader__nav">
+    <button class="btn btn--secondary"><svg class="i"><use href="#i-chevron-left"/></svg>Previous page</button>
+    <button class="btn btn--primary">Next page</button>
+  </div>
+</main>
+</body>
+</html>

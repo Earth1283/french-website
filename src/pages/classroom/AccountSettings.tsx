@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ChevronLeft, KeyRound, Check, ShieldAlert } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
-import { Button } from '../../components/ui/Button';
+import { Button, ButtonLink } from '../../components/ui/Button';
+import { Wordmark } from '../../components/ui/Signage';
 import { RecoveryCodeReveal } from '../../components/classroom/RecoveryCodeReveal';
 
 export function AccountSettings() {
@@ -56,62 +55,66 @@ export function AccountSettings() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-        <Link
-          to="/classes"
-          className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
-          style={{ color: 'var(--accent)' }}
-        >
-          <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Classes
-        </Link>
-        <h1 className="text-3xl font-bold text-primary mb-1">Account</h1>
-        <p className="text-secondary text-sm">{profile?.name} · {profile?.email}</p>
-      </motion.div>
+    <div className="page page--form">
+      <div className="mb-6 flex justify-center">
+        <Wordmark size="lg" />
+      </div>
+      <ButtonLink
+        to="/classes"
+        variant="quiet"
+        className="-ml-1.5 mb-2"
+      >
+        <ChevronLeft size={20} aria-hidden="true" /> Classes
+      </ButtonLink>
+      <h1 className="h-page text-center">Account</h1>
+      <p className="text-center t-body mb-6">{profile?.name} · {profile?.email}</p>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
-        <div className="p-4 space-y-3">
-          <p className="text-sm font-semibold text-primary flex items-center gap-2">
-            <KeyRound size={14} style={{ color: 'var(--accent)' }} /> Change Password
-          </p>
-          <input
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            placeholder="Current password"
-            type="password"
-            className="ios-input py-2 text-sm"
-          />
-          <input
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New password"
-            type="password"
-            className="ios-input py-2 text-sm"
-          />
-          <input
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm new password"
-            type="password"
-            className="ios-input py-2 text-sm"
-          />
+      <div className="sheet p-6 space-y-6">
+        <div className="space-y-4">
+          <h2 className="h-section">Change Password</h2>
+          <div className="field">
+            <input
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Current password"
+              type="password"
+            />
+          </div>
+          <div className="field">
+            <input
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New password"
+              type="password"
+            />
+          </div>
+          <div className="field">
+            <input
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+              type="password"
+            />
+          </div>
           {error && (
-            <p className="text-xs" style={{ color: 'var(--danger)' }}>
+            <p className="t-small text-signal-text" role="alert">
               {error}
             </p>
           )}
           {success && (
-            <p className="text-xs flex items-center gap-1" style={{ color: 'var(--success)' }}>
-              <Check size={12} /> Password updated.
+            <p className="t-small flex items-center gap-1 text-go">
+              <Check size={14} /> Password updated.
             </p>
           )}
           <Button
             onClick={submit}
             disabled={submitting || !currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()}
+            variant="primary"
+            block
           >
             Update Password
           </Button>
-          <p className="text-xs text-muted">
+          <p className="t-small text-ink-3">
             Forgot your password instead of just wanting to change it? Use the recovery code you saved at
             sign-up from the login screen's "Forgot password?" link.
             {role === 'student'
@@ -119,14 +122,10 @@ export function AccountSettings() {
               : " Lost that too? The server's README explains the recovery script you can run on the machine it's hosted on."}
           </p>
         </div>
-      </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="inset-group">
-        <div className="p-4 space-y-3">
-          <p className="text-sm font-semibold text-primary flex items-center gap-2">
-            <ShieldAlert size={14} style={{ color: '#f59e0b' }} /> Recovery Code
-          </p>
-          <p className="text-xs text-muted">
+        <div className="border-t border-rule pt-6 space-y-4">
+          <h2 className="h-section">Recovery Code</h2>
+          <p className="t-small text-ink-3">
             Get a new recovery code if you lost the one from sign-up. This invalidates your old code.
           </p>
           {newRecoveryCode ? (
@@ -140,13 +139,13 @@ export function AccountSettings() {
               <Button variant="secondary" size="sm" onClick={() => setConfirmRegenerate(false)}>
                 Cancel
               </Button>
-              <Button variant="tinted" size="sm" onClick={regenerateRecoveryCode} disabled={regenerating}>
+              <Button variant="secondary" size="sm" onClick={regenerateRecoveryCode} disabled={regenerating}>
                 Yes, generate a new one
               </Button>
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

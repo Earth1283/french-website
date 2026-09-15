@@ -4,6 +4,7 @@ import type { ProgressState } from '../types';
 import { UNITS, A1_UNIT_IDS } from '../data/units';
 import { vocabKey, defaultCard, isDue, updateCard } from '../utils/srs';
 import { computeNewStreak, todayString } from '../utils/streak';
+import { migrateProgress } from './migrateProgress';
 
 interface ProgressStore extends ProgressState {
   completeLesson: (lessonId: string, xpEarned: number) => void;
@@ -11,9 +12,6 @@ interface ProgressStore extends ProgressState {
   setDarkMode: (value: boolean) => void;
   setUnit12Mode: (mode: 'full-freedom' | 'earned-reward') => void;
   setOnboardingDone: () => void;
-  setAccentColor: (color: string) => void;
-  setAppleMode: (value: boolean) => void;
-  setReducedGpu: (value: boolean) => void;
   addXP: (amount: number) => void;
   setXP: (value: number) => void;
   setStreak: (value: number) => void;
@@ -29,17 +27,18 @@ interface ProgressStore extends ProgressState {
   getTotalXP: () => number;
 }
 
-const BADGES: Record<string, { id: string; name: string; emoji: string; description: string }> = {
-  'croissant-rookie': { id: 'croissant-rookie', name: 'Croissant Rookie', emoji: '🥐', description: 'Complete the Food unit' },
-  'direction-seeker': { id: 'direction-seeker', name: 'Direction Seeker', emoji: '🗺️', description: 'Complete the Directions unit' },
-  'false-friend-spotter': { id: 'false-friend-spotter', name: 'False Friend Spotter', emoji: '🪤', description: 'Complete the False Friends unit' },
-  'first-aid': { id: 'first-aid', name: 'First Aid', emoji: '🏥', description: 'Complete the Medical unit' },
-  'polyglot-apprentice': { id: 'polyglot-apprentice', name: 'Polyglot Apprentice', emoji: '📚', description: 'Complete any 5 units' },
-  'a1-certified': { id: 'a1-certified', name: 'A1 Certified', emoji: '🎓', description: 'Complete all A1 curriculum units' },
-  'certified-parisien': { id: 'certified-parisien', name: 'Certified Parisien', emoji: '🗼', description: 'Complete all 12 units' },
+const BADGES: Record<string, { id: string; name: string; description: string }> = {
+  'croissant-rookie': { id: 'croissant-rookie', name: 'Croissant Rookie', description: 'Complete the Food unit' },
+  'direction-seeker': { id: 'direction-seeker', name: 'Direction Seeker', description: 'Complete the Directions unit' },
+  'false-friend-spotter': { id: 'false-friend-spotter', name: 'False Friend Spotter', description: 'Complete the False Friends unit' },
+  'first-aid': { id: 'first-aid', name: 'First Aid', description: 'Complete the Medical unit' },
+  'polyglot-apprentice': { id: 'polyglot-apprentice', name: 'Polyglot Apprentice', description: 'Complete any 5 units' },
+  'a1-certified': { id: 'a1-certified', name: 'A1 Certified', description: 'Complete all A1 curriculum units' },
+  'certified-parisien': { id: 'certified-parisien', name: 'Certified Parisien', description: 'Complete all 12 units' },
 };
 
 export { BADGES };
+
 
 export const useProgressStore = create<ProgressStore>()(
   persist(
@@ -52,9 +51,6 @@ export const useProgressStore = create<ProgressStore>()(
       darkMode: false,
       unit12Mode: null,
       onboardingDone: false,
-      accentColor: '#E63946',
-      appleMode: false,
-      reducedGpu: false,
       bookmarkedLessons: [],
       srsData: {},
 
@@ -106,12 +102,6 @@ export const useProgressStore = create<ProgressStore>()(
       setUnit12Mode: (mode) => set({ unit12Mode: mode }),
 
       setOnboardingDone: () => set({ onboardingDone: true }),
-
-      setAccentColor: (color) => set({ accentColor: color }),
-
-      setAppleMode: (value) => set({ appleMode: value }),
-
-      setReducedGpu: (value) => set({ reducedGpu: value }),
 
       addXP: (amount) => {
         const s = get();
@@ -198,6 +188,8 @@ export const useProgressStore = create<ProgressStore>()(
     }),
     {
       name: 'french-progress',
+      version: 1,
+      migrate: persisted => migrateProgress(persisted) as unknown as ProgressStore,
     }
   )
 );

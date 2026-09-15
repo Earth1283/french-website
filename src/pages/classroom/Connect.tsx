@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ExternalLink, ServerCog, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
+import { Wordmark } from '../../components/ui/Signage';
 
 export function Connect() {
   const navigate = useNavigate();
@@ -41,125 +41,96 @@ export function Connect() {
 
   if (backendUrl && !certTrusted) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-3xl font-bold text-primary mb-1">Trust this server</h1>
-          <p className="text-secondary text-sm font-display italic">Une seule fois.</p>
-        </motion.div>
+      <div className="page page--form">
+        <div className="mb-6 flex justify-center">
+          <Wordmark size="lg" />
+        </div>
+        <h1 className="h-page text-center">Trust this server</h1>
 
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="card p-5 mt-6 space-y-4"
-        >
-          <div className="flex items-start gap-3">
-            <span
-              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: 'var(--accent-tint)' }}
-            >
-              <ShieldCheck size={17} style={{ color: 'var(--accent)' }} />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-primary">{backendUrl}</p>
-              <p className="text-xs text-muted mt-1 leading-relaxed">
-                This classroom server uses a self-signed certificate, which is completely normal for a
-                self-hosted class — your browser just doesn't recognize it yet. Open it once below and
-                click through your browser's warning. You'll only need to do this once per device.
-              </p>
-            </div>
-          </div>
+        <div className="sheet p-6 space-y-5">
+          <h2 className="h-section">Follow these steps</h2>
+          <ol className="list-decimal pl-5 t-body space-y-3">
+            <li>Open the server page to set up the certificate in your browser.</li>
+            <li>Click through your browser's warning about the self-signed certificate.</li>
+            <li>Come back here and click the button below.</li>
+          </ol>
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2">
             <a
               href={`${backendUrl}/api/health`}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary text-sm flex-1 justify-center"
+              className="btn btn--secondary"
             >
-              <ExternalLink size={14} /> Open server page
+              <ExternalLink size={16} /> Open server page
             </a>
-            <Button onClick={checkTrust} disabled={checking} className="flex-1">
-              {checking ? 'Checking…' : "I trusted it — Continue"}
+            <Button onClick={checkTrust} disabled={checking} variant="primary" block>
+              {checking ? 'Checking…' : 'I trusted it — Continue'}
             </Button>
           </div>
 
           {error && (
-            <p className="text-xs" style={{ color: 'var(--danger)' }}>
+            <p className="t-small text-signal-text" role="alert">
               {error}
             </p>
           )}
 
           <button
             onClick={forgetBackend}
-            className="text-xs text-muted hover:underline cursor-pointer"
-            style={{ background: 'transparent', border: 'none' }}
+            className="btn btn--quiet btn--sm self-start"
           >
             Use a different server address
           </button>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold text-primary mb-1">Connect to a Class</h1>
-        <p className="text-secondary text-sm font-display italic">Votre professeur a l'adresse.</p>
-      </motion.div>
+    <div className="page page--form">
+      <div className="mb-6 flex justify-center">
+        <Wordmark size="lg" />
+      </div>
+      <h1 className="h-page text-center">Connect to a Class</h1>
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-        className="card p-5 mt-6 space-y-4"
-      >
-        <div className="flex items-start gap-3">
-          <span
-            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: 'var(--accent-tint)' }}
+      <div className="sheet p-6 space-y-5">
+        <p className="t-small">
+          Your teacher runs their own classroom server and can give you its address — ask them for it,
+          or if you're the teacher, see your server's terminal output after starting it.{' '}
+          <a
+            href="https://github.com/Earth1283/french-website/blob/main/server/SETUP.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-enamel-text hover:underline"
           >
-            <ServerCog size={17} style={{ color: 'var(--accent)' }} />
-          </span>
-          <p className="text-xs text-muted leading-relaxed">
-            Your teacher runs their own classroom server and can give you its address — ask them for it,
-            or if you're the teacher, see your server's terminal output after starting it.{' '}
-            <a
-              href="https://github.com/Earth1283/french-website/blob/main/server/SETUP.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'var(--accent)' }}
-            >
-              Setting one up for the first time? Read the setup guide.
-            </a>
-          </p>
-        </div>
+            Setting one up for the first time? Read the setup guide.
+          </a>
+        </p>
 
-        <input
-          value={urlDraft}
-          onChange={(e) => setUrlDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && connect(urlDraft)}
-          placeholder="https://192.168.1.42:8443"
-          className="ios-input py-2.5 text-sm"
-          autoCapitalize="off"
-          autoCorrect="off"
-          spellCheck={false}
-        />
-        <Button onClick={() => connect(urlDraft)} disabled={!urlDraft.trim()} className="w-full">
+        <div className="field">
+          <input
+            value={urlDraft}
+            onChange={(e) => setUrlDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && connect(urlDraft)}
+            placeholder="https://192.168.1.42:8443"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+        </div>
+        <Button onClick={() => connect(urlDraft)} disabled={!urlDraft.trim()} variant="primary" block>
           Connect <ArrowRight size={16} />
         </Button>
 
         {recentBackendUrls.length > 0 && (
-          <div className="pt-2" style={{ borderTop: '0.5px solid var(--hairline)' }}>
-            <p className="text-xs text-muted mb-2">Recent servers</p>
-            <div className="flex flex-wrap gap-2">
+          <div className="pt-4 border-t border-rule">
+            <p className="t-micro text-ink-3 mb-3">Recent servers</p>
+            <div className="sheet rows">
               {recentBackendUrls.map((url) => (
                 <button
                   key={url}
                   onClick={() => connect(url)}
-                  className="chip cursor-pointer"
-                  style={{ border: 'none' }}
+                  className="row w-full text-left"
                 >
                   {url}
                 </button>
@@ -167,7 +138,7 @@ export function Connect() {
             </div>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

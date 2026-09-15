@@ -1,112 +1,108 @@
 @import "tailwindcss";
+@import "./tokens.css";
+@import "./parts/type.css";
+@import "./parts/chrome.css";
+@import "./parts/controls.css";
+@import "./parts/signage.css";
+@import "./parts/learn.css";
+@import "./parts/board.css";
+@import "./parts/ambient.css";
+@import "./parts/lesson.css";
+@import "./parts/lesson-flow.css";
+@import "./parts/ledger.css";
+@import "./parts/classroom.css";
+@import "./parts/overlay.css";
+@import "./reader.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme static {
+  --font-sign: 'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-read: 'Newsreader Variable', 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-plaque: 6px;
+  --radius-control: 8px;
+  --radius-sheet: 12px;
+  --radius-ticket: 14px;
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-18: 1.125rem;
+  --text-21: 1.3125rem;
+  --text-24: 1.5rem;
+  --text-36: 2.25rem;
+  --text-48: 3rem;
+  --text-60: 3.75rem;
+  --text-72: 4.5rem;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-inset: var(--inset);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-enamel: var(--enamel);
+  --color-enamel-text: var(--enamel-text);
+  --color-on-enamel: var(--on-enamel);
+  --color-on-enamel-2: var(--on-enamel-2);
+  --color-signal: var(--signal);
+  --color-signal-text: var(--signal-text);
+  --color-amber: var(--amber);
+  --color-amber-text: var(--amber-text);
+  --color-go: var(--go);
+  --color-board: var(--board);
+  --color-board-cell: var(--board-cell);
+  --color-board-rule: var(--board-rule);
+  --color-board-text: var(--board-text);
+  --color-board-dim: var(--board-dim);
+  --color-board-amber: var(--board-amber);
+  --color-line: var(--line);
+}
 
 @layer base {
-  :root {
-    /* ── Palette (Bonjour Survival cream / red) ── */
-    --bg: #FAF7F0;
-    --bg-card: #FFFFFF;
-    --bg-card-hover: #F5F2EB;
-    --bg-inset: #F1EDE4;
-    --text-primary: #1a1f3a;
-    --text-secondary: #5a6072;
-    --text-muted: #9aa0b2;
-    --accent: #E63946;
-    --accent-hover: #cc2f3b;
-    --gold: #F4A261;
-    --gold-light: #fde8d0;
-    --success: #2A9D8F;
-    --success-light: #d0f0ec;
-    --danger: #E03131;
-
-    /* ── Materials ── */
-    --border: #E8E4DB;
-    --hairline: rgba(26, 31, 58, 0.10);
-    --glass: rgba(250, 247, 240, 0.78);
-    --glass-card: rgba(255, 255, 255, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.60);
-    --glass-highlight: rgba(255, 255, 255, 0.85);
-
-    /* ── Elevation ── */
-    --shadow-1: 0 1px 2px rgba(26, 31, 58, 0.04), 0 2px 8px rgba(26, 31, 58, 0.05);
-    --shadow-2: 0 2px 6px rgba(26, 31, 58, 0.05), 0 8px 24px rgba(26, 31, 58, 0.08);
-    --shadow-3: 0 4px 12px rgba(26, 31, 58, 0.08), 0 16px 48px rgba(26, 31, 58, 0.14);
-    --shadow: var(--shadow-1);
-    --shadow-hover: var(--shadow-2);
-
-    /* ── Geometry (continuous-corner feel) ── */
-    --radius-sm: 12px;
-    --radius: 18px;
-    --radius-lg: 26px;
-
-    /* ── Type ── */
-    --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
-               'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    --font-display: 'Playfair Display', Georgia, serif;
-
-    /* ── Dynamic accent tints (iOS-style fills derived from --accent) ── */
-    --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
-    --accent-tint-strong: color-mix(in srgb, var(--accent) 18%, transparent);
-    --accent-soft-bg: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
-  }
-
-  .dark {
-    --bg: #0f1117;
-    --bg-card: #1a1f2e;
-    --bg-card-hover: #232840;
-    --bg-inset: #141826;
-    --text-primary: #eef0f7;
-    --text-secondary: #a0a8c0;
-    --text-muted: #6070a0;
-    --border: #2a3050;
-    --hairline: rgba(238, 240, 247, 0.12);
-    --glass: rgba(15, 17, 23, 0.72);
-    --glass-card: rgba(26, 31, 46, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.10);
-    --glass-highlight: rgba(255, 255, 255, 0.08);
-    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 8px rgba(0, 0, 0, 0.35);
-    --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45);
-    --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.45), 0 16px 48px rgba(0, 0, 0, 0.60);
-    --gold-light: #3a2a10;
-    --success-light: #0a2a28;
-    --accent-tint: color-mix(in srgb, var(--accent) 22%, transparent);
-    --accent-tint-strong: color-mix(in srgb, var(--accent) 30%, transparent);
-    --accent-soft-bg: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
-  }
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
   html {
-    font-family: var(--font-ui);
+    font-family: var(--font-sign);
     font-size: 16px;
     line-height: 1.5;
-    letter-spacing: -0.011em;
+    color: var(--ink);
+    background: var(--paper);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    background-color: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
     min-height: 100dvh;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* UI headings are sans with Apple-tight tracking; opt into serif with .font-display */
-  h1, h2, h3, h4 {
-    font-family: var(--font-ui);
-    font-weight: 700;
-    letter-spacing: -0.022em;
-    line-height: 1.2;
+  :focus-visible {
+    outline: 2px solid var(--enamel-text);
+    outline-offset: 2px;
   }
 
-  input, textarea, button, select {
-    font-family: var(--font-ui);
+  ::selection {
+    background: color-mix(in oklab, var(--enamel-text) 25%, transparent);
+  }
+
+  .lucide {
+    stroke-width: 1.75;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: 4px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -115,544 +111,4 @@
       transition-duration: 0.01ms !important;
     }
   }
-}
-
-@layer utilities {
-  .font-display {
-    font-family: var(--font-display);
-    letter-spacing: 0;
-  }
-
-  /* ── Surfaces ─────────────────────────────────────────── */
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-1);
-    transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.3, 0.64, 1),
-                background-color 0.3s ease, border-color 0.3s ease;
-  }
-
-  .card-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-2);
-  }
-
-  .glass {
-    background: var(--glass);
-    backdrop-filter: blur(22px) saturate(180%);
-    -webkit-backdrop-filter: blur(22px) saturate(180%);
-    border: 0.5px solid var(--glass-border);
-  }
-
-  .glass-card {
-    background: var(--glass-card);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 0.5px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-2), inset 0 0.5px 0 var(--glass-highlight);
-  }
-
-  /* iOS press affordance — use on anything tappable */
-  .ios-press {
-    transition: transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.18s ease;
-  }
-  .ios-press:active {
-    transform: scale(0.97);
-    opacity: 0.85;
-  }
-
-  /* ── Grouped inset lists (Settings-style) ─────────────── */
-  .inset-group {
-    background: var(--bg-card);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-1);
-    overflow: hidden;
-  }
-
-  .inset-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.8rem 1rem;
-    min-height: 2.75rem;
-  }
-
-  .inset-row + .inset-row,
-  .inset-divider {
-    border-top: 0.5px solid var(--hairline);
-  }
-
-  /* Phrasebook results rows use their own padding/alignment utility
-     classes (not .inset-row's), so they reuse only the sibling-border
-     rule via a dedicated class rather than inheriting .inset-row's
-     conflicting layout properties. */
-  .phrasebook-row + .phrasebook-row {
-    border-top: 0.5px solid var(--hairline);
-  }
-
-  /* ── Text ─────────────────────────────────────────────── */
-  .text-primary { color: var(--text-primary); }
-  .text-secondary { color: var(--text-secondary); }
-  .text-muted { color: var(--text-muted); }
-
-  .french-word {
-    font-family: var(--font-display);
-    font-style: italic;
-    color: var(--accent);
-  }
-
-  /* iOS section header: small caps over a group */
-  .section-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-    padding: 0 1rem;
-    margin-bottom: 0.45rem;
-  }
-
-  /* ── Buttons (iOS: filled / tinted / bordered / plain) ── */
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 980px;
-    padding: 0.7rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-    letter-spacing: -0.01em;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    transition: background 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.18s ease;
-  }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
-
-  .btn-tinted {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    background: var(--accent-tint);
-    color: var(--accent);
-    border: none;
-    border-radius: 980px;
-    padding: 0.7rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    transition: background 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
-  }
-  .btn-tinted:hover { background: var(--accent-tint-strong); }
-  .btn-tinted:active { transform: scale(0.97); }
-
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--hairline);
-    border-radius: 980px;
-    padding: 0.7rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    box-shadow: var(--shadow-1);
-    transition: background 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
-  }
-  .btn-secondary:hover { background: var(--bg-card-hover); }
-  .btn-secondary:active { transform: scale(0.97); }
-
-  /* ── Badges & chips ───────────────────────────────────── */
-  .xp-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: var(--gold-light);
-    color: #b86a20;
-    border-radius: 99px;
-    padding: 0.18rem 0.65rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: -0.005em;
-  }
-
-  .dark .xp-badge { color: var(--gold); }
-
-  .a1-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    background: var(--success-light);
-    color: var(--success);
-    border-radius: 99px;
-    padding: 0.18rem 0.6rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    border-radius: 99px;
-    padding: 0.3rem 0.8rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: var(--bg-card);
-    border: 1px solid var(--hairline);
-    color: var(--text-secondary);
-  }
-
-  /* ── Inputs ───────────────────────────────────────────── */
-  .ios-input {
-    width: 100%;
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-sm);
-    background: var(--bg-inset);
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    padding: 0.7rem 1rem;
-    outline: none;
-    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-  }
-  .ios-input:focus {
-    border-color: var(--accent);
-    background: var(--bg-card);
-    box-shadow: 0 0 0 3.5px var(--accent-tint);
-  }
-  .ios-input::placeholder { color: var(--text-muted); }
-
-  /* ── Segmented control ────────────────────────────────── */
-  .seg-control {
-    display: flex;
-    background: var(--bg-inset);
-    border-radius: 12px;
-    padding: 2px;
-    gap: 2px;
-  }
-  .seg-item {
-    flex: 1;
-    border: none;
-    background: transparent;
-    border-radius: 10px;
-    padding: 0.45rem 0.8rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: color 0.18s ease;
-    position: relative;
-    font-family: var(--font-ui);
-  }
-  .seg-item[aria-pressed="true"] { color: var(--text-primary); }
-}
-
-/* ── Flip card (lesson flashcards) ── */
-.flip-card-inner {
-  transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.5, 1);
-}
-
-.flip-card-inner.flipped {
-  transform: rotateY(180deg);
-}
-
-.flip-card-front,
-.flip-card-back {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.flip-card-back {
-  transform: rotateY(180deg);
-}
-
-@keyframes xp-pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
-
-.xp-pop {
-  animation: xp-pop 0.4s ease;
-}
-
-.progress-bar-fill {
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 99px;
-}
-
-/* ── Apple-ify — true iOS system palette + materials + type (structure is iOS for everyone already) ── */
-.apple-mode {
-  --bg: #F2F2F7;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #E5E5EA;
-  --bg-inset: #E9E9EE;
-  --accent: #007AFF;
-  --accent-hover: #0062CC;
-  --text-primary: #000000;
-  --text-secondary: #3C3C43;
-  --text-muted: #8E8E93;
-  --border: #C6C6C8;
-  --hairline: rgba(60, 60, 67, 0.16);
-
-  /* True iOS system semantic colors, not the Bonjour palette */
-  --success: #34C759;
-  --success-light: color-mix(in srgb, var(--success) 18%, white);
-  --danger: #FF3B30;
-  --gold: #FF9500;
-  --gold-light: color-mix(in srgb, var(--gold) 20%, white);
-
-  /* Flatter, neutral native shadow (Bonjour shadows are warm-tinted) */
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.10), 0 16px 48px rgba(0, 0, 0, 0.18);
-
-  /* Neutral iOS material tint — the base --glass* vars carry the warm Bonjour cream/black */
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-card: rgba(255, 255, 255, 0.68);
-  --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-}
-
-.apple-mode.dark {
-  --bg: #000000;
-  --bg-card: #1C1C1E;
-  --bg-card-hover: #2C2C2E;
-  --bg-inset: #161618;
-  /* Dark-mode iOS blue is a stop brighter than light-mode blue, not a straight carry-over */
-  --accent: #0A84FF;
-  --accent-hover: #409CFF;
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(235, 235, 245, 0.6);
-  --text-muted: #8E8E93;
-  --border: #38383A;
-  --hairline: rgba(84, 84, 88, 0.5);
-
-  --success: #30D158;
-  --success-light: color-mix(in srgb, var(--success) 22%, black);
-  --danger: #FF453A;
-  --gold: #FF9F0A;
-  --gold-light: color-mix(in srgb, var(--gold) 22%, black);
-
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.55);
-  --shadow-3: 0 2px 6px rgba(0, 0, 0, 0.5), 0 16px 48px rgba(0, 0, 0, 0.65);
-
-  --glass: rgba(28, 28, 30, 0.72);
-  --glass-card: rgba(28, 28, 30, 0.68);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-highlight: rgba(255, 255, 255, 0.1);
-}
-
-/* Vibrancy: Apple's translucent materials read thicker/more saturated than the base glass */
-.apple-mode .glass,
-.apple-mode .glass-card {
-  backdrop-filter: blur(40px) saturate(190%);
-  -webkit-backdrop-filter: blur(40px) saturate(190%);
-}
-
-/* Bottom tab bar acrylic — base pill gets a lighter blur; Apple-ify pushes it to true iOS acrylic */
-.bottom-nav-pill {
-  backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
-  -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
-}
-
-.apple-mode .bottom-nav-pill {
-  backdrop-filter: blur(46px) saturate(210%) brightness(1.08);
-  -webkit-backdrop-filter: blur(46px) saturate(210%) brightness(1.08);
-}
-
-/* No decorative serif under Apple-ify — San Francisco only, italic kept for the French flourish */
-.apple-mode .font-display,
-.apple-mode .french-word {
-  font-family: var(--font-ui);
-  font-style: italic;
-}
-
-/* Apple's large-type tracking runs tighter than the site's base heading tracking */
-.apple-mode h1,
-.apple-mode h2,
-.apple-mode h3,
-.apple-mode h4 {
-  letter-spacing: -0.03em;
-}
-
-/* xp-badge hardcodes an amber, not a token — pull it onto the real system color under Apple-ify */
-.apple-mode .xp-badge {
-  color: var(--gold);
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .apple-mode .glass,
-  .apple-mode .glass-card {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: var(--bg-card);
-  }
-}
-
-/* ── Deep-lesson reader (long-form article typography) ──────────────────
-   Distinct from the app's card/chip chrome on purpose: this is the one
-   place people read continuous prose instead of tapping through discrete
-   steps, so it earns its own editorial treatment — serif headline, a
-   generous measure, a drop cap on the lesson's opening paragraph. Every
-   *italicized* word in the markdown body picks up the site's signature
-   french-word treatment (serif italic, accent color) for free, so authors
-   just wrap a French term in asterisks to get the flourish. */
-.prose-reading {
-  max-width: 64ch;
-  margin: 0 auto;
-  color: var(--text-primary);
-  font-size: 1.0625rem;
-  line-height: 1.75;
-}
-
-.prose-reading > * + * {
-  margin-top: 1.15em;
-}
-
-.prose-reading h2 {
-  font-size: 1.35rem;
-  margin-top: 1.8em;
-}
-
-.prose-reading h3 {
-  font-size: 1.1rem;
-  margin-top: 1.5em;
-}
-
-.prose-reading p {
-  color: var(--text-secondary);
-}
-
-.prose-reading strong {
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-.prose-reading em {
-  font-family: var(--font-display);
-  font-style: italic;
-  color: var(--accent);
-}
-
-.prose-reading.drop-cap > p:first-of-type::first-letter {
-  font-family: var(--font-display);
-  font-style: normal;
-  float: left;
-  font-size: 3.4em;
-  line-height: 0.82;
-  font-weight: 700;
-  padding: 0.04em 0.08em 0 0;
-  color: var(--accent);
-}
-
-.prose-reading ul,
-.prose-reading ol {
-  color: var(--text-secondary);
-  padding-left: 1.4em;
-}
-
-.prose-reading li + li {
-  margin-top: 0.4em;
-}
-
-.prose-reading blockquote {
-  margin: 0;
-  padding: 0.9rem 1.1rem;
-  background: var(--bg-inset);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-style: italic;
-  color: var(--text-secondary);
-}
-
-.prose-reading blockquote p {
-  color: inherit;
-}
-
-.prose-reading code {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 0.87em;
-  background: var(--bg-inset);
-  color: var(--accent);
-  padding: 0.15em 0.4em;
-  border-radius: 6px;
-}
-
-.prose-reading a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-decoration-color: var(--hairline);
-  text-underline-offset: 2px;
-}
-
-.prose-reading a:hover {
-  text-decoration-color: currentColor;
-}
-
-.prose-reading hr {
-  border: none;
-  height: 4px;
-  width: 4px;
-  border-radius: 99px;
-  background: var(--hairline);
-  margin: 2em auto;
-}
-
-.prose-reading .table-scroll {
-  overflow-x: auto;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--hairline);
-}
-
-.prose-reading table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.92rem;
-}
-
-.prose-reading th {
-  text-align: left;
-  background: var(--bg-inset);
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.55rem 0.8rem;
-}
-
-.prose-reading td {
-  padding: 0.55rem 0.8rem;
-  border-top: 0.5px solid var(--hairline);
-  color: var(--text-secondary);
 }

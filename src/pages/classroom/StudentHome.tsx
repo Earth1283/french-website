@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion, KeyRound } from 'lucide-react';
+import { CheckCircle2, Circle, KeyRound, LogOut, ShieldQuestion, UserPlus } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
-import { Button } from '../../components/ui/Button';
+import { Button, ButtonLink } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
+import { Board, BoardGlyph, BoardRow } from '../../components/ui/Board';
 import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
 import type { AssignmentInfo, ClassInfo } from '../../types/classroom';
 
-interface ClassWithAssignments extends ClassInfo {
-  assignments: AssignmentInfo[];
+interface ClassWithAssignments extends ClassInfo { assignments: AssignmentInfo[]; }
+
+function assignmentStatus(assignment: AssignmentInfo) {
+  if (assignment.completed) return `Done${assignment.score == null ? '' : ` · ${assignment.score}%`}`;
+  if (!assignment.due_at) return 'Open';
+  return `Due ${new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(assignment.due_at))}`;
 }
 
 export function StudentHome() {
@@ -23,18 +27,10 @@ export function StudentHome() {
 
   async function load() {
     const res = await classroomApi.get<{ classes: ClassInfo[] }>('/api/student/classes');
-    const withAssignments = await Promise.all(
-      res.classes.map(async (c) => {
-        const a = await classroomApi.get<{ assignments: AssignmentInfo[] }>(`/api/student/classes/${c.id}/assignments`);
-        return { ...c, assignments: a.assignments };
-      })
-    );
-    setClasses(withAssignments);
+    setClasses(await Promise.all(res.classes.map(async (cls) => ({ ...cls, assignments: (await classroomApi.get<{ assignments: AssignmentInfo[] }>(`/api/student/classes/${cls.id}/assignments`)).assignments }))));
   }
 
-  useEffect(() => {
-    load().catch(() => setError('Could not load your classes.'));
-  }, []);
+  useEffect(() => { load().catch(() => setError('Could not load your classes.')); }, []);
 
   async function join() {
     if (!joinCode.trim()) return;
@@ -44,101 +40,47 @@ export function StudentHome() {
       await classroomApi.post('/api/student/enroll', { joinCode: joinCode.trim().toUpperCase() });
       setJoinCode('');
       await load();
-    } catch (err) {
-      setError(err instanceof ClassroomApiError ? err.message : 'Could not join that class.');
+    } catch (caught) {
+      setError(caught instanceof ClassroomApiError ? caught.message : 'Could not join that class.');
     } finally {
       setJoining(false);
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-primary mb-1">My Classes</h1>
-          <p className="text-secondary text-sm">{profile?.name}</p>
+    <div className="page">
+      <header className="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div><h1 className="h-page">My classes</h1><p className="t-small text-ink-2 mt-1">{profile?.name}</p></div>
+        <nav className="flex flex-wrap items-center gap-2" aria-label="Classroom account">
+          <Button variant="quiet" size="sm" onClick={() => setPrivacyOpen(true)}><ShieldQuestion size={16} /> What does my teacher see?</Button>
+          <ButtonLink to="/classes/account" variant="quiet" size="sm"><KeyRound size={16} /> Account</ButtonLink>
+          <Button variant="quiet" size="sm" onClick={disconnect}><LogOut size={16} /> Log out</Button>
+        </nav>
+      </header>
+
+      <Modal open={privacyOpen} onClose={() => setPrivacyOpen(false)} title="Your data"><ClassroomPrivacyNotice /></Modal>
+
+      <section className="sheet p-4 mb-6" aria-labelledby="join-title">
+        <h2 id="join-title" className="h-section mb-3">Join a class</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input value={joinCode} onChange={(e) => setJoinCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && join()} placeholder="Join code, e.g. GEZ6-4F4T" className="field flex-1 uppercase tracking-wider" />
+          <Button onClick={join} disabled={joining || !joinCode.trim()}><UserPlus size={16} /> Join</Button>
         </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <button
-            onClick={() => setPrivacyOpen(true)}
-            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-            style={{ background: 'transparent', border: 'none' }}
-          >
-            <ShieldQuestion size={12} /> What does my teacher see?
-          </button>
-          <Link to="/classes/account" className="text-xs text-muted hover:underline flex items-center gap-1 no-underline">
-            <KeyRound size={12} /> Account
-          </Link>
-          <button
-            onClick={disconnect}
-            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
-            style={{ background: 'transparent', border: 'none' }}
-          >
-            <LogOut size={12} /> Log out
-          </button>
-        </div>
-      </motion.div>
+        {error && <p className="t-small text-signal-text mt-2" role="alert">{error}</p>}
+      </section>
 
-      <Modal open={privacyOpen} onClose={() => setPrivacyOpen(false)} title="Your Data">
-        <ClassroomPrivacyNotice />
-      </Modal>
-
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-4">
-        <div className="flex gap-2">
-          <input
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && join()}
-            placeholder="Join code, e.g. GEZ6-4F4T"
-            className="ios-input py-2 text-sm flex-1 font-mono uppercase"
-          />
-          <Button onClick={join} disabled={joining || !joinCode.trim()}>
-            <UserPlus size={15} /> Join
-          </Button>
-        </div>
-        {error && (
-          <p className="text-xs mt-2" style={{ color: 'var(--danger)' }}>
-            {error}
-          </p>
-        )}
-      </motion.div>
-
-      {classes === null && <p className="text-sm text-muted text-center py-8">Loading…</p>}
-      {classes?.length === 0 && (
-        <p className="text-sm text-muted text-center py-8">Not enrolled in any classes yet — join one above.</p>
-      )}
-
-      {classes?.map((cls, i) => (
-        <motion.section key={cls.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * i }}>
-          <div className="section-label">{cls.name}</div>
-          <div className="inset-group">
-            {cls.assignments.length === 0 && <p className="p-4 text-sm text-muted">Nothing assigned yet.</p>}
-            {cls.assignments.map((a) => (
-              <Link
-                key={a.id}
-                to={`/classes/assignment/${a.id}`}
-                className="inset-row justify-between no-underline"
-              >
-                <div className="flex items-center gap-2.5">
-                  {a.completed ? (
-                    <CheckCircle2 size={16} style={{ color: 'var(--success)' }} />
-                  ) : (
-                    <Circle size={16} style={{ color: 'var(--text-muted)' }} />
-                  )}
-                  <div>
-                    <p className="text-sm font-semibold text-primary">{a.title}</p>
-                    <p className="text-xs text-muted capitalize">
-                      {a.kind}
-                      {a.completed ? ` · ${a.score}%` : ''}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight size={15} style={{ color: 'var(--text-muted)' }} />
-              </Link>
+      {classes === null && <p className="sheet p-6 t-body text-ink-3">Loading…</p>}
+      {classes?.length === 0 && <p className="sheet p-6 t-body text-ink-3">Not enrolled in any classes yet — join one above.</p>}
+      <div className="grid gap-5 lg:grid-cols-2">
+        {classes?.map((cls) => (
+          <Board key={cls.id} title={cls.name} gloss="Assignments" titleId={`class-${cls.id}`}>
+            {cls.assignments.length === 0 && <div className="board__row"><BoardGlyph><Circle size={16} /></BoardGlyph><span className="board__via">Nothing assigned yet.</span></div>}
+            {cls.assignments.map((assignment) => (
+              <BoardRow key={assignment.id} to={`/classes/assignment/${assignment.id}`} glyph={<BoardGlyph>{assignment.completed ? <CheckCircle2 size={17} /> : <Circle size={17} />}</BoardGlyph>} dest={assignment.title} via={<span className="capitalize">{assignment.kind}</span>} status={assignmentStatus(assignment)} now={!assignment.completed && !!assignment.due_at} />
             ))}
-          </div>
-        </motion.section>
-      ))}
+          </Board>
+        ))}
+      </div>
     </div>
   );
 }

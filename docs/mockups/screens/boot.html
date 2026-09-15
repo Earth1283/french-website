@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Loading screen · Bonjour Survival mockup</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<link rel="stylesheet" href="../assets/components.css">
+<script src="../assets/mockup.js"></script>
+<style>
+  .boot { min-height: 100dvh; display: grid; place-items: center; padding: var(--gutter); background: var(--paper); }
+  .boot__inner { display: grid; justify-items: center; gap: 28px; width: min(340px, 100%); }
+  .boot__strip { width: 100%; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .boot__status { flex: 1; font: 600 var(--t-16)/1 var(--font-sign); font-stretch: var(--w-semi); color: var(--board-text); perspective: 400px; }
+  .boot__status span { display: inline-block; }
+  .boot__status .is-flipping { animation: flap var(--dur-3) var(--ease-in-out); }
+  .boot__pct { font: 700 var(--t-14)/1 var(--font-sign); font-stretch: var(--w-condensed); color: var(--board-amber); font-variant-numeric: tabular-nums; }
+  .boot__track { width: 100%; height: 3px; border-radius: 2px; background: var(--inset); overflow: hidden; margin-top: -18px; }
+  .boot__fill { height: 100%; width: 45%; background: var(--enamel-text); transition: width 500ms var(--ease-out); }
+</style>
+</head>
+<body>
+<main class="boot">
+  <div class="boot__inner">
+    <span class="wordmark wordmark--lg" role="img" aria-label="Bonjour Survival"><span class="wordmark__small">Bonjour</span><span class="wordmark__big">Survival</span></span>
+    <div class="board boot__strip" role="status">
+      <span class="boot__status"><span id="msg">Loading lessons…</span></span>
+      <span class="boot__pct" id="pct">45%</span>
+    </div>
+    <div class="boot__track" aria-hidden="true"><div class="boot__fill" id="fill"></div></div>
+  </div>
+</main>
+<script>
+  (function () {
+    if (new URLSearchParams(location.search).get('time')) return;
+    var steps = [['Opening the station…', 10], ['Loading lessons…', 45], ['Loading the lines…', 83], ['Prêt !', 100]];
+    var i = 0, msg = document.getElementById('msg'), pct = document.getElementById('pct'), fill = document.getElementById('fill');
+    setInterval(function () {
+      i = (i + 1) % steps.length;
+      msg.classList.remove('is-flipping'); void msg.offsetWidth; msg.classList.add('is-flipping');
+      setTimeout(function () { msg.textContent = steps[i][0]; pct.textContent = steps[i][1] + '%'; }, 120);
+      fill.style.width = steps[i][1] + '%';
+    }, 1400);
+  })();
+</script>
+</body>
+</html>
