@@ -1,0 +1,16 @@
+export const A1_COMPETENCIES = [
+  { label: 'Emergency phrases & help-seeking', units: ['emergency'] },
+  { label: 'Introduce yourself (name, nationality)', units: ['greetings'] },
+  { label: 'Basic greetings & farewells', units: ['greetings'] },
+  { label: 'Numbers, dates & time', units: ['numbers'] },
+  { label: 'Food & ordering in restaurants', units: ['food'] },
+  { label: 'Asking for & giving directions', units: ['directions'] },
+  { label: 'Transport (metro, bus, taxi)', units: ['directions'] },
+  { label: 'Shopping & pharmacy basics', units: ['shopping'] },
+  { label: 'Hotel & accommodation', units: ['accommodation'] },
+  { label: 'Medical vocabulary & symptoms', units: ['medical'] },
+  { label: 'Simple present tense (être, avoir)', units: ['grammar'] },
+  { label: 'Negation (ne...pas)', units: ['grammar'] },
+  { label: 'Basic question forms', units: ['grammar', 'emergency'] },
+  { label: 'Weather & small talk', units: ['smalltalk'] },
+];

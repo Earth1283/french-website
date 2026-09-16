@@ -7,22 +7,10 @@ import {
 import { useProgressStore } from '../stores/progressStore';
 import { useConversationStore } from '../stores/conversationStore';
 import { Button } from '../components/ui/Button';
+import { ToggleSwitch } from '../components/ui/ToggleSwitch';
 import type { Difficulty } from '../types';
-
-const ACCENT_PRESETS = [
-  { hex: '#E63946', label: 'French Red' },
-  { hex: '#3B82F6', label: 'Bleu de France' },
-  { hex: '#8B5CF6', label: 'Lavender' },
-  { hex: '#F59E0B', label: 'Amber' },
-  { hex: '#EC4899', label: 'Rose' },
-  { hex: '#0EA5E9', label: 'Sky' },
-];
-
-const DIFFICULTY_LABELS: Record<Difficulty, { name: string; desc: string }> = {
-  1: { name: 'Guided', desc: 'Multiple choice answers' },
-  2: { name: 'Standard', desc: 'Type your response' },
-  3: { name: 'Challenge', desc: 'AI judges freely' },
-};
+import { ACCENT_PRESETS, DIFFICULTY_LABELS } from '../data/settingsConstants';
+import { exportProgress, importProgress } from '../lib/progressBackup';
 
 export function Settings() {
   const {
@@ -49,61 +37,13 @@ export function Settings() {
   useEffect(() => { setXpDraft(String(xp)); }, [xp]);
   useEffect(() => { setStreakDraft(String(streak)); }, [streak]);
 
-  function handleExport() {
-    const state = useProgressStore.getState();
-    const data = {
-      completedLessons: state.completedLessons,
-      xp: state.xp,
-      streak: state.streak,
-      lastStudiedDate: state.lastStudiedDate,
-      earnedBadges: state.earnedBadges,
-      bookmarkedLessons: state.bookmarkedLessons,
-      srsData: state.srsData,
-      unit12Mode: state.unit12Mode,
-      accentColor: state.accentColor,
-      exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'bonjour-survival-progress.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const raw = ev.target?.result as string;
-        const data = JSON.parse(raw);
-        const store = useProgressStore.getState();
-        // Only restore fields we recognise; ignore unknown keys
-        if (Array.isArray(data.completedLessons)) store.resetProgress();
-        if (Array.isArray(data.completedLessons)) {
-          useProgressStore.setState({
-            completedLessons: data.completedLessons ?? [],
-            xp: typeof data.xp === 'number' ? data.xp : 0,
-            streak: typeof data.streak === 'number' ? data.streak : 0,
-            lastStudiedDate: data.lastStudiedDate ?? '',
-            earnedBadges: Array.isArray(data.earnedBadges) ? data.earnedBadges : [],
-            bookmarkedLessons: Array.isArray(data.bookmarkedLessons) ? data.bookmarkedLessons : [],
-            srsData: data.srsData && typeof data.srsData === 'object' ? data.srsData : {},
-            ...(data.unit12Mode ? { unit12Mode: data.unit12Mode } : {}),
-            ...(data.accentColor ? { accentColor: data.accentColor } : {}),
-          });
-        }
-        setImportStatus('ok');
-        setTimeout(() => setImportStatus('idle'), 3000);
-      } catch {
-        setImportStatus('error');
-        setTimeout(() => setImportStatus('idle'), 3000);
-      }
-    };
-    reader.readAsText(file);
+    importProgress(file).then(status => {
+      setImportStatus(status);
+      setTimeout(() => setImportStatus('idle'), 3000);
+    });
     e.target.value = '';
   }
 
@@ -328,7 +268,7 @@ export function Settings() {
               <p className="text-sm font-semibold text-primary">Export Progress</p>
               <p className="text-xs text-muted mt-0.5">Download your progress as a JSON file.</p>
             </div>
-            <Button variant="tinted" size="sm" onClick={handleExport}>
+            <Button variant="tinted" size="sm" onClick={exportProgress}>
               <Download size={14} /> Export
             </Button>
           </div>
@@ -580,31 +520,3 @@ function SettingRow({
   );
 }
 
-function ToggleSwitch({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <button
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="relative w-[51px] h-[31px] rounded-full transition-colors duration-200 flex-shrink-0 cursor-pointer"
-      style={{
-        backgroundColor: checked ? 'var(--success)' : 'var(--bg-inset)',
-        border: 'none',
-        boxShadow: checked ? 'none' : 'inset 0 0 0 1px var(--hairline)',
-      }}
-    >
-      <motion.span
-        className="absolute top-[2px] left-[2px] w-[27px] h-[27px] bg-white rounded-full"
-        style={{ boxShadow: '0 2px 5px rgba(0,0,0,0.2), 0 0.5px 1px rgba(0,0,0,0.1)' }}
-        animate={{ x: checked ? 20 : 0 }}
-        transition={{ type: 'spring', damping: 24, stiffness: 420 }}
-      />
-    </button>
-  );
-}

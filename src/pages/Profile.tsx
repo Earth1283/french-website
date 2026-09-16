@@ -8,23 +8,7 @@ import { UNITS } from '../data/units';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { getLevelProgress, MAX_LEVEL } from '../utils/levels';
-
-const A1_COMPETENCIES = [
-  { label: 'Emergency phrases & help-seeking', units: ['emergency'] },
-  { label: 'Introduce yourself (name, nationality)', units: ['greetings'] },
-  { label: 'Basic greetings & farewells', units: ['greetings'] },
-  { label: 'Numbers, dates & time', units: ['numbers'] },
-  { label: 'Food & ordering in restaurants', units: ['food'] },
-  { label: 'Asking for & giving directions', units: ['directions'] },
-  { label: 'Transport (metro, bus, taxi)', units: ['directions'] },
-  { label: 'Shopping & pharmacy basics', units: ['shopping'] },
-  { label: 'Hotel & accommodation', units: ['accommodation'] },
-  { label: 'Medical vocabulary & symptoms', units: ['medical'] },
-  { label: 'Simple present tense (être, avoir)', units: ['grammar'] },
-  { label: 'Negation (ne...pas)', units: ['grammar'] },
-  { label: 'Basic question forms', units: ['grammar', 'emergency'] },
-  { label: 'Weather & small talk', units: ['smalltalk'] },
-];
+import { A1_COMPETENCIES } from '../data/a1Competencies';
 
 export function Profile() {
   const { xp, streak, completedLessons, earnedBadges, isA1Complete, getCompletedUnits, resetProgress } = useProgressStore();
