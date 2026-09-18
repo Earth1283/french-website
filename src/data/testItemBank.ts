@@ -1,19 +1,12 @@
-import type { CEFRBand, Exercise, ExerciseType, TestItem, Unit } from '../types';
+import type { Exercise, TestItem } from '../types';
 import { UNITS } from './units';
+import { estimateSeedDifficulty, getUnitCEFR } from './unitDifficulty';
 import { AUTHORED_ITEMS } from './authoredTestItems';
 
 const SYNTHETIC_TOPIC_META: Record<string, { emoji: string; title: string; color: string }> = {
-  'b1-opinions': { emoji: '💭', title: 'Opinions & Nuance', color: '#8B5CF6' },
-  'b1-hypothetical': { emoji: '🔮', title: 'Hypotheticals & Conditional', color: '#0EA5E9' },
-  'b1-narration': { emoji: '📖', title: 'Past Tense Narration', color: '#F59E0B' },
-  'b1-workplace': { emoji: '💼', title: 'Workplace French', color: '#457B9D' },
   'b1-media': { emoji: '📰', title: 'News & Media', color: '#E76F51' },
   'b1-abstract': { emoji: '🧩', title: 'Abstract & Idiomatic', color: '#2A9D8F' },
   'b2-syntax': { emoji: '🔗', title: 'Advanced Syntax & Relative Clauses', color: '#6D6875' },
-  'b2-subjunctive': { emoji: '🎭', title: 'Subjunctive Nuance', color: '#B5838D' },
-  'b2-argumentation': { emoji: '🗣️', title: 'Debate & Argumentation', color: '#D62828' },
-  'b2-register': { emoji: '🎩', title: 'Register & Style', color: '#003049' },
-  'b2-idiomatic': { emoji: '🗝️', title: 'Advanced Idioms', color: '#C1121F' },
   'b2-abstract-issues': { emoji: '🌐', title: 'Society & Global Issues', color: '#219EBC' },
   'housing': { emoji: '🏠', title: 'Housing & Apartments', color: '#FB8B24' },
   'hobbies': { emoji: '🎸', title: 'Hobbies & Leisure', color: '#5F0F40' },
@@ -39,23 +32,6 @@ export function getTopicMeta(topicId: string): { emoji: string; title: string; c
   return { emoji: '📌', title: topicId, color: 'var(--accent)' };
 }
 
-// Existing lesson content has no true B1/B2 material — isBeyondA1 units
-// ("false friends", "slang", "trains", "culture", "cinema") sit at the
-// harder end of A2, not real B1+ (that gap is exactly why AUTHORED_ITEMS
-// exists).
-function getUnitCEFR(unit: Unit): CEFRBand {
-  if (unit.isPreA1) return 'pre-a1';
-  if (unit.isA1) return 'a1';
-  return 'a2';
-}
-
-function estimateSeedDifficulty(unit: Unit, lessonIndexInUnit: number, totalLessonsInUnit: number, type: ExerciseType): number {
-  const base = unit.isPreA1 ? -2.2 : unit.isA1 ? -0.6 : unit.isA1A2 ? 0.4 : unit.isBeyondA1 ? 1.3 : 0;
-  const positionBump = 0.15 * (lessonIndexInUnit / totalLessonsInUnit);
-  const typeBump = type === 'translation' ? 0.3 : type === 'fill-blank' ? 0.1 : 0;
-  return base + positionBump + typeBump;
-}
-
 function buildDerivedItems(): TestItem[] {
   const items: TestItem[] = [];
   for (const unit of UNITS) {
@@ -78,7 +54,7 @@ function buildDerivedItems(): TestItem[] {
   return items;
 }
 
-/** All 171 existing lesson exercises, wrapped with IRT metadata. Resolved to their live `Exercise` at runtime — see `resolveTestItemExercise` — so edits to lesson content never desync from the bank. */
+/** Every built-in lesson exercise, wrapped with IRT metadata. Resolved to their live `Exercise` at runtime — see `resolveTestItemExercise` — so edits to lesson content never desync from the bank. */
 export const DERIVED_ITEMS: TestItem[] = buildDerivedItems();
 
 // A guessing floor (3PL "c") only applies to multiple-choice items — a lucky

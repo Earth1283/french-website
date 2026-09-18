@@ -2,16 +2,18 @@ import { Link } from 'react-router-dom';
 import { Lock, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ProgressBar } from '../layout/ProgressBar';
+import { AdvancedLevelTag } from '../ui/LevelTag';
 import type { Unit } from '../../types';
 
 interface UnitCardProps {
   unit: Unit;
   progress: number;
   isLocked: boolean;
+  testedOut?: boolean;
   index: number;
 }
 
-export function UnitCard({ unit, progress, isLocked, index }: UnitCardProps) {
+export function UnitCard({ unit, progress, isLocked, testedOut = false, index }: UnitCardProps) {
   const isComplete = progress === 100;
   const lessonCount = unit.lessons.length;
 
@@ -50,6 +52,14 @@ export function UnitCard({ unit, progress, isLocked, index }: UnitCardProps) {
               ✓
             </span>
           )}
+          {testedOut && !isComplete && (
+            <span
+              className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold"
+              style={{ backgroundColor: 'color-mix(in srgb, var(--success) 15%, transparent)', color: 'var(--success)' }}
+            >
+              Tested out
+            </span>
+          )}
           {unit.isPreA1 && (
             <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
               Pre-A1
@@ -61,6 +71,7 @@ export function UnitCard({ unit, progress, isLocked, index }: UnitCardProps) {
               A1→A2
             </span>
           )}
+          <AdvancedLevelTag unit={unit} />
           {unit.isBeyondA1 && (
             <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold bg-purple-100 text-purple-700 dark:bg-purple-600 dark:text-white">
               Bonus

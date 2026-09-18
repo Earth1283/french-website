@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette, BookOpen, MessageSquare, Database, AlertTriangle,
-  ChevronDown, ChevronUp, Key, Download, Upload, RotateCcw, RefreshCw,
+  ChevronDown, ChevronUp, Key, Download, Upload, RotateCcw, RefreshCw, Route,
 } from 'lucide-react';
 import { useProgressStore } from '../stores/progressStore';
 import { useConversationStore } from '../stores/conversationStore';
+import { useLearnerStore } from '../stores/learnerStore';
 import { Button } from '../components/ui/Button';
 import { ToggleSwitch } from '../components/ui/ToggleSwitch';
+import { PersonalizeModal } from '../components/home/PersonalizeModal';
 import type { Difficulty } from '../types';
 import { ACCENT_PRESETS, DIFFICULTY_LABELS } from '../data/settingsConstants';
+import { GOAL_LABELS } from '../utils/learningPath';
 import { exportProgress, importProgress } from '../lib/progressBackup';
 
 export function Settings() {
@@ -26,9 +29,12 @@ export function Settings() {
 
   const { geminiApiKey, difficulty, setApiKey, setDifficulty } = useConversationStore();
 
+  const { profile, clearProfile } = useLearnerStore();
+
   const [dangerOpen, setDangerOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmOnboarding, setConfirmOnboarding] = useState(false);
+  const [personalizeOpen, setPersonalizeOpen] = useState(false);
   const [xpDraft, setXpDraft] = useState(String(xp));
   const [streakDraft, setStreakDraft] = useState(String(streak));
   const [keyDraft, setKeyDraft] = useState('');
@@ -257,6 +263,47 @@ export function Settings() {
         </div>
       </motion.section>
 
+      <motion.section
+        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+      >
+        <GroupLabel icon={<Route size={12} />} title="Learning Path" />
+        <div className="inset-group">
+          <div className="inset-row justify-between">
+            <div>
+              <p className="text-sm font-semibold text-primary">Personalized Path</p>
+              <p className="text-xs text-muted mt-0.5">
+                {profile
+                  ? `For ${profile.goals.map(g => GOAL_LABELS[g]).join(' + ')}${
+                      profile.targetDate
+                        ? ` · by ${new Date(profile.targetDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`
+                        : ''
+                    }`
+                  : 'Standard order. Tell us your goals to reorder lessons.'}
+              </p>
+            </div>
+            <Button
+              variant="tinted"
+              size="sm"
+              onClick={() => setPersonalizeOpen(true)}
+            >
+              {profile ? 'Edit' : 'Set up'}
+            </Button>
+          </div>
+
+          {profile && (
+            <div className="inset-row inset-divider justify-between">
+              <div>
+                <p className="text-sm font-semibold text-primary">Reset Path</p>
+                <p className="text-xs text-muted mt-0.5">Go back to the standard lesson order.</p>
+              </div>
+              <Button variant="secondary" size="sm" onClick={clearProfile}>
+                Reset
+              </Button>
+            </div>
+          )}
+        </div>
+      </motion.section>
+
       {/* ── Data & Privacy ── */}
       <motion.section
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -310,7 +357,7 @@ export function Settings() {
           borderRadius: 'var(--radius)',
           border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
         }}
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
       >
         <button
           onClick={() => setDangerOpen(v => !v)}
@@ -485,6 +532,8 @@ export function Settings() {
       </motion.section>
 
       <div className="h-4" />
+
+      <PersonalizeModal open={personalizeOpen} onClose={() => setPersonalizeOpen(false)} />
     </div>
   );
 }

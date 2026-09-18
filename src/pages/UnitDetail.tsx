@@ -6,6 +6,7 @@ import { hasDeepLesson } from '../content/deepLessons';
 import { useProgressStore } from '../stores/progressStore';
 import { Button } from '../components/ui/Button';
 import { TAP_SPRING } from '../utils/motion';
+import { AdvancedLevelTag } from '../components/ui/LevelTag';
 
 export function UnitDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -71,6 +72,7 @@ export function UnitDetail() {
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h1 className="text-2xl font-bold text-primary">{unit.title}</h1>
                 {unit.isA1 && <span className="a1-tag">A1</span>}
+                <AdvancedLevelTag unit={unit} size="md" />
                 {unit.isBeyondA1 && (
                   <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-600 dark:text-white">
                     Bonus

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronRight, Timer, BookOpen, MessageSquare, Play, ArrowRight } from 'lucide-react';
 import { useProgressStore } from '../../stores/progressStore';
-import { getNextLesson } from '../../utils/nextLesson';
+import { useLearningPath } from '../../hooks/useLearningPath';
 
 const TAP = { type: 'spring', damping: 18, stiffness: 480 } as const;
 
@@ -12,8 +12,8 @@ const glassPill =
   'border border-white/20 bg-white/10 backdrop-blur-md transition-colors hover:bg-white/20';
 
 export function Launcher() {
-  const { completedLessons, isUnit12Unlocked, streak, xp } = useProgressStore();
-  const next = getNextLesson(completedLessons, isUnit12Unlocked());
+  const { completedLessons, streak, xp } = useProgressStore();
+  const next = useLearningPath().path.steps[0];
   const started = completedLessons.length > 0;
 
   return (

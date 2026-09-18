@@ -1,17 +1,26 @@
 import { useProgressStore } from '../stores/progressStore';
+import { useTestStore } from '../stores/testStore';
+import { useLearnerStore } from '../stores/learnerStore';
 
 export function exportProgress() {
-  const state = useProgressStore.getState();
+  const progressState = useProgressStore.getState();
+  const testState = useTestStore.getState();
+  const learnerState = useLearnerStore.getState();
+
   const data = {
-    completedLessons: state.completedLessons,
-    xp: state.xp,
-    streak: state.streak,
-    lastStudiedDate: state.lastStudiedDate,
-    earnedBadges: state.earnedBadges,
-    bookmarkedLessons: state.bookmarkedLessons,
-    srsData: state.srsData,
-    unit12Mode: state.unit12Mode,
-    accentColor: state.accentColor,
+    version: 2,
+    completedLessons: progressState.completedLessons,
+    xp: progressState.xp,
+    streak: progressState.streak,
+    lastStudiedDate: progressState.lastStudiedDate,
+    earnedBadges: progressState.earnedBadges,
+    bookmarkedLessons: progressState.bookmarkedLessons,
+    srsData: progressState.srsData,
+    unit12Mode: progressState.unit12Mode,
+    accentColor: progressState.accentColor,
+    testHistory: testState.history,
+    learnerProfile: learnerState.profile,
+    exerciseStats: learnerState.exerciseStats,
     exportedAt: new Date().toISOString(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -46,6 +55,19 @@ export function importProgress(file: File): Promise<'ok' | 'error'> {
             ...(data.accentColor ? { accentColor: data.accentColor } : {}),
           });
         }
+
+        if (Array.isArray(data.testHistory)) {
+          useTestStore.setState({ history: data.testHistory });
+        }
+
+        if (data.learnerProfile && typeof data.learnerProfile === 'object' && Array.isArray(data.learnerProfile.goals)) {
+          useLearnerStore.getState().setProfile(data.learnerProfile);
+        }
+
+        if (data.exerciseStats && typeof data.exerciseStats === 'object') {
+          useLearnerStore.setState({ exerciseStats: data.exerciseStats });
+        }
+
         resolve('ok');
       } catch {
         resolve('error');

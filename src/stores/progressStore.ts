@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ProgressState } from '../types';
+import type { ProgressState, Unit } from '../types';
 import { UNITS, A1_UNIT_IDS } from '../data/units';
 import { vocabKey, defaultCard, isDue, updateCard } from '../utils/srs';
 import { computeNewStreak, todayString } from '../utils/streak';
+import { useLearnerStore } from './learnerStore';
 
 interface ProgressStore extends ProgressState {
   completeLesson: (lessonId: string, xpEarned: number) => void;
@@ -36,7 +37,10 @@ const BADGES: Record<string, { id: string; name: string; emoji: string; descript
   'first-aid': { id: 'first-aid', name: 'First Aid', emoji: '🏥', description: 'Complete the Medical unit' },
   'polyglot-apprentice': { id: 'polyglot-apprentice', name: 'Polyglot Apprentice', emoji: '📚', description: 'Complete any 5 units' },
   'a1-certified': { id: 'a1-certified', name: 'A1 Certified', emoji: '🎓', description: 'Complete all A1 curriculum units' },
-  'certified-parisien': { id: 'certified-parisien', name: 'Certified Parisien', emoji: '🗼', description: 'Complete all 12 units' },
+  'certified-parisien': { id: 'certified-parisien', name: 'Certified Parisien', emoji: '🗼', description: 'Complete every Pre-A1 to A2 unit' },
+  'bridge-builder': { id: 'bridge-builder', name: 'Bridge Builder', emoji: '🌉', description: 'Complete all A2→B1 bridge units' },
+  'independent-user': { id: 'independent-user', name: 'Independent User', emoji: '🗣️', description: 'Complete all B1 units' },
+  'confident-user': { id: 'confident-user', name: 'Confident User', emoji: '🎩', description: 'Complete all B2 units' },
 };
 
 export { BADGES };
@@ -81,7 +85,12 @@ export const useProgressStore = create<ProgressStore>()(
         if (completedUnitIds.includes('false-friends')) addBadge('false-friend-spotter');
         if (completedUnitIds.includes('medical')) addBadge('first-aid');
         if (completedUnitIds.length >= 5) addBadge('polyglot-apprentice');
-        if (UNITS.length === completedUnitIds.length) addBadge('certified-parisien');
+        const completesTier = (inTier: (u: Unit) => boolean) =>
+          UNITS.filter(inTier).every(u => completedUnitIds.includes(u.id));
+        if (completesTier(u => !u.isBridge && !u.isB1 && !u.isB2)) addBadge('certified-parisien');
+        if (completesTier(u => !!u.isBridge)) addBadge('bridge-builder');
+        if (completesTier(u => !!u.isB1)) addBadge('independent-user');
+        if (completesTier(u => !!u.isB2)) addBadge('confident-user');
 
         const a1Done = A1_UNIT_IDS.every(uid => completedUnitIds.includes(uid));
         if (a1Done) addBadge('a1-certified');
@@ -128,14 +137,17 @@ export const useProgressStore = create<ProgressStore>()(
 
       resetOnboarding: () => set({ onboardingDone: false }),
 
-      resetProgress: () => set({
-        completedLessons: [],
-        xp: 0,
-        streak: 0,
-        lastStudiedDate: '',
-        earnedBadges: [],
-        srsData: {},
-      }),
+      resetProgress: () => {
+        useLearnerStore.getState().resetExerciseStats();
+        set({
+          completedLessons: [],
+          xp: 0,
+          streak: 0,
+          lastStudiedDate: '',
+          earnedBadges: [],
+          srsData: {},
+        });
+      },
 
       toggleBookmark: (lessonId) => set(s => ({
         bookmarkedLessons: s.bookmarkedLessons.includes(lessonId)

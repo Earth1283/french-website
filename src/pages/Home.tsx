@@ -10,6 +10,9 @@ import { A1Banner } from '../components/home/A1Banner';
 import { ProgressBar } from '../components/layout/ProgressBar';
 import { TAP_SPRING } from '../utils/motion';
 import { useHomeInsights } from '../hooks/useHomeInsights';
+import { useLearningPath } from '../hooks/useLearningPath';
+import { PathPanel } from '../components/home/PathPanel';
+import { describeStep } from '../utils/learningPath';
 
 function fuzzyMatch(query: string, target: string): boolean {
   const q = query.toLowerCase();
@@ -29,9 +32,15 @@ export function Home() {
   const totalLessons = getTotalLessons();
   const overallProgress = totalLessons > 0 ? Math.round((completedLessons.length / totalLessons) * 100) : 0;
 
-  const { nextUp, todoItems, dueCount, nextReviewDate, weakSpots, bookmarkDetails } = useHomeInsights({
-    completedLessons, unit12Unlocked, srsData, bookmarkedLessons,
-  });
+  const { dueCount, nextReviewDate, bookmarkDetails } = useHomeInsights({ completedLessons, srsData, bookmarkedLessons });
+  const { path, fixUps } = useLearningPath();
+  const testedOutUnitIds = new Set(path.testedOutUnitIds);
+  const nextUp = path.steps[0];
+  const todoItems = path.steps.slice(0, 3).map(step => ({
+    ...step,
+    verb: step.unit.lessons.some(l => completedLessons.includes(l.id)) ? 'Finish' : 'Start',
+    why: describeStep(step),
+  }));
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -61,7 +70,7 @@ export function Home() {
                 <div className="min-w-0">
                   <p className="text-[0.68rem] font-semibold text-muted uppercase tracking-wider">Continue</p>
                   <p className="font-semibold text-sm text-primary truncate">{nextUp.lesson.title}</p>
-                  <p className="text-xs text-muted truncate">{nextUp.unit.title}</p>
+                  <p className="text-xs text-muted truncate">{describeStep(nextUp) ?? nextUp.unit.title}</p>
                 </div>
               </div>
               <span
@@ -93,7 +102,7 @@ export function Home() {
                 <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-muted">Up next</p>
               </div>
               <div>
-                {todoItems.map(({ unit, lesson, verb }, i) => (
+                {todoItems.map(({ unit, lesson, verb, why }, i) => (
                   <Link
                     key={lesson.id}
                     to={`/unit/${unit.slug}/lesson/${lesson.id}`}
@@ -108,7 +117,7 @@ export function Home() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-semibold text-primary truncate">{lesson.title}</p>
-                      <p className="text-[0.68rem] text-muted truncate">{verb} · {unit.title}</p>
+                      <p className="text-[0.68rem] text-muted truncate">{verb} · {why ?? unit.title}</p>
                     </div>
                     <ChevronRight size={13} className="text-muted flex-shrink-0 opacity-60" />
                   </Link>
@@ -120,6 +129,8 @@ export function Home() {
       </AnimatePresence>
 
       <A1Banner />
+
+      {onboardingDone && <PathPanel path={path} />}
 
       {/* Streak + XP row */}
       {(streak > 0 || xp > 0) && (
@@ -187,7 +198,7 @@ export function Home() {
       </AnimatePresence>
 
       {/* Weak spots recommendation */}
-      {weakSpots.length > 0 && (
+      {fixUps.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -200,7 +211,7 @@ export function Home() {
               <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Needs more practice</h2>
             </div>
             <div className="space-y-2">
-              {weakSpots.map(({ unit, lesson }) => (
+              {fixUps.map(({ unit, lesson, reason }) => (
                 <Link
                   key={lesson.id}
                   to={`/unit/${unit.slug}/lesson/${lesson.id}`}
@@ -215,7 +226,7 @@ export function Home() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-primary truncate">{lesson.title}</p>
-                    <p className="text-xs text-muted truncate">{unit.title}</p>
+                    <p className="text-xs text-muted truncate">{reason}</p>
                   </div>
                   <ChevronRight size={14} className="text-muted flex-shrink-0" />
                 </Link>
@@ -238,7 +249,7 @@ export function Home() {
           <span className="french-word">to France.</span>
         </h1>
         <p className="text-secondary text-lg max-w-xl mx-auto">
-          21 units of practical French — from your very first sound to real conversation.
+          {UNITS.length} units of practical French — from your very first sound to arguing about it in B2.
           Funny. Skippable. Honest about how weird French is.
         </p>
 
@@ -303,7 +314,7 @@ export function Home() {
           return results.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.map(({ unit, progress, isLocked, index }) => (
-                <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} index={index} />
+                <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} testedOut={testedOutUnitIds.has(unit.id)} index={index} />
               ))}
             </div>
           ) : (
@@ -316,6 +327,9 @@ export function Home() {
           { label: 'Core French', units: unitWithMeta.filter(({ unit }) => unit.isA1 && !unit.isPreA1 && !unit.isA1A2 && !unit.isBeyondA1) },
           { label: 'Going Further', units: unitWithMeta.filter(({ unit }) => unit.isA1A2) },
           { label: 'Bonus', units: unitWithMeta.filter(({ unit }) => unit.isBeyondA1) },
+          { label: 'Connecting the Dots · A2→B1', units: unitWithMeta.filter(({ unit }) => unit.isBridge) },
+          { label: 'Independent · B1', units: unitWithMeta.filter(({ unit }) => unit.isB1) },
+          { label: 'Confident · B2', units: unitWithMeta.filter(({ unit }) => unit.isB2) },
         ];
 
         return (
@@ -326,7 +340,7 @@ export function Home() {
                   <p className="section-label">{label}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {units.map(({ unit, progress, isLocked, index }) => (
-                      <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} index={index} />
+                      <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} testedOut={testedOutUnitIds.has(unit.id)} index={index} />
                     ))}
                   </div>
                 </div>

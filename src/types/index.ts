@@ -47,6 +47,9 @@ export interface Unit {
   isA1: boolean;
   isA1A2?: boolean;
   isBeyondA1: boolean;
+  isBridge?: boolean;
+  isB1?: boolean;
+  isB2?: boolean;
 }
 
 export interface ConversationTurn {
@@ -131,4 +134,42 @@ export interface ProgressState {
   reducedGpu: boolean;
   bookmarkedLessons: string[];
   srsData: Record<string, SRSCard>;
+}
+
+export type LearnerGoal = 'trip' | 'moving' | 'exam' | 'fun';
+
+export type PriorLevel = 'none' | 'some' | 'placed';
+
+export interface LearnerProfile {
+  goals: LearnerGoal[];
+  /** YYYY-MM-DD the learner needs French by (a trip, a move, an exam), or null. */
+  targetDate: string | null;
+  priorLevel: PriorLevel;
+}
+
+export type LessonSkill =
+  | 'pronunciation'
+  | 'vocabulary'
+  | 'grammar'
+  | 'numbers'
+  | 'listening'
+  | 'speaking'
+  | 'culture'
+  | 'reading';
+
+export type GoalWeight = 0 | 1 | 2 | 3;
+
+export interface LessonMeta {
+  cefr: CEFRBand;
+  skills: LessonSkill[];
+  /** Lesson ids that should be done first. Must not form a cycle. */
+  prereqs: string[];
+  /** How important this lesson is for each goal: 0 irrelevant … 3 essential. */
+  goalWeight: Record<LearnerGoal, GoalWeight>;
+}
+
+export interface ExerciseStat {
+  attempts: number;
+  correct: number;
+  lastCorrect: boolean;
 }

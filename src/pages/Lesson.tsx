@@ -5,6 +5,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Bookmark, BookOpen } from 'lucid
 import { UNITS } from '../data/units';
 import { getDeepLessonPages } from '../content/deepLessons';
 import { useProgressStore } from '../stores/progressStore';
+import { useLearnerStore } from '../stores/learnerStore';
 import { FlashCard } from '../components/lesson/FlashCard';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { FillInBlank } from '../components/lesson/FillInBlank';
@@ -35,6 +36,7 @@ export function Lesson() {
   const { earnedBadges: prevBadges, completedLessons, bookmarkedLessons } = useProgressStore();
   const completeAction = useProgressStore(s => s.completeLesson);
   const toggleBookmark = useProgressStore(s => s.toggleBookmark);
+  const recordExercise = useLearnerStore(s => s.recordExercise);
   const [earnedBadgesBefore] = useState(() => [...prevBadges]);
 
   const saved = loadSavedProgress(lessonId);
@@ -353,7 +355,14 @@ export function Lesson() {
                 }
               };
 
+              const captureCorrect = () => {
+                recordExercise(lesson.id, exerciseIndex, true);
+                setCorrectCount(c => c + 1);
+                setTimeout(advance, 600);
+              };
+
               const captureWrong = () => {
+                recordExercise(lesson.id, exerciseIndex, false);
                 setMissedExercises(prev => [...prev, { prompt: ex.prompt, answer: ex.answer }]);
                 setTimeout(advance, 1400);
               };
@@ -363,7 +372,7 @@ export function Lesson() {
                   <MultipleChoice
                     key={exerciseIndex}
                     exercise={ex}
-                    onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
+                    onCorrect={captureCorrect}
                     onWrong={captureWrong}
                     keyboardSelect={keyboardSelect}
                   />
@@ -374,7 +383,7 @@ export function Lesson() {
                   <FillInBlank
                     key={exerciseIndex}
                     exercise={ex}
-                    onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
+                    onCorrect={captureCorrect}
                     onWrong={captureWrong}
                   />
                 );
@@ -384,7 +393,7 @@ export function Lesson() {
                   <TranslationChallenge
                     key={exerciseIndex}
                     exercise={ex}
-                    onCorrect={() => { setCorrectCount(c => c + 1); setTimeout(advance, 600); }}
+                    onCorrect={captureCorrect}
                     onWrong={captureWrong}
                   />
                 );

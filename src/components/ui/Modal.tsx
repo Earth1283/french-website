@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -25,7 +26,7 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const offscreenY = reduceMotion ? 0 : (isMobile ? '100%' : 24);
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -88,6 +89,7 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
