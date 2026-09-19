@@ -66,7 +66,6 @@ export interface AssignmentInfo {
   kind?: 'lesson' | 'quiz' | 'reading';
   completed?: number;
   score?: number | null;
-  content?: ClassroomContent;
   unresolvedFlagCount?: number;
 }
 

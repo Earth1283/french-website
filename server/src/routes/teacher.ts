@@ -123,7 +123,6 @@ teacherRouter.get('/classes/:classId/assignments', (req, res) => {
   const flagCounts = countUnresolvedFlagsByAssignment(cls.id);
   const assignments = listAssignmentsByClass(cls.id).map((a) => ({
     ...a,
-    content: getContentById(a.content_id),
     unresolvedFlagCount: flagCounts[a.id] ?? 0,
   }));
   res.json({ assignments });

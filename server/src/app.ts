@@ -1,3 +1,4 @@
+import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import { config } from './config.js';
@@ -9,6 +10,8 @@ import { teacherRouter } from './routes/teacher.js';
 export const app = express();
 
 app.use(cors({ origin: config.corsOrigin, exposedHeaders: ['Content-Type'] }));
+app.use(compression());
+
 // A reading lesson is allowed up to 50 pages of 20,000 characters, which with
 // accented French text and JSON overhead outgrows the default limit. Content
 // routes get room for that; the first parser to see a request wins, so this

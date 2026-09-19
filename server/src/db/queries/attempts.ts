@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { db } from '../connection.js';
+import { prepare } from '../connection.js';
 
 export interface AttemptRow {
   id: string;
@@ -29,7 +29,7 @@ export function recordAttempt(
   xpEarned: number
 ): AttemptRow {
   const id = randomUUID();
-  db.prepare(
+  prepare(
     `INSERT INTO attempts (id, student_id, assignment_id, completed_at, score, xp_earned, responses_json)
      VALUES (?, ?, ?, datetime('now'), ?, ?, ?)
      ON CONFLICT(student_id, assignment_id) DO UPDATE SET
@@ -42,24 +42,21 @@ export function recordAttempt(
 }
 
 export function getAttemptById(id: string): AttemptRow | undefined {
-  return db.prepare('SELECT * FROM attempts WHERE id = ?').get(id) as AttemptRow | undefined;
+  return prepare('SELECT * FROM attempts WHERE id = ?').get(id) as AttemptRow | undefined;
 }
 
 export function getAttemptForStudentAssignment(studentId: string, assignmentId: string): AttemptRow | undefined {
-  return db
-    .prepare('SELECT * FROM attempts WHERE student_id = ? AND assignment_id = ?')
+  return prepare('SELECT * FROM attempts WHERE student_id = ? AND assignment_id = ?')
     .get(studentId, assignmentId) as AttemptRow | undefined;
 }
 
 export function listAttemptsForStudent(studentId: string): AttemptRow[] {
-  return db
-    .prepare('SELECT * FROM attempts WHERE student_id = ? ORDER BY started_at DESC')
+  return prepare('SELECT * FROM attempts WHERE student_id = ? ORDER BY started_at DESC')
     .all(studentId) as AttemptRow[];
 }
 
 export function listAttemptsForStudentInClass(studentId: string, classId: string): AttemptRow[] {
-  return db
-    .prepare(
+  return prepare(
       `SELECT att.* FROM attempts att
        JOIN assignments a ON a.id = att.assignment_id
        WHERE att.student_id = ? AND a.class_id = ?
@@ -76,29 +73,16 @@ export interface QuestionStat {
 }
 
 // responses_json is a JSON blob per attempt rather than normalized rows, so
-// per-question tallying happens here in JS instead of in SQL.
+// SQLite's json_each unpacks it and the tallying still happens in SQL.
 export function getQuestionStatsForAssignment(assignmentId: string): QuestionStat[] {
-  const rows = db
-    .prepare("SELECT responses_json FROM attempts WHERE assignment_id = ? AND completed_at IS NOT NULL")
-    .all(assignmentId) as Array<{ responses_json: string }>;
-
-  const tally = new Map<number, { correct: number; wrong: number }>();
-  for (const row of rows) {
-    const responses = JSON.parse(row.responses_json) as AttemptResponse[];
-    for (const r of responses) {
-      const entry = tally.get(r.index) ?? { correct: 0, wrong: 0 };
-      if (r.correct) entry.correct += 1;
-      else entry.wrong += 1;
-      tally.set(r.index, entry);
-    }
-  }
-
-  return [...tally.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([index, { correct, wrong }]) => ({
-      index,
-      correctCount: correct,
-      wrongCount: wrong,
-      totalCount: correct + wrong,
-    }));
+  return prepare(
+    `SELECT CAST(json_extract(r.value, '$.index') AS INTEGER) AS "index",
+            SUM(json_extract(r.value, '$.correct')) AS correctCount,
+            COUNT(*) - SUM(json_extract(r.value, '$.correct')) AS wrongCount,
+            COUNT(*) AS totalCount
+     FROM attempts att, json_each(att.responses_json) r
+     WHERE att.assignment_id = ? AND att.completed_at IS NOT NULL
+     GROUP BY "index"
+     ORDER BY "index"`
+  ).all(assignmentId) as QuestionStat[];
 }
