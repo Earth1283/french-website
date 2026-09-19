@@ -1,0 +1,198 @@
+import type { InteractiveLesson } from '../../types';
+
+export const a2SentenceStructures: InteractiveLesson = {
+  lessonId: 'pronouns-4',
+  scenes: [
+    {
+      id: 'pronouns-jump',
+      title: 'Object pronouns jump before the verb',
+      idea: 'In English, him / me / them follow the verb. In French, the pronoun jumps in front of it. Full nouns stay where they were.',
+      sentences: [
+        {
+          tokens: [
+            { id: 'je', role: 'subject', en: 'I', fr: 'Je' },
+            { id: 'le', role: 'object', en: 'him', fr: 'le', note: 'le = him / it (masculine). It sits right before the verb.' },
+            { id: 'vois', role: 'verb', en: 'see', fr: 'vois', note: 'voir → je vois.' },
+          ],
+          en: ['je', 'vois', 'le'],
+          focus: ['le'],
+        },
+        {
+          tokens: [
+            { id: 'elle', role: 'subject', en: 'She', fr: 'Elle' },
+            { id: 'me', role: 'object', en: 'me', fr: 'm\'', note: 'me → m\' before a vowel, and it still goes before the verb.' },
+            { id: 'appelle', role: 'verb', en: 'calls', fr: 'appelle' },
+          ],
+          en: ['elle', 'appelle', 'me'],
+          focus: ['me'],
+        },
+        {
+          tokens: [
+            { id: 'nous', role: 'subject', en: 'We', fr: 'Nous' },
+            { id: 'leur', role: 'object', en: 'them', fr: 'leur', note: 'leur = to them. Pronouns jump; the noun "le livre" stays after the verb.' },
+            { id: 'donnons', role: 'verb', en: 'give', fr: 'donnons' },
+            { id: 'le', role: 'article', en: 'the', fr: 'le' },
+            { id: 'livre', role: 'noun', en: 'book', fr: 'livre' },
+          ],
+          en: ['nous', 'donnons', 'leur', 'le', 'livre'],
+          focus: ['leur'],
+        },
+      ],
+      check: {
+        tokens: [
+          { id: 'tu', role: 'subject', en: 'You', fr: 'Tu' },
+          { id: 'la', role: 'object', en: 'her', fr: 'la' },
+          { id: 'connais', role: 'verb', en: 'know', fr: 'connais' },
+        ],
+        en: ['tu', 'connais', 'la'],
+      },
+    },
+    {
+      id: 'sandwich-grows',
+      title: 'The sandwich swallows the pronoun',
+      idea: 'ne … pas wraps the conjugated verb — in the passé composé that\'s the helper (avoir). The pronoun rides inside, glued to the helper.',
+      sentences: [
+        {
+          tokens: [
+            { id: 'je', role: 'subject', en: 'I', fr: 'Je' },
+            { id: 'ne', role: 'negation', fr: 'ne', group: 'neg', note: 'ne opens the sandwich before the pronoun + helper block.' },
+            { id: 'le', role: 'object', en: 'him', fr: 'l\'', note: 'le → l\' before a vowel. It jumps all the way in front of the helper ai.' },
+            { id: 'ai', role: 'verb', en: 'did', fr: 'ai', note: 'The helper. English uses did; French uses avoir.' },
+            { id: 'pas', role: 'negation', en: 'not', fr: 'pas', group: 'neg', note: 'pas closes the sandwich right after the helper — before the past participle.' },
+            { id: 'vu', role: 'verb', en: 'see', fr: 'vu', note: 'The past participle stays outside the sandwich.' },
+          ],
+          en: ['je', 'ai', 'pas', 'vu', 'le'],
+          focus: ['ne', 'le'],
+        },
+        {
+          tokens: [
+            { id: 'elle', role: 'subject', en: 'She', fr: 'Elle' },
+            { id: 'does', role: 'verb', en: 'does', note: 'English needs "does" to say no. French doesn\'t.' },
+            { id: 'ne', role: 'negation', fr: 'ne', group: 'neg' },
+            { id: 'le', role: 'object', en: 'it', fr: 'le', note: 'Inside the sandwich, right before the verb.' },
+            { id: 'sait', role: 'verb', en: 'know', fr: 'sait' },
+            { id: 'pas', role: 'negation', en: 'not', fr: 'pas', group: 'neg' },
+          ],
+          en: ['elle', 'does', 'pas', 'sait', 'le'],
+          focus: ['ne', 'le'],
+        },
+        {
+          tokens: [
+            { id: 'nous', role: 'subject', en: 'We', fr: 'Nous' },
+            { id: 'ne', role: 'negation', fr: 'ne', group: 'neg' },
+            { id: 'lui', role: 'object', en: 'her', fr: 'lui', note: 'lui = to her / to him. Same jump, same spot: before the helper.' },
+            { id: 'avons', role: 'verb', en: 'did', fr: 'avons' },
+            { id: 'pas', role: 'negation', en: 'not', fr: 'pas', group: 'neg' },
+            { id: 'dit', role: 'verb', en: 'tell', fr: 'dit' },
+          ],
+          en: ['nous', 'avons', 'pas', 'dit', 'lui'],
+          focus: ['ne', 'lui'],
+        },
+      ],
+      check: {
+        tokens: [
+          { id: 'je', role: 'subject', en: 'I', fr: 'Je' },
+          { id: 'ne', role: 'negation', fr: 'ne' },
+          { id: 'le', role: 'object', en: 'it', fr: 'l\'' },
+          { id: 'ai', role: 'verb', en: 'did', fr: 'ai' },
+          { id: 'pas', role: 'negation', en: 'not', fr: 'pas' },
+          { id: 'mange', role: 'verb', en: 'eat', fr: 'mangé' },
+        ],
+        en: ['je', 'ai', 'pas', 'mange', 'le'],
+      },
+    },
+    {
+      id: 'adverbs-after',
+      title: 'Adverbs sit right after the verb',
+      idea: 'English slips "often" or "always" before the verb. French puts it straight after — and in the passé composé, between the helper and the participle.',
+      sentences: [
+        {
+          tokens: [
+            { id: 'je', role: 'subject', en: 'I', fr: 'Je' },
+            { id: 'mange', role: 'verb', en: 'eat', fr: 'mange' },
+            { id: 'souvent', role: 'adverb', en: 'often', fr: 'souvent', note: 'Right after the conjugated verb — never between je and mange.' },
+            { id: 'ici', role: 'adverb', en: 'here', fr: 'ici' },
+          ],
+          en: ['je', 'souvent', 'mange', 'ici'],
+          focus: ['souvent'],
+        },
+        {
+          tokens: [
+            { id: 'je', role: 'subject', en: 'I', fr: 'J\'', note: 'je → j\' before a vowel.' },
+            { id: 'ai', role: 'verb', en: 'have', fr: 'ai' },
+            { id: 'souvent', role: 'adverb', en: 'often', fr: 'souvent', note: 'Helper + adverb + participle — the same order as English this time.' },
+            { id: 'mange', role: 'verb', en: 'eaten', fr: 'mangé' },
+          ],
+          focus: ['souvent'],
+        },
+        {
+          tokens: [
+            { id: 'elle', role: 'subject', en: 'She', fr: 'Elle' },
+            { id: 'parle', role: 'verb', en: 'speaks', fr: 'parle' },
+            { id: 'toujours', role: 'adverb', en: 'always', fr: 'toujours', note: 'Frequency adverbs follow the verb.' },
+            { id: 'vite', role: 'adverb', en: 'fast', fr: 'vite' },
+          ],
+          en: ['elle', 'toujours', 'parle', 'vite'],
+          focus: ['toujours'],
+        },
+      ],
+      check: {
+        tokens: [
+          { id: 'nous', role: 'subject', en: 'We', fr: 'Nous' },
+          { id: 'chantons', role: 'verb', en: 'sing', fr: 'chantons' },
+          { id: 'toujours', role: 'adverb', en: 'always', fr: 'toujours' },
+        ],
+        en: ['nous', 'toujours', 'chantons'],
+      },
+    },
+    {
+      id: 'bags',
+      title: 'BAGS adjectives go first',
+      idea: 'Most adjectives follow the noun. Short, everyday ones about Beauty, Age, Goodness and Size go before it — just like in English.',
+      sentences: [
+        {
+          tokens: [
+            { id: 'une', role: 'article', en: 'a', fr: 'une' },
+            { id: 'belle', role: 'adjective', en: 'beautiful', fr: 'belle', note: 'Beauty → before the noun. beau becomes belle with a feminine noun.' },
+            { id: 'maison', role: 'noun', en: 'house', fr: 'maison' },
+          ],
+          focus: ['belle'],
+        },
+        {
+          tokens: [
+            { id: 'une', role: 'article', en: 'a', fr: 'une' },
+            { id: 'maison', role: 'noun', en: 'house', fr: 'maison' },
+            { id: 'rouge', role: 'adjective', en: 'red', fr: 'rouge', note: 'Colors aren\'t BAGS — back after the noun.' },
+          ],
+          en: ['une', 'rouge', 'maison'],
+          focus: ['rouge'],
+        },
+        {
+          tokens: [
+            { id: 'un', role: 'article', en: 'a', fr: 'un' },
+            { id: 'jeune', role: 'adjective', en: 'young', fr: 'jeune', note: 'Age → before the noun.' },
+            { id: 'homme', role: 'noun', en: 'man', fr: 'homme' },
+          ],
+          focus: ['jeune'],
+        },
+        {
+          tokens: [
+            { id: 'un', role: 'article', en: 'a', fr: 'un' },
+            { id: 'grand', role: 'adjective', en: 'big', fr: 'grand', note: 'Size → before the noun.' },
+            { id: 'chien', role: 'noun', en: 'dog', fr: 'chien' },
+          ],
+          focus: ['grand'],
+        },
+      ],
+      check: {
+        tokens: [
+          { id: 'une', role: 'article', en: 'a', fr: 'une' },
+          { id: 'petite', role: 'adjective', en: 'small', fr: 'petite' },
+          { id: 'voiture', role: 'noun', en: 'car', fr: 'voiture' },
+          { id: 'rouge', role: 'adjective', en: 'red', fr: 'rouge' },
+        ],
+        en: ['une', 'petite', 'rouge', 'voiture'],
+      },
+    },
+  ],
+};

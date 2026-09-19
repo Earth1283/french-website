@@ -47,6 +47,16 @@
     --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
     --accent-tint-strong: color-mix(in srgb, var(--accent) 18%, transparent);
     --accent-soft-bg: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+
+    /* ── Grammatical roles (interactive lessons) ── */
+    --role-subject: #2563EB;
+    --role-verb: #059669;
+    --role-object: #9333EA;
+    --role-adjective: #DB2777;
+    --role-negation: #DC2626;
+    --role-adverb: #D97706;
+    --role-noun: #0891B2;
+    --role-article: #64748B;
   }
 
   .dark {
@@ -71,6 +81,14 @@
     --accent-tint: color-mix(in srgb, var(--accent) 22%, transparent);
     --accent-tint-strong: color-mix(in srgb, var(--accent) 30%, transparent);
     --accent-soft-bg: color-mix(in srgb, var(--accent) 14%, var(--bg-card));
+    --role-subject: #60A5FA;
+    --role-verb: #34D399;
+    --role-object: #C084FC;
+    --role-adjective: #F472B6;
+    --role-negation: #F87171;
+    --role-adverb: #FBBF24;
+    --role-noun: #22D3EE;
+    --role-article: #94A3B8;
   }
 
   * {
@@ -655,4 +673,23 @@
   padding: 0.55rem 0.8rem;
   border-top: 0.5px solid var(--hairline);
   color: var(--text-secondary);
+}
+
+.role-pulse {
+  animation: role-pulse 1.1s ease-out 2;
+}
+
+@keyframes role-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pulse-color) 55%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+.tile-shake {
+  animation: tile-shake 0.35s ease-in-out;
+}
+
+@keyframes tile-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }

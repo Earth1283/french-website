@@ -37,6 +37,12 @@ export const LESSON_META: Record<string, LessonMeta> = {
     prereqs: ['building-blocks-2'],
     goalWeight: { trip: 1, moving: 2, exam: 1, fun: 0 },
   },
+  'building-blocks-4': {
+    cefr: 'pre-a1',
+    skills: ['grammar', 'reading'],
+    prereqs: ['building-blocks-1'],
+    goalWeight: { trip: 1, moving: 2, exam: 3, fun: 1 },
+  },
   'emergency-1': {
     cefr: 'a1',
     skills: ['speaking', 'listening'],
@@ -353,6 +359,10 @@ export const LESSON_META: Record<string, LessonMeta> = {
   },
   'pronouns-3': {
     cefr: 'b1', skills: ['grammar', 'reading'], prereqs: ['pronouns-1'],
+    goalWeight: { trip: 1, moving: 2, exam: 3, fun: 1 },
+  },
+  'pronouns-4': {
+    cefr: 'a2', skills: ['grammar', 'reading'], prereqs: ['pronouns-1'],
     goalWeight: { trip: 1, moving: 2, exam: 3, fun: 1 },
   },
   'b1-narration-1': {

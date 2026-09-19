@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { UNITS } from './units';
 import { getDeepLessonPages } from '../content/deepLessons';
+import { hasInteractive } from '../interactive/registry';
 
 const allLessons = UNITS.flatMap(unit => unit.lessons.map(lesson => ({ unit, lesson })));
 const advancedLessons = allLessons.filter(({ unit }) => unit.isBridge || unit.isB1 || unit.isB2);
@@ -48,7 +49,7 @@ describe.each(advancedLessons.map(({ unit, lesson }) => [lesson.id, unit.slug, l
       expect(lesson.exercises.filter(ex => /[()/·]/.test(ex.type === 'multiple-choice' ? '' : ex.answer))).toEqual([]);
     });
 
-    it('has four substantial reading chapters', () => {
+    it.skipIf(hasInteractive(lesson.id))('has four substantial reading chapters', () => {
       const pages = getDeepLessonPages(unitSlug, lesson.id);
       expect(pages).toHaveLength(4);
       for (const page of pages ?? []) {

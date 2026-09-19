@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, Bookmark, BookOpen } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bookmark, BookOpen, Sparkles } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { getDeepLessonPages } from '../content/deepLessons';
+import { hasInteractive } from '../interactive/registry';
 import { useProgressStore } from '../stores/progressStore';
 import { useLearnerStore } from '../stores/learnerStore';
 import { FlashCard } from '../components/lesson/FlashCard';
@@ -16,9 +17,11 @@ import { ProgressBar } from '../components/layout/ProgressBar';
 import { Button } from '../components/ui/Button';
 import { TAP_SPRING } from '../utils/motion';
 
-type Phase = 'intro' | 'read' | 'flashcards' | 'exercises' | 'complete';
+const InteractivePlayer = lazy(() => import('../interactive/InteractivePlayer').then(m => ({ default: m.InteractivePlayer })));
 
-function loadSavedProgress(lessonId: string | undefined): { phase: Phase; cardIndex: number; exerciseIndex: number } | null {
+type Phase = 'intro' | 'read' | 'explore' | 'flashcards' | 'exercises' | 'complete';
+
+function loadSavedProgress(lessonId: string | undefined): { phase: Phase; cardIndex: number; exerciseIndex: number; sceneIndex?: number } | null {
   if (!lessonId) return null;
   try {
     const raw = sessionStorage.getItem(`lesson-progress-${lessonId}`);
@@ -44,6 +47,7 @@ export function Lesson() {
   const [cardIndex, setCardIndex] = useState(() => saved?.cardIndex ?? 0);
   const [flipped, setFlipped] = useState(false);
   const [exerciseIndex, setExerciseIndex] = useState(() => saved?.exerciseIndex ?? 0);
+  const [sceneIndex, setSceneIndex] = useState(() => saved?.sceneIndex ?? 0);
   const [keyboardSelect, setKeyboardSelect] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [newBadges, setNewBadges] = useState<string[]>([]);
@@ -55,8 +59,8 @@ export function Lesson() {
       sessionStorage.removeItem(`lesson-progress-${lessonId}`);
       return;
     }
-    sessionStorage.setItem(`lesson-progress-${lessonId}`, JSON.stringify({ phase, cardIndex, exerciseIndex }));
-  }, [lessonId, phase, cardIndex, exerciseIndex]);
+    sessionStorage.setItem(`lesson-progress-${lessonId}`, JSON.stringify({ phase, cardIndex, exerciseIndex, sceneIndex }));
+  }, [lessonId, phase, cardIndex, exerciseIndex, sceneIndex]);
 
   const isBookmarked = lesson ? bookmarkedLessons.includes(lesson.id) : false;
 
@@ -120,6 +124,7 @@ export function Lesson() {
   const nextLessonIndex = unit.lessons.findIndex(l => l.id === lessonId) + 1;
   const nextLesson = nextLessonIndex < unit.lessons.length ? unit.lessons[nextLessonIndex] : undefined;
   const deepPages = getDeepLessonPages(unit.slug, lesson.id);
+  const interactive = hasInteractive(lesson.id);
 
   const handleFinish = () => {
     sessionStorage.removeItem(`lesson-progress-${lesson.id}`);
@@ -179,17 +184,24 @@ export function Lesson() {
           </div>
 
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            {deepPages && <span className="chip"><BookOpen size={12} /> Full lesson available</span>}
+            {interactive && <span className="chip"><Sparkles size={12} /> Interactive lesson</span>}
+            {deepPages && !interactive && <span className="chip"><BookOpen size={12} /> Full lesson available</span>}
             <span className="chip">📖 {lesson.vocab.length} vocab items</span>
             <span className="chip">✏️ {lesson.exercises.length} exercises</span>
             <span className="xp-badge text-sm px-3 py-1.5">+{lesson.xpReward} XP</span>
           </div>
 
-          {deepPages ? (
+          {interactive || deepPages ? (
             <div className="space-y-3 max-w-xs mx-auto">
-              <Button size="lg" onClick={() => setPhase('read')} className="w-full">
-                Read the Full Lesson <BookOpen size={16} />
-              </Button>
+              {interactive ? (
+                <Button size="lg" onClick={() => setPhase('explore')} className="w-full">
+                  Explore Interactively <Sparkles size={16} />
+                </Button>
+              ) : (
+                <Button size="lg" onClick={() => setPhase('read')} className="w-full">
+                  Read the Full Lesson <BookOpen size={16} />
+                </Button>
+              )}
               <button
                 onClick={() => setPhase('flashcards')}
                 className="text-sm text-muted hover:underline cursor-pointer"
@@ -204,6 +216,34 @@ export function Lesson() {
             </Button>
           )}
         </motion.div>
+      </div>
+    );
+  }
+
+  if (phase === 'explore' && interactive) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Link
+            to={`/unit/${slug}`}
+            aria-label={`Back to ${unit.title}`}
+            className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+          >
+            <ChevronLeft size={20} strokeWidth={2.4} />
+          </Link>
+          <p className="text-sm font-semibold text-primary flex-1 truncate">{lesson.title}</p>
+        </div>
+        <Suspense fallback={<div className="min-h-[50vh]" aria-busy="true" />}>
+          <InteractivePlayer
+            lessonId={lesson.id}
+            accentColor={unit.color}
+            sceneIndex={sceneIndex}
+            onSceneChange={setSceneIndex}
+            completeLabel="Start Flashcards"
+            onComplete={() => setPhase('flashcards')}
+          />
+        </Suspense>
       </div>
     );
   }
