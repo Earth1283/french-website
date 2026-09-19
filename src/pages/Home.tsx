@@ -12,6 +12,7 @@ import { TAP_SPRING } from '../utils/motion';
 import { useHomeInsights } from '../hooks/useHomeInsights';
 import { useLearningPath } from '../hooks/useLearningPath';
 import { PathPanel } from '../components/home/PathPanel';
+import { UpNextList } from '../components/home/UpNextList';
 import { describeStep } from '../utils/learningPath';
 
 function fuzzyMatch(query: string, target: string): boolean {
@@ -84,49 +85,16 @@ export function Home() {
         </motion.div>
       )}
 
-      {/* "Up Next" glass widget — desktop only */}
-      <AnimatePresence>
-        {todoItems.length > 0 && onboardingDone && (
-          <motion.div
-            key="up-next-widget"
-            className="hidden sm:block"
-            initial={{ opacity: 0, y: -10, scale: 0.94 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.94 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 280, delay: 0.3 }}
-            style={{ position: 'fixed', top: '4.5rem', right: '1.25rem', zIndex: 30, width: '16.5rem' }}
-          >
-            <div className="glass-card overflow-hidden">
-              <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-2">
-                <Sparkles size={12} style={{ color: 'var(--accent)' }} />
-                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-muted">Up next</p>
-              </div>
-              <div>
-                {todoItems.map(({ unit, lesson, verb, why }, i) => (
-                  <Link
-                    key={lesson.id}
-                    to={`/unit/${unit.slug}/lesson/${lesson.id}`}
-                    className="no-underline flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-[var(--bg-card-hover)]"
-                    style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
-                  >
-                    <span
-                      className="w-7 h-7 rounded-[8px] flex items-center justify-center text-sm flex-shrink-0"
-                      style={{ backgroundColor: `color-mix(in srgb, ${unit.color} 14%, transparent)` }}
-                    >
-                      {unit.emoji}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-primary truncate">{lesson.title}</p>
-                      <p className="text-[0.68rem] text-muted truncate">{verb} · {why ?? unit.title}</p>
-                    </div>
-                    <ChevronRight size={13} className="text-muted flex-shrink-0 opacity-60" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* "Up Next" — desktop only; mobile gets the Continue CTA above */}
+      {todoItems.length > 0 && onboardingDone && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card hidden sm:block overflow-hidden mb-6"
+        >
+          <UpNextList items={todoItems} />
+        </motion.div>
+      )}
 
       <A1Banner />
 

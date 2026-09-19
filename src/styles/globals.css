@@ -318,7 +318,7 @@
   }
 
   /* ── Inputs ───────────────────────────────────────────── */
-  .ios-input {
+  :where(.ios-input) {
     width: 100%;
     border: 1px solid var(--hairline);
     border-radius: var(--radius-sm);
