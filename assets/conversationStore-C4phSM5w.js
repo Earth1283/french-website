@@ -1,0 +1,1 @@
+import{Et as e,Tt as t}from"./ui-CepEm5pz.js";var n=e()(t(e=>({geminiApiKey:``,difficulty:1,setApiKey:t=>e({geminiApiKey:t}),setDifficulty:t=>e({difficulty:t})}),{name:`french-conversation`}));export{n as t};
