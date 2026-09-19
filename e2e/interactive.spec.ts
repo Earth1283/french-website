@@ -36,3 +36,21 @@ test('interactive lesson: two misses unlock "Show me"', async ({ page }) => {
   await page.getByRole('button', { name: 'Show me' }).click();
   await expect(page.getByText('Parfait')).toBeVisible();
 });
+
+test('interactive lesson: controls keep working after changing scenes', async ({ page }) => {
+  await page.goto('/#/unit/pronouns/lesson/pronouns-4');
+  await page.getByRole('button', { name: 'Explore Interactively' }).click();
+  for (const word of ['Tu', 'la', 'connais']) {
+    await page.getByTestId('tile-pool').getByRole('button', { name: word, exact: true }).click();
+  }
+  await page.getByRole('button', { name: 'Next' }).click();
+
+  await page.getByRole('tab', { name: 'She does not know it' }).click();
+  await page.getByRole('button', { name: 'Make it French' }).click();
+  await expect(page.getByRole('button', { name: 'Back to English' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Prev' }).click();
+  await page.getByRole('tab', { name: 'She calls me' }).click();
+  await page.getByRole('button', { name: 'Make it French' }).click();
+  await expect(page.getByRole('button', { name: 'Back to English' })).toBeVisible();
+});

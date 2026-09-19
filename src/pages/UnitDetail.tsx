@@ -1,8 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock, BookOpen } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock, BookOpen, Sparkles } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { hasDeepLesson } from '../content/deepLessons';
+import { hasInteractive } from '../interactive/registry';
 import { useProgressStore } from '../stores/progressStore';
 import { Button } from '../components/ui/Button';
 import { TAP_SPRING } from '../utils/motion';
@@ -133,6 +134,9 @@ export function UnitDetail() {
                         {lesson.title}
                         {hasDeepLesson(unit.slug, lesson.id) && (
                           <BookOpen size={12} aria-label="Full lesson available" style={{ color: unit.color, flexShrink: 0 }} />
+                        )}
+                        {hasInteractive(lesson.id) && (
+                          <Sparkles size={12} aria-label="Interactive lesson" style={{ color: unit.color, flexShrink: 0 }} />
                         )}
                       </p>
                       <p className="text-xs text-muted truncate">{lesson.subtitle}</p>

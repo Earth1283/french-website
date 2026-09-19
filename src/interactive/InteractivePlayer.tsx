@@ -96,24 +96,22 @@ export function InteractivePlayer({
         </div>
       </div>
 
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.div
-          key={scene.id}
-          initial={calm ? false : { opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={calm ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, x: -24 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-        >
-          <SceneView
-            scene={scene}
-            number={index + 1}
-            total={total}
-            solved={solved.has(index)}
-            calm={calm}
-            onSolved={() => setSolved(prev => new Set(prev).add(index))}
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/* Enter-only transition: an exiting scene left in the DOM would sit on top of the new one and swallow clicks. */}
+      <motion.div
+        key={scene.id}
+        initial={calm ? false : { opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+      >
+        <SceneView
+          scene={scene}
+          number={index + 1}
+          total={total}
+          solved={solved.has(index)}
+          calm={calm}
+          onSolved={() => setSolved(prev => new Set(prev).add(index))}
+        />
+      </motion.div>
 
       <div className="flex items-center justify-between mt-8">
         <Button variant="secondary" onClick={() => onSceneChange(index - 1)} disabled={index === 0}>
