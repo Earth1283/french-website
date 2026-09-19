@@ -1,4 +1,5 @@
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { config } from '../config.js';
 
@@ -17,14 +18,33 @@ function pageFilename(index: number): string {
 
 // Overwrites the full set of pages for a piece of reading content. Called on
 // both create and update, so a teacher removing/reordering pages doesn't
-// leave stale page files behind.
+// leave stale page files behind. The new pages are written to a sibling
+// staging directory first and swapped in by rename, so a failure or crash
+// while writing never leaves the content with half its pages.
 export function writeReadingPages(contentId: string, pages: string[]): void {
   const dir = readingDir(contentId);
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
-  pages.forEach((body, i) => {
-    writeFileSync(join(dir, pageFilename(i)), body, 'utf8');
-  });
+  const suffix = randomUUID();
+  const staging = `${dir}.staging-${suffix}`;
+  const replaced = `${dir}.replaced-${suffix}`;
+  try {
+    mkdirSync(staging, { recursive: true });
+    pages.forEach((body, i) => {
+      writeFileSync(join(staging, pageFilename(i)), body, 'utf8');
+    });
+    try {
+      renameSync(dir, replaced);
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+    }
+    renameSync(staging, dir);
+  } finally {
+    rmSync(staging, { recursive: true, force: true });
+    rmSync(replaced, { recursive: true, force: true });
+  }
+}
+
+export function removeReadingPages(contentId: string): void {
+  rmSync(readingDir(contentId), { recursive: true, force: true });
 }
 
 export function readReadingPages(contentId: string): string[] {

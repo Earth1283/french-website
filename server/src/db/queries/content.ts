@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { prepare } from '../connection.js';
-import { readReadingPages, writeReadingPages } from '../../lib/contentFiles.js';
+import { db, prepare } from '../connection.js';
+import { readReadingPages, removeReadingPages, writeReadingPages } from '../../lib/contentFiles.js';
 import type { ContentBody } from '../../lib/validation.js';
 
 export interface ContentRow {
@@ -26,6 +26,8 @@ function bodyToStoredJson(body: ContentBody): string {
   return JSON.stringify(body);
 }
 
+// The row and the page files change together: the file swap is the last step
+// inside the transaction, so if it throws the row is rolled back with it.
 export function createContent(
   teacherId: string,
   title: string,
@@ -33,10 +35,12 @@ export function createContent(
   body: ContentBody
 ): ContentRow {
   const id = randomUUID();
-  if (body.kind === 'reading') writeReadingPages(id, body.pages);
-  prepare(
-    'INSERT INTO content_items (id, teacher_id, kind, title, subtitle, body_json) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(id, teacherId, body.kind, title, subtitle, bodyToStoredJson(body));
+  db.transaction(() => {
+    prepare(
+      'INSERT INTO content_items (id, teacher_id, kind, title, subtitle, body_json) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run(id, teacherId, body.kind, title, subtitle, bodyToStoredJson(body));
+    if (body.kind === 'reading') writeReadingPages(id, body.pages);
+  })();
   return getContentById(id)!;
 }
 
@@ -68,21 +72,24 @@ export function updateContent(
   id: string,
   fields: { title?: string; subtitle?: string; body?: ContentBody }
 ): ContentRow | undefined {
-  if (fields.title !== undefined) {
-    prepare('UPDATE content_items SET title = ? WHERE id = ?').run(fields.title, id);
-  }
-  if (fields.subtitle !== undefined) {
-    prepare('UPDATE content_items SET subtitle = ? WHERE id = ?').run(fields.subtitle, id);
-  }
-  if (fields.body !== undefined) {
-    if (fields.body.kind === 'reading') writeReadingPages(id, fields.body.pages);
-    prepare('UPDATE content_items SET kind = ?, body_json = ? WHERE id = ?').run(
-      fields.body.kind,
-      bodyToStoredJson(fields.body),
-      id
-    );
-  }
-  prepare("UPDATE content_items SET updated_at = datetime('now') WHERE id = ?").run(id);
+  db.transaction(() => {
+    if (fields.title !== undefined) {
+      prepare('UPDATE content_items SET title = ? WHERE id = ?').run(fields.title, id);
+    }
+    if (fields.subtitle !== undefined) {
+      prepare('UPDATE content_items SET subtitle = ? WHERE id = ?').run(fields.subtitle, id);
+    }
+    prepare("UPDATE content_items SET updated_at = datetime('now') WHERE id = ?").run(id);
+    if (fields.body !== undefined) {
+      prepare('UPDATE content_items SET kind = ?, body_json = ? WHERE id = ?').run(
+        fields.body.kind,
+        bodyToStoredJson(fields.body),
+        id
+      );
+      if (fields.body.kind === 'reading') writeReadingPages(id, fields.body.pages);
+      else removeReadingPages(id);
+    }
+  })();
   return getContentById(id);
 }
 
