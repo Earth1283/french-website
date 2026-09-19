@@ -5,12 +5,13 @@ import { getAssignmentById, listAssignmentsForStudent } from '../db/queries/assi
 import { getContentById, hydrateContentBody } from '../db/queries/content.js';
 import { getAttemptForStudentAssignment, listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
 import { createFlag } from '../db/queries/flags.js';
+import { enrollLimiter } from './rateLimits.js';
 import { createFlagSchema, enrollSchema, submitAttemptSchema } from '../lib/validation.js';
 
 export const studentRouter = Router();
 studentRouter.use(requireStudent);
 
-studentRouter.post('/enroll', (req, res) => {
+studentRouter.post('/enroll', enrollLimiter, (req, res) => {
   const parsed = enrollSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });

@@ -9,6 +9,11 @@ import { teacherRouter } from './routes/teacher.js';
 export const app = express();
 
 app.use(cors({ origin: config.corsOrigin, exposedHeaders: ['Content-Type'] }));
+// A reading lesson is allowed up to 50 pages of 20,000 characters, which with
+// accented French text and JSON overhead outgrows the default limit. Content
+// routes get room for that; the first parser to see a request wins, so this
+// must be registered before the general one.
+app.use('/api/teacher/content', express.json({ limit: '5mb' }));
 app.use(express.json({ limit: '1mb' }));
 
 app.use('/api', healthRouter);
@@ -34,7 +39,22 @@ app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
+const CLIENT_ERROR_MESSAGES: Record<number, string> = {
+  400: 'Malformed request body',
+  413: 'Request body too large',
+};
+
+function clientErrorStatus(err: unknown): number | null {
+  const status = (err as { status?: unknown } | null)?.status;
+  return typeof status === 'number' && status >= 400 && status < 500 ? status : null;
+}
+
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const status = clientErrorStatus(err);
+  if (status) {
+    res.status(status).json({ error: CLIENT_ERROR_MESSAGES[status] ?? 'Bad request' });
+    return;
+  }
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 });

@@ -4,7 +4,9 @@ import { join } from 'node:path';
 import type Database from 'better-sqlite3';
 import type { Express } from 'express';
 
-export async function createTestApp(): Promise<{ app: Express; db: Database.Database }> {
+export async function createTestApp(
+  env: Record<string, string> = {}
+): Promise<{ app: Express; db: Database.Database }> {
   const dir = mkdtempSync(join(tmpdir(), 'classroom-test-'));
   process.env.DATA_DIR = dir;
   process.env.DB_PATH = join(dir, 'test.sqlite3');
@@ -14,6 +16,7 @@ export async function createTestApp(): Promise<{ app: Express; db: Database.Data
   process.env.TLS_CERT_PATH = '';
   process.env.TLS_KEY_PATH = '';
   process.env.AUTH_RATE_LIMIT = '1000';
+  Object.assign(process.env, env);
 
   const { app } = await import('../src/app.js');
   const { db } = await import('../src/db/connection.js');

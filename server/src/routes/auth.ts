@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
 import { requireStudent, requireTeacher } from '../auth/middleware.js';
 import { hashPassword, verifyPassword } from '../auth/hash.js';
 import { signToken, verifyToken } from '../auth/jwt.js';
 import { config } from '../config.js';
+import { authLimiters } from './rateLimits.js';
 import { generateRecoveryCode, hashRecoveryCode, verifyRecoveryCode } from '../lib/recoveryCode.js';
 import {
   countTeachers,
@@ -31,13 +31,7 @@ import {
 
 export const authRouter = Router();
 
-const authLimiter = rateLimit({
-  windowMs: 60_000,
-  max: config.authRateLimit,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-authRouter.use(authLimiter);
+authRouter.use(authLimiters);
 
 function teacherSignupAllowed(signupCode: string | undefined): boolean {
   if (countTeachers() === 0) return true;
