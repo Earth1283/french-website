@@ -118,6 +118,10 @@ export const changePasswordSchema = z.object({
   newPassword: password,
 });
 
+export const regenerateRecoveryCodeSchema = z.object({
+  currentPassword: z.string().min(1),
+});
+
 export const resetStudentPasswordSchema = z.object({
   newPassword: password,
 });

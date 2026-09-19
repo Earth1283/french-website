@@ -4,7 +4,7 @@ import { requireStudent, requireTeacher } from '../auth/middleware.js';
 import { hashPassword, verifyPassword } from '../auth/hash.js';
 import { signToken, verifyToken } from '../auth/jwt.js';
 import { config } from '../config.js';
-import { generateRecoveryCode } from '../lib/recoveryCode.js';
+import { generateRecoveryCode, hashRecoveryCode, verifyRecoveryCode } from '../lib/recoveryCode.js';
 import {
   countTeachers,
   createTeacher,
@@ -23,6 +23,7 @@ import {
 import {
   changePasswordSchema,
   loginSchema,
+  regenerateRecoveryCodeSchema,
   resetWithRecoveryCodeSchema,
   studentRegisterSchema,
   teacherRegisterSchema,
@@ -38,7 +39,12 @@ const authLimiter = rateLimit({
 });
 authRouter.use(authLimiter);
 
-authRouter.post('/teacher/register', (req, res) => {
+function teacherSignupAllowed(signupCode: string | undefined): boolean {
+  if (countTeachers() === 0) return true;
+  return !!config.teacherSignupCode && signupCode === config.teacherSignupCode;
+}
+
+authRouter.post('/teacher/register', async (req, res) => {
   const parsed = teacherRegisterSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
@@ -46,12 +52,9 @@ authRouter.post('/teacher/register', (req, res) => {
   }
   const { name, email, password, signupCode } = parsed.data;
 
-  const isFirstTeacher = countTeachers() === 0;
-  if (!isFirstTeacher) {
-    if (!config.teacherSignupCode || signupCode !== config.teacherSignupCode) {
-      res.status(403).json({ error: 'Teacher signup requires an invite code on this server' });
-      return;
-    }
+  if (!teacherSignupAllowed(signupCode)) {
+    res.status(403).json({ error: 'Teacher signup requires an invite code on this server' });
+    return;
   }
 
   if (getTeacherByEmail(email)) {
@@ -60,9 +63,18 @@ authRouter.post('/teacher/register', (req, res) => {
   }
 
   const recoveryCode = generateRecoveryCode();
+  const passwordHash = await hashPassword(password);
+
+  // Hashing yields the event loop, so another signup can land in between —
+  // re-check right before the insert, with nothing awaited in between, or two
+  // concurrent first-time signups would both count as "the first teacher".
+  if (!teacherSignupAllowed(signupCode)) {
+    res.status(403).json({ error: 'Teacher signup requires an invite code on this server' });
+    return;
+  }
   let teacher;
   try {
-    teacher = createTeacher(name, email, hashPassword(password), hashPassword(recoveryCode));
+    teacher = createTeacher(name, email, passwordHash, hashRecoveryCode(recoveryCode));
   } catch {
     res.status(409).json({ error: 'An account with this email already exists' });
     return;
@@ -73,14 +85,14 @@ authRouter.post('/teacher/register', (req, res) => {
     .json({ token, teacher: { id: teacher.id, name: teacher.name, email: teacher.email }, recoveryCode });
 });
 
-authRouter.post('/teacher/login', (req, res) => {
+authRouter.post('/teacher/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const teacher = getTeacherByEmail(parsed.data.email);
-  if (!teacher || !verifyPassword(parsed.data.password, teacher.password_hash)) {
+  if (!teacher || !await verifyPassword(parsed.data.password, teacher.password_hash)) {
     res.status(401).json({ error: 'Invalid email or password' });
     return;
   }
@@ -88,7 +100,7 @@ authRouter.post('/teacher/login', (req, res) => {
   res.json({ token, teacher: { id: teacher.id, name: teacher.name, email: teacher.email } });
 });
 
-authRouter.post('/student/register', (req, res) => {
+authRouter.post('/student/register', async (req, res) => {
   const parsed = studentRegisterSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
@@ -102,7 +114,7 @@ authRouter.post('/student/register', (req, res) => {
   const recoveryCode = generateRecoveryCode();
   let student;
   try {
-    student = createStudent(name, email, hashPassword(password), hashPassword(recoveryCode));
+    student = createStudent(name, email, await hashPassword(password), hashRecoveryCode(recoveryCode));
   } catch {
     res.status(409).json({ error: 'An account with this email already exists' });
     return;
@@ -113,14 +125,14 @@ authRouter.post('/student/register', (req, res) => {
     .json({ token, student: { id: student.id, name: student.name, email: student.email }, recoveryCode });
 });
 
-authRouter.post('/student/login', (req, res) => {
+authRouter.post('/student/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const student = getStudentByEmail(parsed.data.email);
-  if (!student || !verifyPassword(parsed.data.password, student.password_hash)) {
+  if (!student || !await verifyPassword(parsed.data.password, student.password_hash)) {
     res.status(401).json({ error: 'Invalid email or password' });
     return;
   }
@@ -131,85 +143,105 @@ authRouter.post('/student/login', (req, res) => {
 // Recovery codes are single-use: a successful reset immediately issues a
 // replacement so an intercepted code can't be reused, and stops the account
 // being permanently unrecoverable after one reset.
-authRouter.post('/teacher/reset-with-recovery-code', (req, res) => {
+authRouter.post('/teacher/reset-with-recovery-code', async (req, res) => {
   const parsed = resetWithRecoveryCodeSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const teacher = getTeacherByEmail(parsed.data.email);
-  if (!teacher?.recovery_code_hash || !verifyPassword(parsed.data.recoveryCode, teacher.recovery_code_hash)) {
+  if (!teacher?.recovery_code_hash || !await verifyRecoveryCode(parsed.data.recoveryCode, teacher.recovery_code_hash)) {
     res.status(401).json({ error: 'Invalid email or recovery code' });
     return;
   }
-  updateTeacherPassword(teacher.id, hashPassword(parsed.data.newPassword));
+  updateTeacherPassword(teacher.id, await hashPassword(parsed.data.newPassword));
   const recoveryCode = generateRecoveryCode();
-  updateTeacherRecoveryCodeHash(teacher.id, hashPassword(recoveryCode));
+  updateTeacherRecoveryCodeHash(teacher.id, hashRecoveryCode(recoveryCode));
   const updated = getTeacherById(teacher.id)!;
   const token = signToken({ sub: updated.id, role: 'teacher', tokenVersion: updated.token_version });
   res.json({ token, teacher: { id: updated.id, name: updated.name, email: updated.email }, recoveryCode });
 });
 
-authRouter.post('/student/reset-with-recovery-code', (req, res) => {
+authRouter.post('/student/reset-with-recovery-code', async (req, res) => {
   const parsed = resetWithRecoveryCodeSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const student = getStudentByEmail(parsed.data.email);
-  if (!student?.recovery_code_hash || !verifyPassword(parsed.data.recoveryCode, student.recovery_code_hash)) {
+  if (!student?.recovery_code_hash || !await verifyRecoveryCode(parsed.data.recoveryCode, student.recovery_code_hash)) {
     res.status(401).json({ error: 'Invalid email or recovery code' });
     return;
   }
-  updateStudentPassword(student.id, hashPassword(parsed.data.newPassword));
+  updateStudentPassword(student.id, await hashPassword(parsed.data.newPassword));
   const recoveryCode = generateRecoveryCode();
-  updateStudentRecoveryCodeHash(student.id, hashPassword(recoveryCode));
+  updateStudentRecoveryCodeHash(student.id, hashRecoveryCode(recoveryCode));
   const updated = getStudentById(student.id)!;
   const token = signToken({ sub: updated.id, role: 'student', tokenVersion: updated.token_version });
   res.json({ token, student: { id: updated.id, name: updated.name, email: updated.email }, recoveryCode });
 });
 
-authRouter.post('/teacher/regenerate-recovery-code', requireTeacher, (req, res) => {
+authRouter.post('/teacher/regenerate-recovery-code', requireTeacher, async (req, res) => {
+  const parsed = regenerateRecoveryCodeSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const teacher = getTeacherById(req.teacherId!)!;
+  if (!await verifyPassword(parsed.data.currentPassword, teacher.password_hash)) {
+    res.status(401).json({ error: 'Current password is incorrect' });
+    return;
+  }
   const recoveryCode = generateRecoveryCode();
-  updateTeacherRecoveryCodeHash(req.teacherId!, hashPassword(recoveryCode));
+  updateTeacherRecoveryCodeHash(teacher.id, hashRecoveryCode(recoveryCode));
   res.json({ recoveryCode });
 });
 
-authRouter.post('/student/regenerate-recovery-code', requireStudent, (req, res) => {
+authRouter.post('/student/regenerate-recovery-code', requireStudent, async (req, res) => {
+  const parsed = regenerateRecoveryCodeSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const student = getStudentById(req.studentId!)!;
+  if (!await verifyPassword(parsed.data.currentPassword, student.password_hash)) {
+    res.status(401).json({ error: 'Current password is incorrect' });
+    return;
+  }
   const recoveryCode = generateRecoveryCode();
-  updateStudentRecoveryCodeHash(req.studentId!, hashPassword(recoveryCode));
+  updateStudentRecoveryCodeHash(student.id, hashRecoveryCode(recoveryCode));
   res.json({ recoveryCode });
 });
 
-authRouter.post('/teacher/change-password', requireTeacher, (req, res) => {
+authRouter.post('/teacher/change-password', requireTeacher, async (req, res) => {
   const parsed = changePasswordSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const teacher = getTeacherById(req.teacherId!)!;
-  if (!verifyPassword(parsed.data.currentPassword, teacher.password_hash)) {
+  if (!await verifyPassword(parsed.data.currentPassword, teacher.password_hash)) {
     res.status(401).json({ error: 'Current password is incorrect' });
     return;
   }
-  updateTeacherPassword(teacher.id, hashPassword(parsed.data.newPassword));
+  updateTeacherPassword(teacher.id, await hashPassword(parsed.data.newPassword));
   const updated = getTeacherById(teacher.id)!;
   const token = signToken({ sub: updated.id, role: 'teacher', tokenVersion: updated.token_version });
   res.json({ token });
 });
 
-authRouter.post('/student/change-password', requireStudent, (req, res) => {
+authRouter.post('/student/change-password', requireStudent, async (req, res) => {
   const parsed = changePasswordSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const student = getStudentById(req.studentId!)!;
-  if (!verifyPassword(parsed.data.currentPassword, student.password_hash)) {
+  if (!await verifyPassword(parsed.data.currentPassword, student.password_hash)) {
     res.status(401).json({ error: 'Current password is incorrect' });
     return;
   }
-  updateStudentPassword(student.id, hashPassword(parsed.data.newPassword));
+  updateStudentPassword(student.id, await hashPassword(parsed.data.newPassword));
   const updated = getStudentById(student.id)!;
   const token = signToken({ sub: updated.id, role: 'student', tokenVersion: updated.token_version });
   res.json({ token });

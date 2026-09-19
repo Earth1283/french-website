@@ -22,5 +22,5 @@ if (!teacher) {
   process.exit(1);
 }
 
-updateTeacherPassword(teacher.id, hashPassword(newPassword));
+updateTeacherPassword(teacher.id, await hashPassword(newPassword));
 console.log(`Password updated for ${teacher.name} <${teacher.email}>. They'll need to log in again everywhere.`);

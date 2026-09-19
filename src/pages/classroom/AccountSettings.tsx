@@ -18,15 +18,21 @@ export function AccountSettings() {
   const [newRecoveryCode, setNewRecoveryCode] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
+  const [regeneratePassword, setRegeneratePassword] = useState('');
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
 
   async function regenerateRecoveryCode() {
+    setRegenerateError(null);
     setRegenerating(true);
     try {
       const path =
         role === 'teacher' ? '/api/auth/teacher/regenerate-recovery-code' : '/api/auth/student/regenerate-recovery-code';
-      const res = await classroomApi.post<{ recoveryCode: string }>(path);
+      const res = await classroomApi.post<{ recoveryCode: string }>(path, { currentPassword: regeneratePassword });
       setNewRecoveryCode(res.recoveryCode);
       setConfirmRegenerate(false);
+      setRegeneratePassword('');
+    } catch (err) {
+      setRegenerateError(err instanceof ClassroomApiError ? err.message : 'Something went wrong.');
     } finally {
       setRegenerating(false);
     }
@@ -136,13 +142,40 @@ export function AccountSettings() {
               Generate new recovery code
             </Button>
           ) : (
-            <div className="flex gap-2">
-              <Button variant="secondary" size="sm" onClick={() => setConfirmRegenerate(false)}>
-                Cancel
-              </Button>
-              <Button variant="tinted" size="sm" onClick={regenerateRecoveryCode} disabled={regenerating}>
-                Yes, generate a new one
-              </Button>
+            <div className="space-y-3">
+              <input
+                value={regeneratePassword}
+                onChange={(e) => setRegeneratePassword(e.target.value)}
+                placeholder="Current password"
+                type="password"
+                className="ios-input py-2 text-sm"
+              />
+              {regenerateError && (
+                <p className="text-xs" style={{ color: 'var(--danger)' }}>
+                  {regenerateError}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setConfirmRegenerate(false);
+                    setRegeneratePassword('');
+                    setRegenerateError(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="tinted"
+                  size="sm"
+                  onClick={regenerateRecoveryCode}
+                  disabled={regenerating || !regeneratePassword.trim()}
+                >
+                  Yes, generate a new one
+                </Button>
+              </div>
             </div>
           )}
         </div>

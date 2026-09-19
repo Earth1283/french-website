@@ -142,3 +142,20 @@ describe('teacher resets a student password', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('password hashes from before the native bcrypt switch', () => {
+  it('still lets a student log in with a hash produced by bcryptjs', async () => {
+    await request(app)
+      .post('/api/auth/student/register')
+      .send({ name: 'Alex', email: 'alex@example.com', password: 'placeholder1' });
+    // Generated with bcryptjs 3 at cost 10 for the password "legacy-password".
+    db.prepare('UPDATE students SET password_hash = ?').run(
+      '$2b$10$uqccEI6LImOVgqwqazNvxuJ364KY7iPdwj1NB/L/jdW.KCeZbnnJu'
+    );
+
+    const res = await request(app)
+      .post('/api/auth/student/login')
+      .send({ email: 'alex@example.com', password: 'legacy-password' });
+    expect(res.status).toBe(200);
+  });
+});

@@ -99,7 +99,7 @@ teacherRouter.get('/classes/:classId/roster', (req, res) => {
   res.json({ roster: getRoster(cls.id) });
 });
 
-teacherRouter.post('/classes/:classId/students/:studentId/reset-password', (req, res) => {
+teacherRouter.post('/classes/:classId/students/:studentId/reset-password', async (req, res) => {
   const cls = ownedClass(req, req.params.classId);
   if (!cls || !isEnrolled(req.params.studentId, cls.id)) {
     res.status(404).json({ error: 'Student not found in this class' });
@@ -110,7 +110,7 @@ teacherRouter.post('/classes/:classId/students/:studentId/reset-password', (req,
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
-  updateStudentPassword(req.params.studentId, hashPassword(parsed.data.newPassword));
+  updateStudentPassword(req.params.studentId, await hashPassword(parsed.data.newPassword));
   res.status(204).end();
 });
 
