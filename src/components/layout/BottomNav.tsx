@@ -3,6 +3,7 @@ import { Home, BookOpen, MessageSquare, User, Settings, Timer, Gauge, Graduation
 import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 import { TAP_SPRING } from '../../utils/motion';
+import { isNavActive } from '../../utils/navMatch';
 
 const NAV_ITEMS = [
   { to: '/learn', icon: Home, label: 'Home' },
@@ -21,9 +22,6 @@ export function BottomNav() {
   const { pathname } = useLocation();
   const reducedGpu = useProgressStore(s => s.reducedGpu);
 
-  const isActive = (to: string) =>
-    to === '/learn' ? pathname === '/learn' : pathname.startsWith(to);
-
   // Flat translucent bar — fallback when the user opts out of the liquid glass nav
   if (reducedGpu) {
     return (
@@ -37,7 +35,7 @@ export function BottomNav() {
       >
         <div className="flex items-center justify-around h-16">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
-            const active = isActive(to);
+            const active = isNavActive(pathname, to);
             return (
               <Link
                 key={to}
@@ -73,7 +71,7 @@ export function BottomNav() {
         }}
       >
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
-          const active = isActive(to);
+          const active = isNavActive(pathname, to);
           return (
             <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
               <Link

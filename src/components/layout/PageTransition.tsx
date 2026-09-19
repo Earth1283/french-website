@@ -8,7 +8,7 @@ interface PageTransitionProps {
 }
 
 // iOS push/pop: forward navigations slide in from the right with a spring,
-// back navigations from the left; the outgoing page recedes slightly.
+// back navigations from the left. Entrance only — an exit-wait deadlocks on rapid navigation.
 export function PageTransition({ children, keyProp }: PageTransitionProps) {
   const navType = useNavigationType();
   const x = navType === 'POP' ? -32 : 32;
@@ -18,7 +18,6 @@ export function PageTransition({ children, keyProp }: PageTransitionProps) {
       key={keyProp}
       initial={{ opacity: 0, x }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -x / 2, scale: 0.99 }}
       transition={{ type: 'spring', damping: 26, stiffness: 280, mass: 0.9 }}
     >
       {children}

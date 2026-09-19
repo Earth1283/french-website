@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useProgressStore } from '../../stores/progressStore';
 import { TAP_SPRING } from '../../utils/motion';
 import { FrenchFlag } from '../ui/FrenchFlag';
+import { isNavActive } from '../../utils/navMatch';
 
 const NAV_ITEMS = [
   { to: '/learn', icon: Home, label: 'Home' },
@@ -74,7 +75,7 @@ export function Navbar() {
           {/* Desktop nav — fluid sliding active pill */}
           <nav className="hidden sm:flex items-center gap-0.5 rounded-full p-1" style={{ backgroundColor: 'var(--bg-inset)' }}>
             {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
-              const isActive = location.pathname === to;
+              const isActive = isNavActive(location.pathname, to);
               return (
                 <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
                   <Link
@@ -104,7 +105,7 @@ export function Navbar() {
             <Link
               to="/settings"
               className="flex p-2 rounded-full transition-colors no-underline ios-press"
-              style={{ color: location.pathname === '/settings' ? 'var(--accent)' : 'var(--text-muted)' }}
+              style={{ color: isNavActive(location.pathname, '/settings') ? 'var(--accent)' : 'var(--text-muted)' }}
               aria-label="Settings"
             >
               <Settings size={17} />

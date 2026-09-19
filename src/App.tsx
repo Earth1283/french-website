@@ -1,6 +1,5 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { useProgressStore } from './stores/progressStore';
 import { useIdlePreload } from './hooks/useIdlePreload';
 import { Navbar } from './components/layout/Navbar';
@@ -76,12 +75,9 @@ const ACCENT_HOVER: Record<string, string> = {
   '#0EA5E9': '#0284c7',
 };
 
-// Full-bleed ambient pages (Landing "/", Focus "/focus") are rendered OUTSIDE
-// the AnimatePresence `mode="wait"` transition system. They don't use the iOS
-// push/pop slide, and keeping them out avoids a wait-deadlock where navigating
-// away mid-transition could leave the outgoing full-screen page (and its fixed
-// backdrop) stuck over the next route. Each ambient page handles its own
-// entrance animation internally.
+// Full-bleed ambient pages (Landing "/", Focus "/focus") are rendered outside
+// the app chrome and the iOS push/pop slide. Each handles its own entrance
+// animation internally.
 function AmbientRoutes() {
   return (
     <ErrorBoundary>
@@ -100,29 +96,27 @@ function AnimatedRoutes() {
   return (
     <ErrorBoundary>
       <Suspense fallback={null}>
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/learn" element={<PageTransition keyProp="/learn"><Home /></PageTransition>} />
-            <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
-            <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
-            <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
-            <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
-            <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
-            <Route path="/classes/connect" element={<PageTransition keyProp="classes-connect"><Connect /></PageTransition>} />
-            <Route path="/classes/auth" element={<PageTransition keyProp="classes-auth"><ClassroomAuth /></PageTransition>} />
-            <Route path="/classes/account" element={<PageTransition keyProp="classes-account"><AccountSettings /></PageTransition>} />
-            <Route path="/classes/content" element={<PageTransition keyProp="content-library"><ContentLibrary /></PageTransition>} />
-            <Route path="/classes/content/new" element={<PageTransition keyProp="content-new"><ContentEditor /></PageTransition>} />
-            <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
-            <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />
-            <Route path="/classes/:classId/assignments/:assignmentId/results" element={<PageTransition keyProp="assignment-results"><AssignmentResults /></PageTransition>} />
-            <Route path="/classes/:classId" element={<PageTransition keyProp="class-detail"><ClassDetail /></PageTransition>} />
-            <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
-            <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
-            <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
-            <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
-          </Routes>
-        </AnimatePresence>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/learn" element={<PageTransition keyProp="/learn"><Home /></PageTransition>} />
+          <Route path="/unit/:slug" element={<PageTransition keyProp="unit"><UnitDetail /></PageTransition>} />
+          <Route path="/unit/:slug/lesson/:lessonId" element={<PageTransition keyProp="lesson"><Lesson /></PageTransition>} />
+          <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
+          <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
+          <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
+          <Route path="/classes/connect" element={<PageTransition keyProp="classes-connect"><Connect /></PageTransition>} />
+          <Route path="/classes/auth" element={<PageTransition keyProp="classes-auth"><ClassroomAuth /></PageTransition>} />
+          <Route path="/classes/account" element={<PageTransition keyProp="classes-account"><AccountSettings /></PageTransition>} />
+          <Route path="/classes/content" element={<PageTransition keyProp="content-library"><ContentLibrary /></PageTransition>} />
+          <Route path="/classes/content/new" element={<PageTransition keyProp="content-new"><ContentEditor /></PageTransition>} />
+          <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
+          <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />
+          <Route path="/classes/:classId/assignments/:assignmentId/results" element={<PageTransition keyProp="assignment-results"><AssignmentResults /></PageTransition>} />
+          <Route path="/classes/:classId" element={<PageTransition keyProp="class-detail"><ClassDetail /></PageTransition>} />
+          <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
+          <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
+          <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
+        </Routes>
       </Suspense>
     </ErrorBoundary>
   );
