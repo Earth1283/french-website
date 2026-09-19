@@ -77,7 +77,7 @@ describe('full classroom flow', () => {
     const attemptRes = await request(app)
       .post(`/api/student/assignments/${assignmentId}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [{ index: 0, correct: true }], score: 100, xpEarned: 10 });
+      .send({ responses: [{ index: 0, answerGiven: 'Bonjour' }] });
     expect(attemptRes.status).toBe(201);
 
     const rosterRes = await request(app)

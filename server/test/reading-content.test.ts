@@ -119,7 +119,7 @@ describe('reading content', () => {
     const attempt = await request(app)
       .post(`/api/student/assignments/${assignment.body.assignment.id}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [], score: 100, xpEarned: 15 });
+      .send({ responses: [] });
     expect(attempt.status).toBe(201);
     expect(attempt.body.attempt.score).toBe(100);
 
@@ -144,7 +144,7 @@ describe('reading content', () => {
     const attempt = await request(app)
       .post(`/api/student/assignments/${assignment.body.assignment.id}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [], score: null, xpEarned: 0 });
+      .send({ responses: [] });
     expect(attempt.status).toBe(201);
     expect(attempt.body.attempt.score).toBeNull();
 

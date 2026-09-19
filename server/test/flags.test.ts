@@ -72,11 +72,9 @@ describe('question analytics', () => {
       .set('Authorization', `Bearer ${studentToken}`)
       .send({
         responses: [
-          { index: 0, correct: true },
-          { index: 1, correct: false },
+          { index: 0, answerGiven: 'Bonjour' },
+          { index: 1, answerGiven: 'Bonjour' },
         ],
-        score: 50,
-        xpEarned: 5,
       });
 
     const res = await request(app)

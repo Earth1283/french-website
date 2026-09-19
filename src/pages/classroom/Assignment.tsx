@@ -53,13 +53,9 @@ export function Assignment() {
 
   async function finish(finalResponses: AttemptResponseEntry[]) {
     setSubmitting(true);
-    const correct = finalResponses.filter((r) => r.correct).length;
-    const score = Math.round((correct / finalResponses.length) * 100);
     try {
       await classroomApi.post(`/api/student/assignments/${assignmentId}/attempts`, {
-        responses: finalResponses,
-        score,
-        xpEarned: content.body.xpReward,
+        responses: finalResponses.map(({ index, answerGiven }) => ({ index, answerGiven })),
       });
     } finally {
       setSubmitting(false);
@@ -70,11 +66,7 @@ export function Assignment() {
   async function finishReading() {
     setSubmitting(true);
     try {
-      await classroomApi.post(`/api/student/assignments/${assignmentId}/attempts`, {
-        responses: [],
-        score: readingGradable ? 100 : null,
-        xpEarned: readingGradable ? content.body.xpReward : 0,
-      });
+      await classroomApi.post(`/api/student/assignments/${assignmentId}/attempts`, { responses: [] });
     } finally {
       setSubmitting(false);
       setPhase('complete');
@@ -243,8 +235,8 @@ export function Assignment() {
             </p>
             {(() => {
               const ex = exercises[exerciseIndex];
-              const onCorrect = () => advanceExercise({ index: exerciseIndex, correct: true });
-              const onWrong = () => advanceExercise({ index: exerciseIndex, correct: false });
+              const onCorrect = (answerGiven?: string) => advanceExercise({ index: exerciseIndex, correct: true, answerGiven });
+              const onWrong = (answerGiven?: string) => advanceExercise({ index: exerciseIndex, correct: false, answerGiven });
               if (ex.type === 'multiple-choice') return <MultipleChoice key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
               if (ex.type === 'fill-blank') return <FillInBlank key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;
               if (ex.type === 'translation') return <TranslationChallenge key={exerciseIndex} exercise={ex} onCorrect={onCorrect} onWrong={onWrong} />;

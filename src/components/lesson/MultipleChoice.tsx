@@ -5,8 +5,8 @@ import { speak } from '../../utils/speech';
 
 interface MultipleChoiceProps {
   exercise: Exercise;
-  onCorrect: () => void;
-  onWrong: () => void;
+  onCorrect: (answerGiven?: string) => void;
+  onWrong: (answerGiven?: string) => void;
   keyboardSelect?: number | null;
 }
 
@@ -31,8 +31,8 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
     if (answered) return;
     setSelected(option);
     setTimeout(() => {
-      if (option === exercise.answer) onCorrect();
-      else onWrong();
+      if (option === exercise.answer) onCorrect(option);
+      else onWrong(option);
     }, 800);
   };
 

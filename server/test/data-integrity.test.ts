@@ -67,12 +67,12 @@ describe('retaking an assignment', () => {
     await request(app)
       .post(`/api/student/assignments/${assignmentId}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [{ index: 0, correct: false }], score: 0, xpEarned: 0 });
+      .send({ responses: [{ index: 0, answerGiven: 'Merci' }] });
 
     await request(app)
       .post(`/api/student/assignments/${assignmentId}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [{ index: 0, correct: true }], score: 100, xpEarned: 10 });
+      .send({ responses: [{ index: 0, answerGiven: 'Bonjour' }] });
 
     const list = await request(app)
       .get(`/api/student/classes/${classId}/assignments`)
@@ -98,7 +98,7 @@ describe('retaking an assignment', () => {
     await request(app)
       .post(`/api/student/assignments/${assignmentId}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [{ index: 0, correct: true }], score: 100, xpEarned: 10 });
+      .send({ responses: [{ index: 0, answerGiven: 'Bonjour' }] });
 
     const res = await request(app)
       .get(`/api/student/assignments/${assignmentId}`)
@@ -114,7 +114,7 @@ describe('deleting content', () => {
     await request(app)
       .post(`/api/student/assignments/${assignmentId}/attempts`)
       .set('Authorization', `Bearer ${studentToken}`)
-      .send({ responses: [{ index: 0, correct: true }], score: 100, xpEarned: 10 });
+      .send({ responses: [{ index: 0, answerGiven: 'Bonjour' }] });
 
     const del = await request(app)
       .delete(`/api/teacher/content/${contentId}`)

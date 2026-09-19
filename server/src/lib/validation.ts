@@ -93,18 +93,18 @@ export const enrollSchema = z.object({
   joinCode: z.string().trim().min(1),
 });
 
+// Only the answers themselves are accepted from the client. Correctness,
+// score and XP are all worked out server-side in lib/grading.ts, so anything
+// else an older client still sends (correct, score, xpEarned) is stripped.
 export const submitAttemptSchema = z.object({
-  responses: z.array(
-    z.object({
-      index: z.number().int().nonnegative(),
-      correct: z.boolean(),
-      answerGiven: z.string().optional(),
-    })
-  ),
-  // null for a completed non-gradable reading assignment — see
-  // ClassroomReadingBody.gradable on the frontend.
-  score: z.number().min(0).max(100).nullable(),
-  xpEarned: z.number().int().nonnegative(),
+  responses: z
+    .array(
+      z.object({
+        index: z.number().int().nonnegative(),
+        answerGiven: z.string().max(2000).optional(),
+      })
+    )
+    .max(500),
 });
 
 export const resetWithRecoveryCodeSchema = z.object({

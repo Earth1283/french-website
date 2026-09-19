@@ -7,8 +7,8 @@ import { checkAnswer } from '../../utils/fuzzy';
 
 interface FillInBlankProps {
   exercise: Exercise;
-  onCorrect: () => void;
-  onWrong: () => void;
+  onCorrect: (answerGiven?: string) => void;
+  onWrong: (answerGiven?: string) => void;
 }
 
 const STATUS_STYLES: Record<string, React.CSSProperties> = {
@@ -37,11 +37,12 @@ export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) 
 
   const check = () => {
     if (!value.trim()) return;
-    const result = checkAnswer(value.trim(), exercise.answer);
+    const answerGiven = value.trim();
+    const result = checkAnswer(answerGiven, exercise.answer);
     setStatus(result);
     setTimeout(() => {
-      if (result === 'correct' || result === 'typo') onCorrect();
-      else onWrong();
+      if (result === 'correct' || result === 'typo') onCorrect(answerGiven);
+      else onWrong(answerGiven);
     }, result === 'wrong' ? 1400 : 1200);
   };
 

@@ -6,6 +6,7 @@ import { getContentById, hydrateContentBody } from '../db/queries/content.js';
 import { getAttemptForStudentAssignment, listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
 import { createFlag } from '../db/queries/flags.js';
 import { enrollLimiter } from './rateLimits.js';
+import { gradeAttempt } from '../lib/grading.js';
 import { createFlagSchema, enrollSchema, submitAttemptSchema } from '../lib/validation.js';
 
 export const studentRouter = Router();
@@ -76,13 +77,17 @@ studentRouter.post('/assignments/:assignmentId/attempts', (req, res) => {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
-  const attempt = recordAttempt(
-    req.studentId!,
-    assignment.id,
-    parsed.data.responses,
-    parsed.data.score,
-    parsed.data.xpEarned
-  );
+  const content = getContentById(assignment.content_id);
+  if (!content) {
+    res.status(404).json({ error: 'Assignment content not found' });
+    return;
+  }
+  const graded = gradeAttempt(hydrateContentBody(content), parsed.data.responses);
+  if (!graded.ok) {
+    res.status(400).json({ error: graded.error });
+    return;
+  }
+  const attempt = recordAttempt(req.studentId!, assignment.id, graded.responses, graded.score, graded.xpEarned);
   res.status(201).json({ attempt });
 });
 
