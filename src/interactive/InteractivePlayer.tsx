@@ -11,6 +11,7 @@ import { MorphSentence } from './primitives/MorphSentence';
 import { AlignedSentence } from './primitives/AlignedSentence';
 import { TileBuilder } from './primitives/TileBuilder';
 import { RoleLegend } from './primitives/RoleLegend';
+import { NumberFormula } from './primitives/NumberFormula';
 
 interface InteractivePlayerProps {
   lessonId: string;
@@ -188,6 +189,8 @@ function SceneView({ scene, number, total, solved, calm, onSolved }: SceneViewPr
           </div>
         )}
 
+        <NumberFormula sentence={sentence} idPrefix={`${scene.id}-${sentenceIndex}-formula`} />
+
         <p className="text-center text-[0.7rem] font-bold uppercase tracking-wider text-muted">
           {french ? 'Français' : 'English'}
         </p>
@@ -220,15 +223,16 @@ function SceneView({ scene, number, total, solved, calm, onSolved }: SceneViewPr
         <RoleLegend roles={roles} />
       </section>
 
-      <section className="card p-4 sm:p-5" aria-label="Your turn">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Your turn</p>
+      <section className="card p-4 sm:p-5 space-y-3" aria-label="Your turn">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted">Your turn</p>
+        <NumberFormula sentence={scene.check} idPrefix={`${scene.id}-check-formula`} />
         <TileBuilder sentence={scene.check} solved={solved} calm={calm} onSolved={onSolved} />
       </section>
     </div>
   );
 }
 
-const ROLE_ORDER: Role[] = ['subject', 'verb', 'object', 'negation', 'adverb', 'article', 'noun', 'adjective'];
+const ROLE_ORDER: Role[] = ['subject', 'verb', 'object', 'negation', 'adverb', 'article', 'noun', 'adjective', 'multiplier', 'base', 'addend', 'hour', 'fraction'];
 
 function sceneRoles(scene: Scene): Role[] {
   const used = new Set(scene.sentences.flatMap(s => s.tokens.map(t => t.role)));

@@ -12,6 +12,15 @@ export function englishText(s: Sentence): string {
   return englishOrder(s).map(t => t.en).join(' ');
 }
 
+/** French text for the whole sentence, hyphenating compound words but keeping "et un" / "et onze" spaced out as written. */
+export function frenchText(s: Sentence): string {
+  return frenchOrder(s).reduce((acc, t, i) => {
+    if (i === 0) return t.fr ?? '';
+    const sep = t.fr?.startsWith('et ') ? ' ' : '-';
+    return `${acc}${sep}${t.fr ?? ''}`;
+  }, '');
+}
+
 export function groupOf(t: Token): string {
   return t.group ?? t.id;
 }

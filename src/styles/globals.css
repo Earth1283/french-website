@@ -57,6 +57,11 @@
     --role-adverb: #D97706;
     --role-noun: #0891B2;
     --role-article: #64748B;
+    --role-base: #4F46E5;
+    --role-multiplier: #7C3AED;
+    --role-addend: #0D9488;
+    --role-hour: #EA580C;
+    --role-fraction: #E11D48;
   }
 
   .dark {
@@ -89,6 +94,11 @@
     --role-adverb: #FBBF24;
     --role-noun: #22D3EE;
     --role-article: #94A3B8;
+    --role-base: #818CF8;
+    --role-multiplier: #A78BFA;
+    --role-addend: #2DD4BF;
+    --role-hour: #FB923C;
+    --role-fraction: #FB7185;
   }
 
   * {

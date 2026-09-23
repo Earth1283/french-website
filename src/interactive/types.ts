@@ -1,4 +1,7 @@
-export type Role = 'subject' | 'verb' | 'object' | 'adjective' | 'negation' | 'adverb' | 'noun' | 'article';
+export type Role =
+  | 'subject' | 'verb' | 'object' | 'adjective' | 'negation' | 'adverb' | 'noun' | 'article'
+  | 'base' | 'multiplier' | 'addend'
+  | 'hour' | 'fraction';
 
 export interface Token {
   id: string;
@@ -10,6 +13,8 @@ export interface Token {
   /** Tokens sharing a group light up together (e.g. don't ↔ ne … pas). Defaults to the id. */
   group?: string;
   note?: string;
+  /** Numeric value for base/multiplier/addend tokens, so a number breakdown can be computed and shown. */
+  value?: number;
 }
 
 export interface Sentence {
