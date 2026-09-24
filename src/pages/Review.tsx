@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Volume2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
-import { vocabKey, defaultCard, isDue } from '../utils/srs';
+import { buildReviewSession } from '../utils/reviewQueue';
 import { speak } from '../utils/speech';
 import { Button } from '../components/ui/Button';
 import type { VocabItem } from '../types';
@@ -14,37 +14,35 @@ interface ReviewCard extends VocabItem {
   key: string;
   lessonTitle: string;
   unitEmoji: string;
+  /** A second look at a card missed earlier this session; it doesn't change the schedule. */
+  retry?: boolean;
+}
+
+const RETRY_GAP = 3;
+
+function shuffle<T>(items: T[]): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 export function Review() {
   const completedLessons = useProgressStore(s => s.completedLessons);
-  const srsData = useProgressStore(s => s.srsData);
   const updateSRS = useProgressStore(s => s.updateSRS);
   const addXP = useProgressStore(s => s.addXP);
 
-  const dueCards = useMemo<ReviewCard[]>(() => {
-    const cards: ReviewCard[] = [];
-    for (const unit of UNITS) {
-      for (const lesson of unit.lessons) {
-        if (!completedLessons.includes(lesson.id)) continue;
-        lesson.vocab.forEach((v, idx) => {
-          const key = vocabKey(lesson.id, idx);
-          const card = srsData[key] ?? defaultCard();
-          if (isDue(card)) {
-            cards.push({ ...v, key, lessonTitle: lesson.title, unitEmoji: unit.emoji });
-          }
-        });
-      }
-    }
-    // Shuffle
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
-    return cards;
-  // Only recompute at mount — srsData changes as we review, but we don't want the deck to shift mid-session
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Built once at mount: srsData changes as we review, but the deck shouldn't shift mid-session.
+  const [{ deck, deferred }] = useState(() => {
+    const { items, deferred } = buildReviewSession(completedLessons, useProgressStore.getState().srsData);
+    const deck: ReviewCard[] = shuffle(items).map(({ key, unit, lesson, vocab }) => (
+      { ...vocab, key, lessonTitle: lesson.title, unitEmoji: unit.emoji }
+    ));
+    return { deck, deferred };
+  });
+  const [queue, setQueue] = useState<ReviewCard[]>(deck);
 
   const [idx, setIdx] = useState(0);
   const [showing, setShowing] = useState<'front' | 'back'>('front');
@@ -53,16 +51,26 @@ export function Review() {
 
   const handleReveal = () => {
     setShowing('back');
-    if (dueCards[idx]) speak(dueCards[idx].french);
+    if (queue[idx]) speak(queue[idx].french);
   };
 
   const handleRate = (correct: boolean) => {
-    if (idx >= dueCards.length) return;
-    updateSRS(dueCards[idx].key, correct);
-    setTally(t => correct ? { ...t, correct: t.correct + 1 } : { ...t, wrong: t.wrong + 1 });
-    if (correct) {
-      addXP(2);
-      setSessionXP(x => x + 2);
+    const card = queue[idx];
+    if (!card) return;
+    if (!card.retry) {
+      updateSRS(card.key, correct);
+      setTally(t => correct ? { ...t, correct: t.correct + 1 } : { ...t, wrong: t.wrong + 1 });
+      if (correct) {
+        addXP(2);
+        setSessionXP(x => x + 2);
+      }
+    }
+    if (!correct) {
+      setQueue(q => {
+        const next = [...q];
+        next.splice(Math.min(idx + 1 + RETRY_GAP, next.length), 0, { ...card, retry: true });
+        return next;
+      });
     }
     setIdx(i => i + 1);
     setShowing('front');
@@ -70,7 +78,7 @@ export function Review() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (idx >= dueCards.length) return;
+      if (idx >= queue.length) return;
       if (showing === 'front') {
         if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') {
           e.preventDefault();
@@ -89,7 +97,7 @@ export function Review() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showing, idx, dueCards]);
+  }, [showing, idx, queue]);
 
   const nextLessons = useMemo(() => {
     const items: { unit: (typeof UNITS)[0]; lesson: (typeof UNITS)[0]['lessons'][0] }[] = [];
@@ -104,7 +112,7 @@ export function Review() {
     return items;
   }, [completedLessons]);
 
-  if (dueCards.length === 0) {
+  if (deck.length === 0) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 300 }} className="space-y-5">
@@ -150,7 +158,7 @@ export function Review() {
     );
   }
 
-  if (idx >= dueCards.length) {
+  if (idx >= queue.length) {
     const total = tally.correct + tally.wrong;
     const pct = total > 0 ? Math.round((tally.correct / total) * 100) : 0;
     return (
@@ -161,6 +169,9 @@ export function Review() {
           <p className="text-secondary">
             {tally.correct} correct out of {total} · {pct}%
           </p>
+          {deferred > 0 && (
+            <p className="text-sm text-muted">{deferred} more card{deferred !== 1 ? 's' : ''} waiting — they'll be ready in your next session.</p>
+          )}
           {sessionXP > 0 && (
             <div className="inline-flex items-center gap-1.5 xp-badge text-sm px-3 py-1.5">
               ⚡ +{sessionXP} XP earned
@@ -174,7 +185,7 @@ export function Review() {
     );
   }
 
-  const card = dueCards[idx];
+  const card = queue[idx];
 
   return (
     <div className="max-w-xl mx-auto px-4 py-6 relative">
@@ -191,13 +202,13 @@ export function Review() {
         <div className="flex-1">
           <div className="flex items-center justify-between text-xs text-muted mb-1 font-medium">
             <span>Review session</span>
-            <span>{idx + 1} / {dueCards.length}</span>
+            <span>{idx + 1} / {queue.length}</span>
           </div>
           <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-inset)' }}>
             <motion.div
               className="h-full rounded-full"
               style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
-              animate={{ scaleX: idx / dueCards.length }}
+              animate={{ scaleX: idx / queue.length }}
               transition={{ type: 'spring', damping: 26, stiffness: 240 }}
             />
           </div>
@@ -222,7 +233,7 @@ export function Review() {
               onClick={handleReveal}
             >
               <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                {card.unitEmoji} {card.lessonTitle}
+                {card.retry ? '🔁 Another look' : `${card.unitEmoji} ${card.lessonTitle}`}
               </p>
               <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>
                 {card.french}

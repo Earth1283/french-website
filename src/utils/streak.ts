@@ -1,11 +1,23 @@
-const DAY_MS = 86_400_000;
+function pad(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+/** Calendar date in the learner's own timezone as YYYY-MM-DD. */
+export function dateString(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
 
 export function todayString(): string {
-  return new Date().toISOString().slice(0, 10);
+  return dateString(new Date());
+}
+
+export function addDays(base: string, days: number): string {
+  const [y, m, d] = base.split('-').map(Number);
+  return dateString(new Date(y, m - 1, d + days));
 }
 
 export function yesterdayString(): string {
-  return new Date(Date.now() - DAY_MS).toISOString().slice(0, 10);
+  return addDays(todayString(), -1);
 }
 
 /** Returns the new streak count given the last studied date and current streak. */
@@ -19,4 +31,8 @@ export function computeNewStreak(lastStudiedDate: string, currentStreak: number)
 /** True when the user hasn't studied yet today (streak is at risk). */
 export function isStreakAtRisk(lastStudiedDate: string): boolean {
   return lastStudiedDate !== todayString();
+}
+
+export function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(to + 'T00:00:00Z') - Date.parse(from + 'T00:00:00Z')) / 86_400_000);
 }

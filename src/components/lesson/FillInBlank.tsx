@@ -33,15 +33,17 @@ const STATUS_STYLES: Record<string, React.CSSProperties> = {
 export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<'idle' | 'correct' | 'typo' | 'wrong'>('idle');
+  const [almost, setAlmost] = useState<'accents' | 'spelling'>('spelling');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const check = () => {
     if (!value.trim()) return;
     const answerGiven = value.trim();
     const result = checkAnswer(answerGiven, exercise.answer);
-    setStatus(result);
+    setStatus(result === 'accent' ? 'typo' : result);
+    setAlmost(result === 'accent' ? 'accents' : 'spelling');
     setTimeout(() => {
-      if (result === 'correct' || result === 'typo') onCorrect(answerGiven);
+      if (result !== 'wrong') onCorrect(answerGiven);
       else onWrong(answerGiven);
     }, result === 'wrong' ? 1400 : 1200);
   };
@@ -85,7 +87,7 @@ export function FillInBlank({ exercise, onCorrect, onWrong }: FillInBlankProps) 
             }}
           >
             <p className="text-sm flex-1" style={{ color: '#b45309' }}>
-              Almost — watch the spelling:{' '}
+              Almost — watch the {almost}:{' '}
               <strong className="text-primary">{exercise.answer}</strong>
             </p>
             <button

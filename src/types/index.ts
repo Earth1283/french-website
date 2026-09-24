@@ -5,6 +5,10 @@ export interface SRSCard {
   ease: number;
   nextReview: string; // YYYY-MM-DD
   reps: number;
+  /** Times a remembered card was forgotten again. Absent on cards saved before this was tracked. */
+  lapses?: number;
+  /** Date the card first entered review; absent on cards saved before this was tracked. */
+  introduced?: string;
 }
 
 export interface VocabItem {

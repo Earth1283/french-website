@@ -2,15 +2,14 @@ import type { ExerciseStat, Lesson, SRSCard, TestResult, Unit } from '../types';
 import { UNITS } from '../data/units';
 import { estimateSeedDifficulty } from '../data/unitDifficulty';
 import { probability2PL } from './irt';
-import { vocabKey } from './srs';
+import { MATURE_INTERVAL_DAYS, vocabKey } from './srs';
+import { daysBetween, todayString } from './streak';
 
 const TEST_OUT_PROBABILITY = 0.85;
 const TEST_OUT_MIN_TOPIC_ACCURACY = 2 / 3;
 const WEAK_SCORE = 0.6;
 const MIN_WEAK_EVIDENCE = 2;
 const VOCAB_WEIGHT = 0.5;
-const MIN_EASE = 1.3;
-const MAX_EASE = 2.5;
 
 export function exerciseKey(lessonId: string, exerciseIndex: number): string {
   return `${lessonId}::${exerciseIndex}`;
@@ -20,6 +19,8 @@ export interface MasteryEvidence {
   exerciseStats: Record<string, ExerciseStat>;
   srsData: Record<string, SRSCard>;
   latestTest?: TestResult;
+  /** Defaults to today; lets overdue cards count for less. */
+  today?: string;
 }
 
 export interface LessonMastery {
@@ -31,7 +32,24 @@ export interface LessonMastery {
   weakVocabCards: number;
 }
 
-export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTest }: MasteryEvidence): LessonMastery {
+/**
+ * How well a card is remembered, 0–1: how long it has stayed remembered
+ * (interval, capped at MATURE_INTERVAL_DAYS), discounted for past lapses and
+ * for however long it has sat overdue. A card failed on its latest review is 0.
+ */
+export function cardStrength(card: SRSCard, today: string): number {
+  if (card.reps === 0) return 0;
+  const lapsePenalty = 1 / (1 + 0.25 * (card.lapses ?? 0));
+  const overdueDays = Math.max(0, daysBetween(card.nextReview, today));
+  const forgetting = 1 / (1 + overdueDays / Math.max(card.interval, 1));
+  return Math.min(1, card.interval / MATURE_INTERVAL_DAYS) * lapsePenalty * forgetting;
+}
+
+function isWeakCard(card: SRSCard): boolean {
+  return card.reps === 0 || ((card.lapses ?? 0) >= 2 && card.interval < MATURE_INTERVAL_DAYS);
+}
+
+export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTest, today = todayString() }: MasteryEvidence): LessonMastery {
   let successes = 0;
   let weight = 0;
   let lastExerciseMisses = 0;
@@ -48,9 +66,9 @@ export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTe
   lesson.vocab.forEach((_, idx) => {
     const card = srsData[vocabKey(lesson.id, idx)];
     if (!card) return;
-    successes += VOCAB_WEIGHT * (card.ease - MIN_EASE) / (MAX_EASE - MIN_EASE);
+    successes += VOCAB_WEIGHT * cardStrength(card, today);
     weight += VOCAB_WEIGHT;
-    if (card.ease < 2.1) weakVocabCards++;
+    if (isWeakCard(card)) weakVocabCards++;
   });
 
   const testItemPrefix = `lesson-${lesson.id}-`;

@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ProgressState, Unit } from '../types';
 import { UNITS, A1_UNIT_IDS } from '../data/units';
-import { vocabKey, defaultCard, isDue, updateCard } from '../utils/srs';
+import { defaultCard, updateCard } from '../utils/srs';
+import { buildReviewSession } from '../utils/reviewQueue';
 import { computeNewStreak, todayString } from '../utils/streak';
 import { useLearnerStore } from './learnerStore';
 
@@ -163,17 +164,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       getDueReviewCount: () => {
         const s = get();
-        let count = 0;
-        for (const unit of UNITS) {
-          for (const lesson of unit.lessons) {
-            if (!s.completedLessons.includes(lesson.id)) continue;
-            lesson.vocab.forEach((_, idx) => {
-              const card = s.srsData[vocabKey(lesson.id, idx)] ?? defaultCard();
-              if (isDue(card)) count++;
-            });
-          }
-        }
-        return count;
+        return buildReviewSession(s.completedLessons, s.srsData).items.length;
       },
 
       getLessonProgress: (unitSlug) => {

@@ -3,6 +3,9 @@ import { UNITS } from '../data/units';
 import { LESSON_META } from '../data/lessonMeta';
 import { getUnitCEFR } from '../data/unitDifficulty';
 import { isUnitTestedOut } from './mastery';
+import { daysBetween } from './streak';
+
+export { daysBetween };
 
 export type PathReason = 'essential' | 'foundation' | 'next';
 
@@ -47,10 +50,6 @@ export function describeStep(step: PathStep): string | null {
   if (step.reason === 'essential' && step.goal) return `Essential for ${GOAL_LABELS[step.goal]}`;
   if (step.reason === 'foundation') return 'Builds a foundation you need';
   return null;
-}
-
-export function daysBetween(from: string, to: string): number {
-  return Math.round((Date.parse(to + 'T00:00:00Z') - Date.parse(from + 'T00:00:00Z')) / 86_400_000);
 }
 
 function minimumWeightFor(daysUntilTarget: number | null): number {

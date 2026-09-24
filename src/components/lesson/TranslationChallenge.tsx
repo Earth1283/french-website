@@ -33,14 +33,16 @@ const STATUS_STYLES: Record<string, React.CSSProperties> = {
 export function TranslationChallenge({ exercise, onCorrect, onWrong }: TranslationChallengeProps) {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<'idle' | 'correct' | 'typo' | 'wrong'>('idle');
+  const [almost, setAlmost] = useState<'accents' | 'spelling'>('spelling');
 
   const check = () => {
     if (!value.trim()) return;
     const answerGiven = value.trim();
     const result = checkAnswer(answerGiven, exercise.answer);
-    setStatus(result);
+    setStatus(result === 'accent' ? 'typo' : result);
+    setAlmost(result === 'accent' ? 'accents' : 'spelling');
     setTimeout(() => {
-      if (result === 'correct' || result === 'typo') onCorrect(answerGiven);
+      if (result !== 'wrong') onCorrect(answerGiven);
       else onWrong(answerGiven);
     }, result === 'wrong' ? 1400 : 1200);
   };
@@ -96,7 +98,7 @@ export function TranslationChallenge({ exercise, onCorrect, onWrong }: Translati
           >
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs mb-0.5" style={{ color: '#b45309' }}>Almost — watch the spelling:</p>
+                <p className="text-xs mb-0.5" style={{ color: '#b45309' }}>Almost — watch the {almost}:</p>
                 <p className="text-sm font-semibold text-primary">{exercise.answer}</p>
               </div>
               <button

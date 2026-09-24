@@ -71,7 +71,7 @@ describe('server-side grading', () => {
     expect(stored.map((r: { correct: boolean }) => r.correct)).toEqual([false, false, false, false]);
   });
 
-  it('accepts multiple choice exactly and typed answers with accent and typo leniency', async () => {
+  it('accepts multiple choice exactly and typed answers with typo leniency', async () => {
     const { studentAuth, attemptsUrl } = await setupAssignment();
     const res = await request(app)
       .post(attemptsUrl)
@@ -80,7 +80,7 @@ describe('server-side grading', () => {
         responses: [
           { index: 0, answerGiven: 'Bonjour' },
           { index: 1, answerGiven: 'Mercii' },
-          { index: 2, answerGiven: 'ou est la gare' },
+          { index: 2, answerGiven: 'où est la gare' },
           { index: 3, answerGiven: 'au revoir' },
         ],
       });
@@ -141,7 +141,11 @@ describe('answer matching parity with the frontend', () => {
   const cases: Array<[string, string]> = [
     ['merci', 'merci'],
     ['Merci !', 'merci'],
+    ['où est la gare', 'Où est la gare ?'],
     ['ou est la gare', 'Où est la gare ?'],
+    ['tu parle', 'tu parles'],
+    ['je suis alle', 'je suis allée'],
+    ['Mercii', 'merci'],
     ['Ou est la gar', 'Où est la gare ?'],
     ['bonjuor', 'bonjour'],
     ['bonj', 'bonjour'],
@@ -153,6 +157,7 @@ describe('answer matching parity with the frontend', () => {
     ['a', 'ab'],
     ['ab', 'abcdef'],
     ['je suis fatigue', 'Je suis fatigué.'],
+    ['je suis fatigué', 'Je suis fatigué.'],
     ['completely different sentence here', 'Où est la gare ?'],
   ];
 
