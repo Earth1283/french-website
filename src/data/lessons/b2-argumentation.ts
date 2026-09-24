@@ -211,7 +211,7 @@ export const b2ArgumentationLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Translate using "force est de constater que": "One must admit that the plan failed."',
         answer: 'Force est de constater que le plan a échoué.',
-        hint: 'A fixed formal opener — no "il" before "force".',
+        hint: 'A fixed formal opener — no "il" before "force". Mind the accent on échoué.',
       },
     ],
   },
@@ -298,7 +298,7 @@ export const b2ArgumentationLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Translate using "à mon sens": "In my view, this argument is weak."',
         answer: 'À mon sens, cet argument est faible.',
-        hint: 'A more literary alternative to "à mon avis".',
+        hint: 'A more literary alternative to "à mon avis". Mind the accent on À.',
       },
       {
         type: 'multiple-choice',

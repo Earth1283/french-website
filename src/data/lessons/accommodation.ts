@@ -54,7 +54,7 @@ export const accommodationLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Say "I have a reservation under the name Chen"',
         answer: "J'ai une réservation au nom de Chen",
-        hint: 'Combine "J\'ai une réservation" + "au nom de"',
+        hint: 'Combine "J\'ai une réservation" + "au nom de" — Mind the accent on à.',
       },
       {
         type: 'multiple-choice',
@@ -83,7 +83,7 @@ export const accommodationLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Ask for your room key',
         answer: 'Ma clé, s\'il vous plaît',
-        hint: '"Ma" + the word for key + "s\'il vous plaît"',
+        hint: '"Ma" + the word for key (mind the accent) + "s\'il vous plaît"',
       },
     ],
   },
@@ -259,7 +259,7 @@ export const accommodationLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Ask what time you need to check out',
         answer: 'À quelle heure dois-je libérer la chambre ?',
-        hint: '"À quelle heure" = at what time, "dois-je libérer la chambre" = do I need to vacate the room',
+        hint: '"À quelle heure" (mind the accent on À) = at what time, "dois-je libérer la chambre" = do I need to vacate the room',
       },
       {
         type: 'multiple-choice',

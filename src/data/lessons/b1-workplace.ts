@@ -81,7 +81,7 @@ export const b1WorkplaceLessons: Lesson[] = [
         type: 'fill-blank',
         prompt: '___ notre conversation téléphonique, je vous confirme le rendez-vous. (Following our phone conversation)',
         answer: 'Suite à',
-        hint: 'A chunk meaning "following" — always followed by a noun.',
+        hint: 'A chunk meaning "following" — always followed by a noun. Mind the accent on à.',
       },
       {
         type: 'translation',
@@ -93,7 +93,7 @@ export const b1WorkplaceLessons: Lesson[] = [
         type: 'fill-blank',
         prompt: 'N\'hésitez pas ___ me contacter. (Don\'t hesitate to contact me)',
         answer: 'à',
-        hint: 'n\'hésitez pas is always followed by à + infinitive.',
+        hint: 'n\'hésitez pas is always followed by à + infinitive. Mind the accent on à.',
       },
       {
         type: 'multiple-choice',

@@ -216,7 +216,7 @@ export const b2RegisterLessons: Lesson[] = [
         type: 'translation',
         prompt: "Say 'So, are you coming?' starting with the casual filler for 'so'.",
         answer: 'Du coup, tu viens ?',
-        hint: 'Start with du coup.',
+        hint: 'Start with du coup. Mind du (du/dû distinction).',
       },
     ],
   },
@@ -312,7 +312,7 @@ export const b2RegisterLessons: Lesson[] = [
         type: 'translation',
         prompt: "Translate 'He was the first to understand' using the passé simple of être.",
         answer: 'Il fut le premier à comprendre',
-        hint: "Use 'fut', the passé simple of être.",
+        hint: "Use 'fut', the passé simple of être. Mind the accent on à.",
       },
       {
         type: 'multiple-choice',

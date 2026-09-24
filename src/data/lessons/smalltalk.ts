@@ -108,7 +108,7 @@ export const smalltalkLessons: Lesson[] = [
         type: 'translation',
         prompt: 'How do you say "I\'m tired"?',
         answer: 'Je suis fatigué',
-        hint: 'Use "Je suis" + the adjective',
+        hint: 'Use "Je suis" + the adjective. Mind the accents.',
       },
       {
         type: 'fill-blank',

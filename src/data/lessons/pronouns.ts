@@ -412,7 +412,7 @@ export const pronounsLessons: Lesson[] = [
         type: 'translation',
         prompt: 'You know her.',
         answer: 'Tu la connais',
-        hint: 'The pronoun la jumps before the verb',
+        hint: 'The pronoun la jumps before the verb. Mind the accents.',
       },
       {
         type: 'translation',

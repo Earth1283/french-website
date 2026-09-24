@@ -134,7 +134,7 @@ export const identityLessons: Lesson[] = [
         type: 'translation',
         prompt: 'How do you say "I work in technology"?',
         answer: 'Je travaille dans la technologie',
-        hint: 'Je travaille dans + article + field',
+        hint: 'Je travaille dans + article + field. Mind the accents.',
       },
       {
         type: 'fill-blank',

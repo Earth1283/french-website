@@ -92,7 +92,7 @@ export const medicalLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Say "I have a fever"',
         answer: "J'ai de la fièvre",
-        hint: '"J\'ai de la" + fièvre',
+        hint: '"J\'ai de la" + fièvre. Mind the accents.',
       },
     ],
   },
@@ -165,7 +165,7 @@ export const medicalLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Ask for "something for a cough"',
         answer: 'Quelque chose contre la toux',
-        hint: '"Quelque chose contre" + the ailment',
+        hint: '"Quelque chose contre" + the ailment. Mind the accents.',
       },
       {
         type: 'multiple-choice',
@@ -189,7 +189,7 @@ export const medicalLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Say "I\'m allergic to penicillin" (pénicilline)',
         answer: "J'ai une allergie à la pénicilline",
-        hint: '"J\'ai une allergie à" + the substance',
+        hint: '"J\'ai une allergie à" + the substance. Mind the accents.',
       },
       {
         type: 'multiple-choice',

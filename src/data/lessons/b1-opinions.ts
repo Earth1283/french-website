@@ -98,7 +98,7 @@ export const b1OpinionsLessons: Lesson[] = [
         type: 'fill-blank',
         prompt: '___, il vaut mieux réserver à l\'avance. (In my opinion, it\'s better to book in advance)',
         answer: 'À mon avis',
-        hint: 'Adverbial opinion phrase, no "que" needed before the clause.',
+        hint: 'Adverbial opinion phrase, no "que" needed before the clause. Mind the accent on À.',
       },
       {
         type: 'translation',

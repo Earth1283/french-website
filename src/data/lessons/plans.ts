@@ -118,7 +118,7 @@ export const plansLessons: Lesson[] = [
         type: 'translation',
         prompt: 'How do you say "I\'m busy tomorrow"?',
         answer: 'Je suis occupé(e) demain',
-        hint: 'Occupé(e) + demain (tomorrow)',
+        hint: 'Occupé(e) + demain (tomorrow). Mind the accents.',
       },
       {
         type: 'multiple-choice',

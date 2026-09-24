@@ -51,7 +51,7 @@ export const grammarLessons: Lesson[] = [
         type: 'fill-blank',
         prompt: '"Je veux ___ pain" (I want some bread — bread is masculine)',
         answer: 'du',
-        hint: 'Partitive article for masculine nouns: de + le',
+        hint: 'Partitive article for masculine nouns: de + le. Mind the accents.',
       },
     ],
   },

@@ -79,7 +79,7 @@ export const directionsLessons: Lesson[] = [
         type: 'fill-blank',
         prompt: '"___ est la pharmacie ?" (Where is the pharmacy?)',
         answer: 'Où',
-        hint: 'The French word for "where"',
+        hint: 'The French word for "where". Mind the accents.',
       },
     ],
   },
@@ -125,7 +125,7 @@ export const directionsLessons: Lesson[] = [
         type: 'translation',
         prompt: 'Say: "I would like to go to the airport" (l\'aéroport = airport)',
         answer: "Je voudrais aller à l'aéroport",
-        hint: '"Je voudrais aller à" + destination',
+        hint: '"Je voudrais aller à" + destination. Mind the accents.',
       },
       {
         type: 'multiple-choice',
