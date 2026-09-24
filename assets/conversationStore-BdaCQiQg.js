@@ -1,0 +1,1 @@
+import{Mt as e,jt as t}from"./ui-B8fnwiPM.js";var n=e()(t(e=>({geminiApiKey:``,difficulty:1,setApiKey:t=>e({geminiApiKey:t}),setDifficulty:t=>e({difficulty:t})}),{name:`french-conversation`}));export{n as t};
