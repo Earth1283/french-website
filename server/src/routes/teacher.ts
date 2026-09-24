@@ -19,15 +19,22 @@ import {
   updateContent,
 } from '../db/queries/content.js';
 import { createAssignment, deleteAssignment, getAssignmentById, listAssignmentsByClass } from '../db/queries/assignments.js';
-import { getQuestionStatsForAssignment } from '../db/queries/attempts.js';
+import {
+  getAttemptById,
+  getQuestionStatsForAssignment,
+  listSubmissionsForAssignment,
+  reviewAttempt,
+} from '../db/queries/attempts.js';
 import { countUnresolvedFlagsByAssignment, getFlagById, listFlagsForAssignment, resolveFlag } from '../db/queries/flags.js';
 import { updateStudentPassword } from '../db/queries/students.js';
 import { hashPassword } from '../auth/hash.js';
+import { bandsToPercent, countWords } from '../lib/rubric.js';
 import {
   createAssignmentSchema,
   createClassSchema,
   createContentSchema,
   resetStudentPasswordSchema,
+  reviewAttemptSchema,
   updateClassSchema,
   updateContentSchema,
 } from '../lib/validation.js';
@@ -48,8 +55,13 @@ function ownedContent(req: Request, contentId: string) {
 }
 
 function promptsFromBody(bodyJson: string): string[] {
-  const body = JSON.parse(bodyJson) as { kind: string; exercises?: { prompt: string }[]; items?: { prompt: string }[] };
-  const list = body.kind === 'lesson' ? body.exercises : body.items;
+  const body = JSON.parse(bodyJson) as {
+    kind: string;
+    exercises?: { prompt: string }[];
+    items?: { prompt: string }[];
+    questions?: { prompt: string }[];
+  };
+  const list = body.kind === 'lesson' ? body.exercises : body.kind === 'listening' ? body.questions : body.items;
   return (list ?? []).map((item) => item.prompt);
 }
 
@@ -145,7 +157,42 @@ teacherRouter.get('/classes/:classId/assignments/:assignmentId/results', (req, r
     ...q,
     prompt: prompts[q.index] ?? `Question ${q.index + 1}`,
   }));
-  res.json({ assignment, content, questions, flags: listFlagsForAssignment(assignment.id) });
+  const submissions = listSubmissionsForAssignment(assignment.id).map((s) => ({
+    attemptId: s.id,
+    studentId: s.student_id,
+    studentName: s.studentName,
+    text: s.submission_text,
+    wordCount: countWords(s.submission_text ?? ''),
+    submittedAt: s.completed_at,
+    reviewedAt: s.reviewed_at,
+    score: s.score,
+    review: s.review_json ? JSON.parse(s.review_json) : null,
+  }));
+  res.json({ assignment, content, questions, submissions, flags: listFlagsForAssignment(assignment.id) });
+});
+
+// Marks a writing submission with the DELF grid: one band (0–3) per
+// criterion, plus written feedback the student sees on the assignment.
+teacherRouter.post('/attempts/:attemptId/review', (req, res) => {
+  const attempt = getAttemptById(req.params.attemptId);
+  const assignment = attempt ? getAssignmentById(attempt.assignment_id) : undefined;
+  if (!attempt || !assignment || !ownedClass(req, assignment.class_id)) {
+    res.status(404).json({ error: 'Submission not found' });
+    return;
+  }
+  const content = getContentById(assignment.content_id);
+  const body = content ? hydrateContentBody(content) : null;
+  if (!body || body.kind !== 'writing' || !attempt.completed_at) {
+    res.status(400).json({ error: 'Only submitted writing can be reviewed' });
+    return;
+  }
+  const parsed = reviewAttemptSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const score = bandsToPercent(body.level, parsed.data.bands);
+  res.json({ attempt: reviewAttempt(attempt.id, score, parsed.data) });
 });
 
 teacherRouter.post('/classes/:classId/assignments', (req, res) => {

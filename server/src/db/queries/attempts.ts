@@ -10,6 +10,9 @@ export interface AttemptRow {
   score: number | null;
   xp_earned: number | null;
   responses_json: string;
+  submission_text: string | null;
+  review_json: string | null;
+  reviewed_at: string | null;
 }
 
 export interface AttemptResponse {
@@ -21,24 +24,55 @@ export interface AttemptResponse {
 // One attempt per (student, assignment) — a retake replaces the previous
 // attempt in place (enforced by a unique index) rather than adding a second
 // row, so roster counts and per-question stats can't double-count a redo.
+// A resubmitted essay clears the old review: the teacher marks the new text.
 export function recordAttempt(
   studentId: string,
   assignmentId: string,
   responses: AttemptResponse[],
   score: number | null,
-  xpEarned: number
+  xpEarned: number,
+  submissionText: string | null = null
 ): AttemptRow {
   const id = randomUUID();
   prepare(
-    `INSERT INTO attempts (id, student_id, assignment_id, completed_at, score, xp_earned, responses_json)
-     VALUES (?, ?, ?, datetime('now'), ?, ?, ?)
+    `INSERT INTO attempts (id, student_id, assignment_id, completed_at, score, xp_earned, responses_json, submission_text)
+     VALUES (?, ?, ?, datetime('now'), ?, ?, ?, ?)
      ON CONFLICT(student_id, assignment_id) DO UPDATE SET
        completed_at = excluded.completed_at,
        score = excluded.score,
        xp_earned = excluded.xp_earned,
-       responses_json = excluded.responses_json`
-  ).run(id, studentId, assignmentId, score, xpEarned, JSON.stringify(responses));
+       responses_json = excluded.responses_json,
+       submission_text = excluded.submission_text,
+       review_json = NULL,
+       reviewed_at = NULL`
+  ).run(id, studentId, assignmentId, score, xpEarned, JSON.stringify(responses), submissionText);
   return getAttemptForStudentAssignment(studentId, assignmentId)!;
+}
+
+export interface WritingReview {
+  bands: Record<string, number>;
+  feedback: string;
+}
+
+export function reviewAttempt(attemptId: string, score: number, review: WritingReview): AttemptRow {
+  prepare(
+    `UPDATE attempts SET score = ?, review_json = ?, reviewed_at = datetime('now') WHERE id = ?`
+  ).run(score, JSON.stringify(review), attemptId);
+  return getAttemptById(attemptId)!;
+}
+
+export interface SubmissionRow extends AttemptRow {
+  studentName: string;
+}
+
+export function listSubmissionsForAssignment(assignmentId: string): SubmissionRow[] {
+  return prepare(
+    `SELECT att.*, s.name AS studentName
+     FROM attempts att
+     JOIN students s ON s.id = att.student_id
+     WHERE att.assignment_id = ? AND att.completed_at IS NOT NULL AND att.submission_text IS NOT NULL
+     ORDER BY att.reviewed_at IS NOT NULL, att.completed_at DESC`
+  ).all(assignmentId) as SubmissionRow[];
 }
 
 export function getAttemptById(id: string): AttemptRow | undefined {

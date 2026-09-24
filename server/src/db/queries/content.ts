@@ -6,7 +6,7 @@ import type { ContentBody } from '../../lib/validation.js';
 export interface ContentRow {
   id: string;
   teacher_id: string;
-  kind: 'lesson' | 'quiz' | 'reading';
+  kind: 'lesson' | 'quiz' | 'reading' | 'listening' | 'writing';
   title: string;
   subtitle: string;
   body_json: string;

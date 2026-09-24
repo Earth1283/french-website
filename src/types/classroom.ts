@@ -1,4 +1,5 @@
 import type { CEFRBand, Exercise, ExerciseType, VocabItem } from './index';
+import type { DelfLevel, ListeningLine, ListeningQuestion, RubricBand, RubricCriterionId } from './exam';
 
 export interface ClassroomLessonBody {
   kind: 'lesson';
@@ -32,12 +33,59 @@ export interface ClassroomReadingBody {
   gradable: boolean;
 }
 
-export type ClassroomContentBody = ClassroomLessonBody | ClassroomQuizBody | ClassroomReadingBody;
+export interface ClassroomListeningBody {
+  kind: 'listening';
+  level?: DelfLevel;
+  situation: string;
+  /** Plays allowed before answering. */
+  plays: number;
+  script: ListeningLine[];
+  questions: ListeningQuestion[];
+  xpReward: number;
+}
+
+export interface ClassroomWritingBody {
+  kind: 'writing';
+  level: DelfLevel;
+  consigne: string;
+  minWords: number;
+  timeMinutes?: number;
+  checklist: string[];
+  /** Withheld from students until they have submitted. */
+  modelAnswer?: string;
+  xpReward: number;
+}
+
+export type ClassroomContentBody =
+  | ClassroomLessonBody
+  | ClassroomQuizBody
+  | ClassroomReadingBody
+  | ClassroomListeningBody
+  | ClassroomWritingBody;
+
+export type ClassroomContentKind = ClassroomContentBody['kind'];
+
+export interface WritingReview {
+  bands: Record<RubricCriterionId, RubricBand>;
+  feedback: string;
+}
+
+export interface WritingSubmissionInfo {
+  attemptId: string;
+  studentId: string;
+  studentName: string;
+  text: string;
+  wordCount: number;
+  submittedAt: string;
+  reviewedAt: string | null;
+  score: number | null;
+  review: WritingReview | null;
+}
 
 export interface ClassroomContent {
   id: string;
   teacher_id: string;
-  kind: 'lesson' | 'quiz' | 'reading';
+  kind: ClassroomContentKind;
   title: string;
   subtitle: string;
   body_json?: string;
@@ -63,7 +111,7 @@ export interface AssignmentInfo {
   due_at: string | null;
   visible: number;
   title?: string;
-  kind?: 'lesson' | 'quiz' | 'reading';
+  kind?: ClassroomContentKind;
   completed?: number;
   score?: number | null;
   unresolvedFlagCount?: number;
@@ -80,7 +128,13 @@ export interface QuestionStat {
 export interface AssignmentDetailResponse {
   assignment: AssignmentInfo;
   content: { title: string; subtitle: string; kind: string; body: ClassroomContentBody };
-  previousAttempt: { score: number | null; xpEarned: number | null } | null;
+  previousAttempt: {
+    score: number | null;
+    xpEarned: number | null;
+    submissionText?: string | null;
+    review?: WritingReview | null;
+    reviewedAt?: string | null;
+  } | null;
 }
 
 export interface FlagInfo {
@@ -118,10 +172,10 @@ export interface ClassroomProfile {
 }
 
 // Lesson/quiz reduce to a flat Exercise[] so the exercise renderers never branch on kind.
-// Reading has no exercises at all — it's handled by its own reader flow.
+// Reading, listening and writing have their own flows and no Exercise[].
 export function bodyToExercises(body: ClassroomContentBody): Exercise[] {
   if (body.kind === 'lesson') return body.exercises;
-  if (body.kind === 'reading') return [];
+  if (body.kind !== 'quiz') return [];
   return body.items.map((item) => ({
     type: item.type,
     prompt: item.prompt,

@@ -4,13 +4,20 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, Plus, Trash2, Save, Eye, Pencil } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { classroomApi } from '../../services/classroom';
+import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import { MarkdownField } from '../../components/classroom/MarkdownField';
 import { MarkdownFormattingGuide } from '../../components/classroom/MarkdownFormattingGuide';
+import {
+  ListeningEditor,
+  blankListeningDraft,
+  listeningBodyFromDraft,
+  listeningDraftFromBody,
+} from '../../components/classroom/ListeningEditor';
+import { WritingEditor, blankWritingDraft, writingBodyFromDraft, writingDraftFromBody } from '../../components/classroom/WritingEditor';
 import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { ExerciseType } from '../../types';
-import type { ClassroomContent, ClassroomContentBody } from '../../types/classroom';
+import type { ClassroomContent, ClassroomContentBody, ClassroomContentKind } from '../../types/classroom';
 
 interface VocabRow {
   french: string;
@@ -26,7 +33,9 @@ interface ExerciseRow {
   hint: string;
 }
 
-type ContentKind = 'lesson' | 'quiz' | 'reading';
+type ContentKind = ClassroomContentKind;
+
+const KINDS: ContentKind[] = ['lesson', 'quiz', 'reading', 'listening', 'writing'];
 
 const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'multiple-choice', label: 'Multiple Choice' },
@@ -57,6 +66,8 @@ export function ContentEditor() {
   const [exercises, setExercises] = useState<ExerciseRow[]>([blankExercise()]);
   const [pages, setPages] = useState<string[]>([blankPage()]);
   const [gradable, setGradable] = useState(true);
+  const [listening, setListening] = useState(blankListeningDraft);
+  const [writing, setWriting] = useState(blankWritingDraft);
   const [previewOn, setPreviewOn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +96,10 @@ export function ContentEditor() {
       } else if (body.kind === 'reading') {
         setPages(body.pages.length ? body.pages : [blankPage()]);
         setGradable(body.gradable);
+      } else if (body.kind === 'listening') {
+        setListening(listeningDraftFromBody(body));
+      } else if (body.kind === 'writing') {
+        setWriting(writingDraftFromBody(body));
       } else {
         setExercises(
           body.items.map((e) => ({
@@ -115,7 +130,15 @@ export function ContentEditor() {
     setError(null);
 
     let body: ClassroomContentBody;
-    if (kind === 'reading') {
+    if (kind === 'listening' || kind === 'writing') {
+      const built = kind === 'listening' ? listeningBodyFromDraft(listening, xpReward) : writingBodyFromDraft(writing, xpReward);
+      if (typeof built === 'string' || !title.trim()) {
+        setError(typeof built === 'string' ? built : 'A title is required.');
+        setSaving(false);
+        return;
+      }
+      body = built;
+    } else if (kind === 'reading') {
       const cleanPages = pages.map((p) => p.trim()).filter(Boolean);
       if (!title.trim() || cleanPages.length === 0) {
         setError('A title and at least one non-empty page are required.');
@@ -148,8 +171,8 @@ export function ContentEditor() {
         await classroomApi.post('/api/teacher/content', { title: title.trim(), subtitle: subtitle.trim(), body });
       }
       navigate(-1);
-    } catch {
-      setError('Could not save this content.');
+    } catch (e) {
+      setError(e instanceof ClassroomApiError && e.status === 400 ? `Could not save: ${e.message}` : 'Could not save this content.');
     } finally {
       setSaving(false);
     }
@@ -175,8 +198,8 @@ export function ContentEditor() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
         <div className="p-4 space-y-3">
           <div className="seg-control">
-            {(['lesson', 'quiz', 'reading'] as const).map((k) => (
-              <button key={k} onClick={() => setKind(k)} aria-pressed={kind === k} className="seg-item capitalize">
+            {KINDS.map((k) => (
+              <button key={k} onClick={() => setKind(k)} aria-pressed={kind === k} className="seg-item capitalize text-[0.75rem] sm:text-[0.85rem] px-1">
                 {k}
               </button>
             ))}
@@ -253,7 +276,19 @@ export function ContentEditor() {
         </motion.section>
       )}
 
-      {kind !== 'reading' && (
+      {kind === 'listening' && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <ListeningEditor value={listening} onChange={setListening} onImportTitle={(t) => { if (!title.trim()) setTitle(t); }} />
+        </motion.div>
+      )}
+
+      {kind === 'writing' && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <WritingEditor value={writing} onChange={setWriting} onImportTitle={(t) => { if (!title.trim()) setTitle(t); }} />
+        </motion.div>
+      )}
+
+      {(kind === 'lesson' || kind === 'quiz') && (
       <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <div className="section-label">{kind === 'lesson' ? 'Exercises' : 'Questions'}</div>
         <div className="inset-group">

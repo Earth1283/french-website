@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
+import { useLearnerStore } from '../stores/learnerStore';
 import { UnitCard } from '../components/home/UnitCard';
 import { OnboardingModal } from '../components/home/OnboardingModal';
 import { A1Banner } from '../components/home/A1Banner';
@@ -28,6 +29,7 @@ function fuzzyMatch(query: string, target: string): boolean {
 export function Home() {
   const { completedLessons, onboardingDone, isUnit12Unlocked, streak, xp, bookmarkedLessons, srsData } = useProgressStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const preparingForExam = useLearnerStore(s => s.profile?.goals.includes('exam') ?? false);
   const unit12Unlocked = isUnit12Unlocked();
 
   const totalLessons = getTotalLessons();
@@ -119,6 +121,20 @@ export function Home() {
           )}
           <p className="text-xs text-muted">Keep it up!</p>
         </motion.div>
+      )}
+
+      {/* Exam goal — point straight at the listening/writing practice */}
+      {preparingForExam && (
+        <Link to="/exam" className="no-underline block mb-4">
+          <motion.div whileTap={{ scale: 0.98 }} transition={TAP_SPRING} className="card p-4 flex items-center gap-3">
+            <span className="text-2xl" aria-hidden>🎓</span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-primary">DELF Prep</p>
+              <p className="text-xs text-muted">Exam-format listening and writing practice, marked with the official grid.</p>
+            </div>
+            <ChevronRight size={16} className="text-muted" />
+          </motion.div>
+        </Link>
       )}
 
       {/* Review banner */}

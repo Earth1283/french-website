@@ -223,7 +223,7 @@ export function Settings() {
           <div className="p-4 inset-divider">
             <p className="text-sm font-semibold text-primary mb-0.5">Gemini API Key</p>
             <p className="text-xs text-muted mb-3">
-              Stored locally only. Enables AI-powered conversations in Converse mode.
+              Stored locally only. Enables AI-powered conversations in Converse mode and DELF-grid marking of your writing in DELF Prep.
             </p>
             <div className="flex gap-2">
               <div className="relative flex-1">
