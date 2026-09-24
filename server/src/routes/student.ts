@@ -51,6 +51,14 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
     return;
   }
   const previousAttempt = getAttemptForStudentAssignment(req.studentId!, assignment.id);
+  const submitted = !!previousAttempt?.completed_at;
+  let body = hydrateContentBody(content);
+  // A writing task's model answer is only revealed once the student has
+  // handed in their own text.
+  if (body.kind === 'writing' && !submitted) {
+    const { modelAnswer: _hidden, ...rest } = body;
+    body = rest;
+  }
   res.json({
     assignment,
     content: {
@@ -58,10 +66,20 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
       title: content.title,
       subtitle: content.subtitle,
       kind: content.kind,
-      body: hydrateContentBody(content),
+      body,
     },
-    previousAttempt: previousAttempt?.completed_at
-      ? { score: previousAttempt.score, xpEarned: previousAttempt.xp_earned }
+    previousAttempt: submitted
+      ? {
+          score: previousAttempt!.score,
+          xpEarned: previousAttempt!.xp_earned,
+          ...(body.kind === 'writing'
+            ? {
+                submissionText: previousAttempt!.submission_text,
+                review: previousAttempt!.review_json ? JSON.parse(previousAttempt!.review_json) : null,
+                reviewedAt: previousAttempt!.reviewed_at,
+              }
+            : {}),
+        }
       : null,
   });
 });
@@ -82,12 +100,19 @@ studentRouter.post('/assignments/:assignmentId/attempts', (req, res) => {
     res.status(404).json({ error: 'Assignment content not found' });
     return;
   }
-  const graded = gradeAttempt(hydrateContentBody(content), parsed.data.responses);
+  const graded = gradeAttempt(hydrateContentBody(content), parsed.data.responses, parsed.data.text);
   if (!graded.ok) {
     res.status(400).json({ error: graded.error });
     return;
   }
-  const attempt = recordAttempt(req.studentId!, assignment.id, graded.responses, graded.score, graded.xpEarned);
+  const attempt = recordAttempt(
+    req.studentId!,
+    assignment.id,
+    graded.responses,
+    graded.score,
+    graded.xpEarned,
+    graded.submissionText ?? null
+  );
   res.status(201).json({ attempt });
 });
 
@@ -110,8 +135,11 @@ studentRouter.get('/progress', (req, res) => {
   const attempts = listAttemptsForStudent(req.studentId!);
   const completed = attempts.filter((a) => a.completed_at);
   const totalXp = completed.reduce((sum, a) => sum + (a.xp_earned ?? 0), 0);
-  const averageScore = completed.length
-    ? completed.reduce((sum, a) => sum + (a.score ?? 0), 0) / completed.length
+  // Ungraded work (supplementary reading, writing awaiting review) has no
+  // score and must not drag the average down as if it were a zero.
+  const scored = completed.filter((a) => a.score !== null);
+  const averageScore = scored.length
+    ? scored.reduce((sum, a) => sum + (a.score ?? 0), 0) / scored.length
     : 0;
   res.json({ totalXp, averageScore, completedCount: completed.length, attempts });
 });

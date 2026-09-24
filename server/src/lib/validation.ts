@@ -73,7 +73,56 @@ const readingBodySchema = z.object({
   gradable: z.boolean().default(true),
 });
 
-export const contentBodySchema = z.discriminatedUnion('kind', [lessonBodySchema, quizBodySchema, readingBodySchema]);
+const delfLevel = z.enum(['a1', 'a2', 'b1', 'b2']);
+
+const listeningQuestionSchema = z
+  .object({
+    type: z.enum(['multiple-choice', 'short']),
+    prompt: z.string().trim().min(1).max(500),
+    options: z.array(z.string().trim().min(1).max(300)).min(2).max(6).optional(),
+    answer: z.string().trim().min(1).max(300),
+    explanation: z.string().trim().max(1000).optional(),
+  })
+  .refine((q) => q.type !== 'multiple-choice' || (q.options?.includes(q.answer) ?? false), {
+    message: 'A multiple-choice answer must be one of its options',
+  });
+
+// The script is read aloud by the student's browser (speech synthesis), so
+// only text is stored — no audio files to host.
+const listeningBodySchema = z.object({
+  kind: z.literal('listening'),
+  level: delfLevel.optional(),
+  situation: z.string().trim().max(500).default(''),
+  // How many times the recording can be played; the DELF plays most documents twice.
+  plays: z.number().int().min(1).max(3).default(2),
+  script: z
+    .array(z.object({ speaker: z.string().trim().max(60).optional(), text: z.string().trim().min(1).max(3000) }))
+    .min(1)
+    .max(60),
+  questions: z.array(listeningQuestionSchema).min(1).max(40),
+  xpReward: z.number().int().nonnegative().default(10),
+});
+
+// Free writing marked by the teacher against the DELF grid for `level`.
+const writingBodySchema = z.object({
+  kind: z.literal('writing'),
+  level: delfLevel,
+  consigne: z.string().trim().min(1).max(3000),
+  minWords: z.number().int().min(1).max(2000),
+  timeMinutes: z.number().int().min(1).max(240).optional(),
+  checklist: z.array(z.string().trim().min(1).max(300)).max(20).default([]),
+  // Shown to a student only after they have submitted.
+  modelAnswer: z.string().trim().max(20_000).optional(),
+  xpReward: z.number().int().nonnegative().default(10),
+});
+
+export const contentBodySchema = z.discriminatedUnion('kind', [
+  lessonBodySchema,
+  quizBodySchema,
+  readingBodySchema,
+  listeningBodySchema,
+  writingBodySchema,
+]);
 export type ContentBody = z.infer<typeof contentBodySchema>;
 
 export const createContentSchema = z.object({
@@ -105,6 +154,15 @@ export const submitAttemptSchema = z.object({
       })
     )
     .max(500),
+  // Writing assignments only: the student's full text.
+  text: z.string().max(20_000).optional(),
+});
+
+const band = z.number().int().min(0).max(3);
+
+export const reviewAttemptSchema = z.object({
+  bands: z.object({ task: band, coherence: band, sociolinguistic: band, lexicon: band, morphosyntax: band }),
+  feedback: z.string().trim().max(5000).optional().default(''),
 });
 
 export const resetWithRecoveryCodeSchema = z.object({

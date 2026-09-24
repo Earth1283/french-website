@@ -21,6 +21,9 @@ const loadSettings = () => import('./pages/Settings');
 const loadReview = () => import('./pages/Review');
 const loadFocus = () => import('./pages/Focus');
 const loadAdaptiveTest = () => import('./pages/AdaptiveTest');
+const loadExamHub = () => import('./pages/exam/ExamHub');
+const loadListeningExercise = () => import('./pages/exam/ListeningExercise');
+const loadWritingExercise = () => import('./pages/exam/WritingExercise');
 const loadClassroomConnect = () => import('./pages/classroom/Connect');
 const loadClassroomAuth = () => import('./pages/classroom/Auth');
 const loadClassesHome = () => import('./pages/classroom/ClassesHome');
@@ -41,6 +44,9 @@ const Conversation = lazy(() => loadConversation().then(m => ({ default: m.Conve
 const Settings = lazy(() => loadSettings().then(m => ({ default: m.Settings })));
 const Review = lazy(() => loadReview().then(m => ({ default: m.Review })));
 const AdaptiveTest = lazy(() => loadAdaptiveTest().then(m => ({ default: m.AdaptiveTest })));
+const ExamHub = lazy(() => loadExamHub().then(m => ({ default: m.ExamHub })));
+const ListeningExercise = lazy(() => loadListeningExercise().then(m => ({ default: m.ListeningExercise })));
+const WritingExercise = lazy(() => loadWritingExercise().then(m => ({ default: m.WritingExercise })));
 const Connect = lazy(() => loadClassroomConnect().then(m => ({ default: m.Connect })));
 const ClassroomAuth = lazy(() => loadClassroomAuth().then(m => ({ default: m.ClassroomAuth })));
 const ClassesHome = lazy(() => loadClassesHome().then(m => ({ default: m.ClassesHome })));
@@ -62,6 +68,7 @@ const IDLE_PRELOAD_ORDER = [
   loadProfile,
   loadConversation,
   loadAdaptiveTest,
+  loadExamHub,
   loadSettings,
   loadClassesHome,
 ];
@@ -103,6 +110,9 @@ function AnimatedRoutes() {
           <Route path="/phrasebook" element={<PageTransition keyProp="phrasebook"><Phrasebook /></PageTransition>} />
           <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
           <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
+          <Route path="/exam" element={<PageTransition keyProp="exam"><ExamHub /></PageTransition>} />
+          <Route path="/exam/listening/:docId" element={<PageTransition keyProp="exam-listening"><ListeningExercise /></PageTransition>} />
+          <Route path="/exam/writing/:taskId" element={<PageTransition keyProp="exam-writing"><WritingExercise /></PageTransition>} />
           <Route path="/classes/connect" element={<PageTransition keyProp="classes-connect"><Connect /></PageTransition>} />
           <Route path="/classes/auth" element={<PageTransition keyProp="classes-auth"><ClassroomAuth /></PageTransition>} />
           <Route path="/classes/account" element={<PageTransition keyProp="classes-account"><AccountSettings /></PageTransition>} />

@@ -28,8 +28,9 @@ Features
 *   **Audio Pronunciation:** Tap any 🔊 button to hear French spoken aloud. Available on flashcards, phrasebook, and on answer reveals in exercises. Uses the Web Speech API — no API key, works offline.
 *   **Lesson Bookmarks:** Save any lesson for later with the bookmark icon in the lesson header. Bookmarked lessons appear as quick-links on the home screen.
 *   **Keyboard Shortcuts:** In lessons — ``←`` / ``→`` navigate flashcards, ``Space`` / ``F`` flips a card, ``1``–``4`` selects a multiple-choice option.
+*   **DELF Prep** (``/#/exam``): Listening and writing practice in the format of the DELF tout public papers, A1–B2. Listening documents (announcements, voicemails, dialogues, radio segments) are read aloud with a separate voice for each speaker. Exam mode gives the official number of plays; practice mode allows unlimited replays at slower speeds; after answering you get explanations and a transcript you can replay line by line. Writing tasks have the official word minimums, an optional timer, an accent keyboard, a checklist and a model answer. They are marked on the current DELF grid (five criteria, four bands each): by Gemini if you've added a key, or by you otherwise. All tasks are original material written to the official formats; the hub links to France Éducation International's free sample papers for the real thing.
 *   **Phrasebook:** Your digital survival kit for when your brain freezes.
-*   **Conversation AI:** Practice real scenarios with a Gemini-powered NPC (bring your own API key).
+*   **Conversation AI:** Practice real scenarios with a Gemini-powered NPC (bring your own API key). The same key enables AI marking of DELF writing.
 *   **Dark Mode & Accent Colours:** Six accent presets; preferences persist across sessions.
 *   **Smooth Transitions:** Powered by Framer Motion, because learning a language is hard enough without jerky UI.
 *   **Fast Loads:** Route-based code splitting + vendor chunk caching keeps the initial bundle small. A themed loading screen (matching your stored dark/accent preference) appears instantly before any JS runs.

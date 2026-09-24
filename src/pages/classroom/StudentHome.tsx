@@ -129,7 +129,11 @@ export function StudentHome() {
                     <p className="text-sm font-semibold text-primary">{a.title}</p>
                     <p className="text-xs text-muted capitalize">
                       {a.kind}
-                      {a.completed ? ` · ${a.score}%` : ''}
+                      {a.completed
+                        ? a.score !== null && a.score !== undefined
+                          ? ` · ${a.score}%`
+                          : a.kind === 'writing' ? ' · awaiting review' : ' · done'
+                        : ''}
                     </p>
                   </div>
                 </div>

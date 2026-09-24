@@ -81,6 +81,26 @@ content, or reading pages — stop the server first (or copy the `-wal` and
 sitting in those until the server shuts down cleanly. Deleting `data/secret.key` will log everyone out;
 deleting the whole `data/` directory starts you over from scratch.
 
+## Content kinds
+
+Teachers can create five kinds of content: **lesson** (vocab + exercises),
+**quiz**, **reading** (multi-page markdown), **listening** and **writing**.
+
+- **Listening** stores a script (optionally with speaker names) and three-option
+  or short-answer questions. There are no audio files: the student's browser
+  reads the script aloud with speech synthesis, so each speaker gets a different
+  voice, and the teacher chooses how many plays are allowed (the DELF plays most
+  documents twice). Answers are graded on the server like a quiz.
+- **Writing** stores a task (consigne), a DELF level, a word minimum and an
+  optional model answer. The model answer is withheld from a student until they
+  hand in their text. The attempt is saved with no score, then the teacher marks it
+  from the assignment results page on the DELF production écrite grid: five criteria,
+  four bands each (`POST /api/teacher/attempts/:attemptId/review`). The score is
+  stored as a percentage like every other kind. Resubmitting clears the mark.
+
+Both editors can start from any document or task in the app's built-in DELF Prep
+library.
+
 ## Multiple teachers on one instance
 
 The first person to register becomes a teacher with no restrictions. After

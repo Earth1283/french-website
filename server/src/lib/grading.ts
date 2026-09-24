@@ -112,6 +112,12 @@ export function isAnswerCorrect(exercise: GradableExercise, answerGiven: string)
   return isTypedAnswerAccepted(answerGiven.trim(), exercise.answer);
 }
 
+/** Listening questions: MCQs match exactly, short written answers get the typed-answer tolerance. */
+export function isListeningAnswerCorrect(question: { type: 'multiple-choice' | 'short'; answer: string }, answerGiven: string): boolean {
+  if (question.type === 'multiple-choice') return answerGiven === question.answer;
+  return isTypedAnswerAccepted(answerGiven.trim(), question.answer);
+}
+
 export interface SubmittedResponse {
   index: number;
   answerGiven?: string;
@@ -124,10 +130,10 @@ export interface GradedResponse {
 }
 
 export type GradeResult =
-  | { ok: true; score: number | null; xpEarned: number; responses: GradedResponse[] }
+  | { ok: true; score: number | null; xpEarned: number; responses: GradedResponse[]; submissionText?: string }
   | { ok: false; error: string };
 
-export function gradeAttempt(body: ContentBody, submitted: SubmittedResponse[]): GradeResult {
+export function gradeAttempt(body: ContentBody, submitted: SubmittedResponse[], text?: string): GradeResult {
   if (body.kind === 'reading') {
     return {
       ok: true,
@@ -137,28 +143,39 @@ export function gradeAttempt(body: ContentBody, submitted: SubmittedResponse[]):
     };
   }
 
-  const exercises = body.kind === 'lesson' ? body.exercises : body.items;
-  if (submitted.length !== exercises.length) {
-    return { ok: false, error: `Expected an answer for each of the ${exercises.length} questions` };
+  // Writing is marked by the teacher later: the score stays null until then,
+  // and XP is earned for handing the work in.
+  if (body.kind === 'writing') {
+    const trimmed = text?.trim() ?? '';
+    if (!trimmed) return { ok: false, error: 'Write your text before submitting' };
+    return { ok: true, score: null, xpEarned: body.xpReward, responses: [], submissionText: trimmed };
+  }
+
+  const checkers: ((answer: string) => boolean)[] =
+    body.kind === 'listening'
+      ? body.questions.map((q) => (a: string) => isListeningAnswerCorrect(q, a))
+      : (body.kind === 'lesson' ? body.exercises : body.items).map((ex) => (a: string) => isAnswerCorrect(ex, a));
+  if (submitted.length !== checkers.length) {
+    return { ok: false, error: `Expected an answer for each of the ${checkers.length} questions` };
   }
 
   const graded = new Map<number, GradedResponse>();
   for (const { index, answerGiven } of submitted) {
-    const exercise = exercises[index];
-    if (!exercise || graded.has(index)) {
+    const check = checkers[index];
+    if (!check || graded.has(index)) {
       return { ok: false, error: 'Answers must be for distinct questions in this assignment' };
     }
     if (answerGiven === undefined) {
       return { ok: false, error: 'Answers are missing. Your app may be out of date; refresh the page and try again' };
     }
-    graded.set(index, { index, correct: isAnswerCorrect(exercise, answerGiven), answerGiven });
+    graded.set(index, { index, correct: check(answerGiven), answerGiven });
   }
 
   const responses = [...graded.values()].sort((a, b) => a.index - b.index);
   const correctCount = responses.filter((r) => r.correct).length;
   return {
     ok: true,
-    score: Math.round((correctCount / exercises.length) * 100),
+    score: Math.round((correctCount / checkers.length) * 100),
     xpEarned: body.xpReward,
     responses,
   };

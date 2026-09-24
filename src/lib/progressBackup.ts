@@ -1,14 +1,16 @@
 import { useProgressStore } from '../stores/progressStore';
 import { useTestStore } from '../stores/testStore';
 import { useLearnerStore } from '../stores/learnerStore';
+import { useExamStore } from '../stores/examStore';
 
 export function exportProgress() {
   const progressState = useProgressStore.getState();
   const testState = useTestStore.getState();
   const learnerState = useLearnerStore.getState();
+  const examState = useExamStore.getState();
 
   const data = {
-    version: 2,
+    version: 3,
     completedLessons: progressState.completedLessons,
     xp: progressState.xp,
     streak: progressState.streak,
@@ -21,6 +23,11 @@ export function exportProgress() {
     testHistory: testState.history,
     learnerProfile: learnerState.profile,
     exerciseStats: learnerState.exerciseStats,
+    examPrep: {
+      level: examState.level,
+      listeningResults: examState.listeningResults,
+      writingSubmissions: examState.writingSubmissions,
+    },
     exportedAt: new Date().toISOString(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -66,6 +73,15 @@ export function importProgress(file: File): Promise<'ok' | 'error'> {
 
         if (data.exerciseStats && typeof data.exerciseStats === 'object') {
           useLearnerStore.setState({ exerciseStats: data.exerciseStats });
+        }
+
+        const exam = data.examPrep;
+        if (exam && typeof exam === 'object') {
+          useExamStore.setState({
+            ...(['a1', 'a2', 'b1', 'b2'].includes(exam.level) ? { level: exam.level } : {}),
+            ...(Array.isArray(exam.listeningResults) ? { listeningResults: exam.listeningResults } : {}),
+            ...(Array.isArray(exam.writingSubmissions) ? { writingSubmissions: exam.writingSubmissions } : {}),
+          });
         }
 
         resolve('ok');

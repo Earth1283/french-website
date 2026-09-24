@@ -199,6 +199,19 @@ export function AdaptiveTest() {
           <Button size="lg" onClick={startTest} className="w-full max-w-xs mx-auto">
             Start Test <ArrowRight size={17} />
           </Button>
+          <Link
+            to="/exam"
+            className="card p-4 flex items-center gap-3 text-left no-underline ios-press"
+          >
+            <span className="text-2xl" aria-hidden>🎧</span>
+            <span className="flex-1">
+              <span className="block text-sm font-semibold text-primary">Preparing for the DELF?</span>
+              <span className="block text-xs text-muted">
+                This test checks reading and grammar. Practise the listening and writing papers in DELF Prep.
+              </span>
+            </span>
+            <ArrowRight size={16} className="text-muted" />
+          </Link>
         </motion.div>
 
         {history.length > 0 && (

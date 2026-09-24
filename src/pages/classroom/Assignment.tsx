@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, PartyPopper, Flag, Check } from 'lucide-react';
@@ -8,13 +8,20 @@ import { MultipleChoice } from '../../components/lesson/MultipleChoice';
 import { FillInBlank } from '../../components/lesson/FillInBlank';
 import { TranslationChallenge } from '../../components/lesson/TranslationChallenge';
 import { DeepLessonReader } from '../../components/lesson/DeepLessonReader';
+import { ListeningPlayer } from '../../components/exam/ListeningPlayer';
+import { ListeningQuestions } from '../../components/exam/ListeningQuestions';
+import { Transcript } from '../../components/exam/Transcript';
+import { WritingWorkspace } from '../../components/exam/WritingWorkspace';
+import { RubricScorecard } from '../../components/exam/RubricScorecard';
+import { buildEvaluation, countWords } from '../../data/exam/rubric';
+import { useExamStore } from '../../stores/examStore';
 import { ProgressBar } from '../../components/layout/ProgressBar';
 import { Button } from '../../components/ui/Button';
 import { bodyToExercises } from '../../types/classroom';
 import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { AssignmentDetailResponse, AttemptResponseEntry } from '../../types/classroom';
 
-type Phase = 'intro' | 'flashcards' | 'exercises' | 'reading' | 'complete';
+type Phase = 'intro' | 'flashcards' | 'exercises' | 'reading' | 'listening' | 'writing' | 'complete';
 
 export function Assignment() {
   const { assignmentId } = useParams<{ assignmentId: string }>();
@@ -29,11 +36,23 @@ export function Assignment() {
   const [flagFormOpen, setFlagFormOpen] = useState(false);
   const [flagReason, setFlagReason] = useState('');
   const [flagSubmitting, setFlagSubmitting] = useState(false);
+  const [listeningAnswers, setListeningAnswers] = useState<(string | undefined)[]>([]);
+  const [listeningResults, setListeningResults] = useState<boolean[] | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const draftKey = `classroom-${assignmentId}`;
+  const draft = useExamStore(s => s.drafts[draftKey]);
+  const setDraft = useExamStore(s => s.setDraft);
+  const clearDraft = useExamStore(s => s.clearDraft);
+  const onDraftChange = useCallback((text: string) => setDraft(draftKey, text), [draftKey, setDraft]);
+
+  const load = useCallback(() => {
+    if (!assignmentId) return Promise.resolve();
+    return classroomApi.get<AssignmentDetailResponse>(`/api/student/assignments/${assignmentId}`).then(setData);
+  }, [assignmentId]);
 
   useEffect(() => {
-    if (!assignmentId) return;
-    classroomApi.get<AssignmentDetailResponse>(`/api/student/assignments/${assignmentId}`).then(setData);
-  }, [assignmentId]);
+    load();
+  }, [load]);
 
   useEffect(() => {
     setFlagFormOpen(false);
@@ -50,6 +69,43 @@ export function Assignment() {
   const isReading = content.body.kind === 'reading';
   const readingPages = content.body.kind === 'reading' ? content.body.pages.map(parseMarkdownPage) : [];
   const readingGradable = content.body.kind === 'reading' ? content.body.gradable : true;
+  const listeningBody = content.body.kind === 'listening' ? content.body : null;
+  const writingBody = content.body.kind === 'writing' ? content.body : null;
+  const previousReview = data.previousAttempt?.review ?? null;
+
+  async function submitListening() {
+    if (!listeningBody) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await classroomApi.post<{ attempt: { responses_json: string } }>(
+        `/api/student/assignments/${assignmentId}/attempts`,
+        { responses: listeningBody.questions.map((_, index) => ({ index, answerGiven: listeningAnswers[index] ?? '' })) },
+      );
+      // The server's marking is the one that counts.
+      const graded = JSON.parse(res.attempt.responses_json) as AttemptResponseEntry[];
+      setListeningResults(listeningBody.questions.map((_, i) => graded.find(g => g.index === i)?.correct ?? false));
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'Could not submit your answers.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function submitWriting(text: string) {
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await classroomApi.post(`/api/student/assignments/${assignmentId}/attempts`, { responses: [], text });
+      clearDraft(draftKey);
+      await load();
+      setPhase('complete');
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'Could not submit your text. Your draft is saved — try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function finish(finalResponses: AttemptResponseEntry[]) {
     setSubmitting(true);
@@ -114,23 +170,73 @@ export function Assignment() {
           </div>
           <div className="flex items-center justify-center gap-2 flex-wrap">
             {isReading && <span className="chip">📄 {readingPages.length} pages</span>}
-            {!isReading && vocab.length > 0 && <span className="chip">📖 {vocab.length} vocab items</span>}
-            {!isReading && <span className="chip">✏️ {exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>}
+            {listeningBody && <span className="chip">🎧 {listeningBody.questions.length} questions · {listeningBody.plays === 1 ? 'heard once' : `heard ${listeningBody.plays}×`}</span>}
+            {writingBody && <span className="chip">✍️ {writingBody.minWords}+ mots{writingBody.timeMinutes ? ` · ${writingBody.timeMinutes} min` : ''}</span>}
+            {(content.body.kind === 'lesson' || content.body.kind === 'quiz') && vocab.length > 0 && <span className="chip">📖 {vocab.length} vocab items</span>}
+            {(content.body.kind === 'lesson' || content.body.kind === 'quiz') && <span className="chip">✏️ {exercises.length} {content.body.kind === 'quiz' ? 'questions' : 'exercises'}</span>}
             {(!isReading || readingGradable) && <span className="xp-badge text-sm px-3 py-1.5">+{content.body.xpReward} XP</span>}
           </div>
-          {data.previousAttempt && (
+          {data.previousAttempt && !writingBody && (
             <p className="text-xs text-muted">
               {data.previousAttempt.score === null
                 ? "You've already read this. Doing it again just re-marks it as read."
                 : `You already completed this — scored ${data.previousAttempt.score}%. Doing it again replaces that score.`}
             </p>
           )}
+          {data.previousAttempt && writingBody && (
+            <div className="text-left space-y-3">
+              {previousReview ? (
+                <>
+                  <RubricScorecard
+                    level={writingBody.level}
+                    evaluation={buildEvaluation(
+                      writingBody.level,
+                      'teacher',
+                      previousReview.bands,
+                      countWords(data.previousAttempt.submissionText ?? ''),
+                      0,
+                      { comments: {} },
+                    )}
+                  />
+                  {previousReview.feedback && (
+                    <div className="card p-4">
+                      <p className="text-sm font-semibold text-primary mb-1">Your teacher's feedback</p>
+                      <p className="text-sm text-secondary whitespace-pre-wrap">{previousReview.feedback}</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-xs text-muted text-center">Submitted — waiting for your teacher to mark it.</p>
+              )}
+              {data.previousAttempt.submissionText && (
+                <div className="card p-4">
+                  <p className="text-sm font-semibold text-primary mb-1">Your text</p>
+                  <p className="text-sm text-secondary whitespace-pre-wrap" lang="fr">{data.previousAttempt.submissionText}</p>
+                </div>
+              )}
+              {writingBody.modelAnswer && (
+                <div className="card p-4">
+                  <p className="text-sm font-semibold text-primary mb-1">Model answer</p>
+                  <p className="text-sm text-secondary whitespace-pre-wrap" lang="fr">{writingBody.modelAnswer}</p>
+                </div>
+              )}
+              <p className="text-xs text-muted text-center">Submitting again replaces your text and clears the mark.</p>
+            </div>
+          )}
           <Button
             size="lg"
-            onClick={() => setPhase(isReading ? 'reading' : vocab.length > 0 ? 'flashcards' : 'exercises')}
+            onClick={() =>
+              setPhase(
+                isReading ? 'reading'
+                  : listeningBody ? 'listening'
+                    : writingBody ? 'writing'
+                      : vocab.length > 0 ? 'flashcards' : 'exercises',
+              )
+            }
             className="w-full max-w-xs mx-auto"
           >
-            {data.previousAttempt ? 'Retake' : isReading ? 'Start Reading' : "Let's go!"} <ArrowRight size={17} />
+            {data.previousAttempt ? (writingBody ? 'Rewrite' : 'Retake') : isReading ? 'Start Reading' : writingBody ? 'Start writing' : "Let's go!"}{' '}
+            <ArrowRight size={17} />
           </Button>
         </motion.div>
       </div>
@@ -167,6 +273,87 @@ export function Assignment() {
     );
   }
 
+  if (phase === 'listening' && listeningBody) {
+    const correct = listeningResults?.filter(Boolean).length ?? 0;
+    return (
+      <div className="max-w-xl mx-auto px-4 py-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/classes"
+            aria-label="Back to My Classes"
+            className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+          >
+            <ChevronLeft size={20} strokeWidth={2.4} />
+          </Link>
+          <p className="text-sm font-semibold text-primary flex-1 truncate">{content.title}</p>
+        </div>
+        {listeningBody.situation && <p className="text-sm text-secondary" lang="fr">{listeningBody.situation}</p>}
+        <ListeningPlayer script={listeningBody.script} maxPlays={listeningResults ? null : listeningBody.plays} allowRateChange={!!listeningResults} />
+        {listeningResults && (
+          <div className="card p-4">
+            <p className="text-sm font-semibold text-primary">{correct} / {listeningBody.questions.length} correct · +{content.body.xpReward} XP</p>
+            <p className="text-xs text-muted">Saved for your teacher. The transcript is below.</p>
+          </div>
+        )}
+        <ListeningQuestions
+          questions={listeningBody.questions}
+          answers={listeningAnswers}
+          results={listeningResults}
+          onAnswer={(i, v) => setListeningAnswers(prev => { const next = [...prev]; next[i] = v; return next; })}
+        />
+        {submitError && <p className="text-sm" style={{ color: 'var(--danger)' }}>{submitError}</p>}
+        {!listeningResults ? (
+          <Button onClick={submitListening} disabled={submitting} className="w-full">
+            {submitting ? 'Submitting…' : 'Submit answers'}
+          </Button>
+        ) : (
+          <>
+            <Transcript script={listeningBody.script} />
+            <Link to="/classes"><Button variant="secondary" className="w-full">Back to My Classes</Button></Link>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  if (phase === 'writing' && writingBody) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/classes"
+            aria-label="Back to My Classes"
+            className="w-9 h-9 flex items-center justify-center rounded-full ios-press no-underline flex-shrink-0"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--hairline)', boxShadow: 'var(--shadow-1)' }}
+          >
+            <ChevronLeft size={20} strokeWidth={2.4} />
+          </Link>
+          <p className="text-sm font-semibold text-primary flex-1 truncate">{content.title}</p>
+          <span className="chip text-xs">DELF {writingBody.level.toUpperCase()}</span>
+        </div>
+        <div className="card p-4 space-y-2">
+          <p className="text-[0.95rem] text-primary leading-relaxed whitespace-pre-wrap" lang="fr">{writingBody.consigne}</p>
+          {writingBody.checklist.length > 0 && (
+            <ul className="text-xs text-secondary space-y-0.5 list-disc pl-5">
+              {writingBody.checklist.map(c => <li key={c}>{c}</li>)}
+            </ul>
+          )}
+        </div>
+        {submitError && <p className="text-sm" style={{ color: 'var(--danger)' }}>{submitError}</p>}
+        <WritingWorkspace
+          minWords={writingBody.minWords}
+          timeMinutes={writingBody.timeMinutes ?? 45}
+          initialText={draft ?? ''}
+          onDraftChange={onDraftChange}
+          onSubmit={(text) => submitWriting(text)}
+          submitting={submitting}
+          submitLabel="Hand in to my teacher"
+        />
+      </div>
+    );
+  }
+
   if (phase === 'complete') {
     const correct = responses.filter((r) => r.correct).length;
     const score = responses.length ? Math.round((correct / responses.length) * 100) : null;
@@ -177,12 +364,20 @@ export function Assignment() {
         </span>
         <h1 className="text-2xl font-bold text-primary">Nice work!</h1>
         <p className="text-secondary">
-          {isReading
-            ? readingGradable
-              ? `Lesson complete · +${content.body.xpReward} XP`
-              : 'Marked as read'
-            : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
+          {writingBody
+            ? `Handed in · +${content.body.xpReward} XP. Your teacher will mark it with the DELF grid.`
+            : isReading
+              ? readingGradable
+                ? `Lesson complete · +${content.body.xpReward} XP`
+                : 'Marked as read'
+              : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
         </p>
+        {writingBody?.modelAnswer && (
+          <div className="card p-4 text-left">
+            <p className="text-sm font-semibold text-primary mb-1">Model answer</p>
+            <p className="text-sm text-secondary whitespace-pre-wrap" lang="fr">{writingBody.modelAnswer}</p>
+          </div>
+        )}
         <Link to="/classes">
           <Button className="mt-2">Back to My Classes</Button>
         </Link>
