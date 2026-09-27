@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NO_OVERSHOOT_SPRING, COLLAPSE } from '../../utils/motion';
 import { LogIn, ShieldQuestion, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
@@ -93,10 +94,10 @@ export function ClassroomAuth() {
   if (view === 'recovery-reveal') {
     return (
       <div className="max-w-xl mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-primary mb-1">Almost there</h1>
           <p className="text-secondary text-sm font-display italic">One thing before you go in.</p>
-        </motion.div>
+        </div>
         <RecoveryCodeReveal
           code={revealCode}
           email={email}
@@ -111,14 +112,11 @@ export function ClassroomAuth() {
   if (view === 'forgot-password') {
     return (
       <div className="max-w-xl mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <h1 className="text-3xl font-bold text-primary mb-1">Reset Password</h1>
           <p className="text-secondary text-sm font-display italic truncate">{backendUrl}</p>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+        </div>
+        <div
           className="card p-5 mt-6 space-y-3"
         >
           <p className="text-xs text-muted">
@@ -168,22 +166,19 @@ export function ClassroomAuth() {
               ? "Lost your recovery code too? Ask your teacher to reset your password from the class roster."
               : "Lost your recovery code too? See the server's README for the recovery script (needs access to the machine it runs on)."}
           </p>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold text-primary mb-1">Sign In</h1>
         <p className="text-secondary text-sm font-display italic truncate">{backendUrl}</p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
+      <div
         className="card p-5 mt-6 space-y-5"
       >
         <div className="seg-control">
@@ -200,7 +195,7 @@ export function ClassroomAuth() {
                   layoutId="classroom-role-seg"
                   className="absolute inset-0 rounded-[10px]"
                   style={{ backgroundColor: 'var(--bg-card)', boxShadow: 'var(--shadow-1)', zIndex: 0 }}
-                  transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+                  transition={NO_OVERSHOOT_SPRING}
                 />
               )}
               <span style={{ position: 'relative', zIndex: 1 }}>
@@ -255,10 +250,7 @@ export function ClassroomAuth() {
             <AnimatePresence>
               {privacyOpen && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  {...COLLAPSE}
                   className="overflow-hidden"
                 >
                   <div className="p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
@@ -326,7 +318,7 @@ export function ClassroomAuth() {
         >
           <LogIn size={16} /> {mode === 'login' ? 'Log In' : 'Create Account'}
         </Button>
-      </motion.div>
+      </div>
     </div>
   );
 }

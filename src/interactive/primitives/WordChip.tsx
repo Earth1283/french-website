@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
+import { BASE_TRANSITION } from '../../utils/motion';
 import type { Token } from '../types';
 import { ROLES, roleColor } from '../roles';
 import { TooltipBubble, useTooltip } from './Tooltip';
@@ -35,7 +36,7 @@ export const WordChip = forwardRef<HTMLSpanElement, WordChipProps>(function Word
       initial={calm ? false : { opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={calm ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.85 }}
-      transition={{ type: 'spring', damping: 24, stiffness: 300 }}
+      transition={BASE_TRANSITION}
       className="relative inline-flex"
     >
       <button

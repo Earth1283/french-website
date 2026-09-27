@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Route, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PersonalizeModal } from './PersonalizeModal';
@@ -33,7 +32,7 @@ export function PathPanel({ path }: { path: LearningPath }) {
   return (
     <>
       <PersonalizeModal open={editing} onClose={() => setEditing(false)} />
-      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+      <div className="mb-6">
         {profile ? (
           <div className="card p-4 flex items-center gap-3">
             <Route size={16} className="flex-shrink-0" style={{ color: 'var(--accent)' }} />
@@ -67,7 +66,7 @@ export function PathPanel({ path }: { path: LearningPath }) {
             </button>
           </div>
         )}
-      </motion.div>
+      </div>
     </>
   );
 }

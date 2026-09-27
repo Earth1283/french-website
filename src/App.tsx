@@ -1,5 +1,7 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
+import { MotionConfig } from 'framer-motion';
+import { BASE_TRANSITION } from './utils/motion';
 import { useProgressStore } from './stores/progressStore';
 import { useIdlePreload } from './hooks/useIdlePreload';
 import { Navbar } from './components/layout/Navbar';
@@ -83,8 +85,7 @@ const ACCENT_HOVER: Record<string, string> = {
 };
 
 // Full-bleed ambient pages (Landing "/", Focus "/focus") are rendered outside
-// the app chrome and the iOS push/pop slide. Each handles its own entrance
-// animation internally.
+// the app chrome and the page transition. Each handles its own entrance.
 function AmbientRoutes() {
   return (
     <ErrorBoundary>
@@ -165,28 +166,28 @@ function AppContent() {
 
   // Ambient pages get a bare, chrome-less shell; everything else gets the app
   // chrome (nav + padded main) with the animated route transitions.
-  if (isAmbient) {
-    return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-        <AmbientRoutes />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      <Navbar />
-      <main className={reducedGpu ? 'pb-16 sm:pb-0' : 'pb-28 sm:pb-0'}>
-        <AnimatedRoutes />
-      </main>
-      <BottomNav />
-    </div>
+    <MotionConfig reducedMotion={reducedGpu ? 'always' : 'user'} transition={BASE_TRANSITION}>
+      {isAmbient ? (
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+          <AmbientRoutes />
+        </div>
+      ) : (
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+          <Navbar />
+          <main className={reducedGpu ? 'pb-16 sm:pb-0' : 'pb-28 sm:pb-0'}>
+            <AnimatedRoutes />
+          </main>
+          <BottomNav />
+        </div>
+      )}
+    </MotionConfig>
   );
 }
 
 export default function App() {
   return (
-    <HashRouter>
+    <HashRouter future={{ v7_startTransition: true }}>
       <AppContent />
     </HashRouter>
   );

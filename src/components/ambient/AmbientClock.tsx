@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { BASE_TRANSITION } from '../../utils/motion';
 import { useClock } from '../../hooks/useClock';
 
 interface Props {
@@ -60,7 +61,7 @@ export function AmbientClock({ size = 'lg', showSeconds = true }: Props) {
             initial={reduceMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
-            transition={{ duration: 0.28, ease: 'easeOut' }}
+            transition={BASE_TRANSITION}
             className="inline-block"
           >
             {dateText}

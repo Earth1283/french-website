@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { COLLAPSE } from '../../utils/motion';
 import { Plus, Users, LogOut, ChevronRight, ChevronDown, BookOpen, Archive, KeyRound } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import type { ClassInfo } from '../../types/classroom';
 
-function ClassRow({ cls, index }: { cls: ClassInfo; index: number }) {
+function ClassRow({ cls }: { cls: ClassInfo }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 * index }}>
+    <div>
       <Link to={`/classes/${cls.id}`} className="card p-4 flex items-center justify-between no-underline ios-press">
         <div className="flex items-center gap-3">
           <span
@@ -25,7 +26,7 @@ function ClassRow({ cls, index }: { cls: ClassInfo; index: number }) {
         </div>
         <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
       </Link>
-    </motion.div>
+    </div>
   );
 }
 
@@ -66,7 +67,7 @@ export function TeacherDashboard() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary mb-1">Your Classes</h1>
           <p className="text-secondary text-sm">{profile?.name}</p>
@@ -89,9 +90,9 @@ export function TeacherDashboard() {
             <LogOut size={12} /> Log out
           </button>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-4">
+      <div className="card p-4">
         <div className="flex gap-2">
           <input
             value={nameDraft}
@@ -109,15 +110,15 @@ export function TeacherDashboard() {
             {error}
           </p>
         )}
-      </motion.div>
+      </div>
 
       <div className="space-y-2.5">
         {classes === null && <p className="text-sm text-muted text-center py-8">Loading…</p>}
         {classes?.length === 0 && (
           <p className="text-sm text-muted text-center py-8">No classes yet — create your first one above.</p>
         )}
-        {active.map((cls, i) => (
-          <ClassRow key={cls.id} cls={cls} index={i} />
+        {active.map(cls => (
+          <ClassRow key={cls.id} cls={cls} />
         ))}
       </div>
 
@@ -135,14 +136,12 @@ export function TeacherDashboard() {
           <AnimatePresence>
             {showArchived && (
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
+                {...COLLAPSE}
                 className="overflow-hidden"
               >
                 <div className="space-y-2.5 pt-2.5">
-                  {archived.map((cls, i) => (
-                    <ClassRow key={cls.id} cls={cls} index={i} />
+                  {archived.map(cls => (
+                    <ClassRow key={cls.id} cls={cls} />
                   ))}
                 </div>
               </motion.div>

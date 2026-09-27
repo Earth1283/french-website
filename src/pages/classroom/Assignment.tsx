@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { STEP_FORWARD } from '../../utils/motion';
 import { ArrowRight, ChevronLeft, ChevronRight, CheckCircle2, PartyPopper, Flag, Check } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { FlashCard } from '../../components/lesson/FlashCard';
@@ -163,7 +164,7 @@ export function Assignment() {
         <Link to="/classes" className="inline-flex items-center gap-0.5 text-[0.95rem] font-medium mb-8 no-underline" style={{ color: 'var(--accent)' }}>
           <ChevronLeft size={20} strokeWidth={2.4} className="-ml-1.5" /> My Classes
         </Link>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 280 }} className="space-y-6">
+        <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-primary">{content.title}</h1>
             {content.subtitle && <p className="text-secondary mt-2">{content.subtitle}</p>}
@@ -238,7 +239,7 @@ export function Assignment() {
             {data.previousAttempt ? (writingBody ? 'Rewrite' : 'Retake') : isReading ? 'Start Reading' : writingBody ? 'Start writing' : "Let's go!"}{' '}
             <ArrowRight size={17} />
           </Button>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -404,7 +405,7 @@ export function Assignment() {
 
       <AnimatePresence mode="popLayout">
         {phase === 'flashcards' && (
-          <motion.div key={`card-${cardIndex}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ type: 'spring', damping: 26, stiffness: 320 }}>
+          <motion.div key={`card-${cardIndex}`} {...STEP_FORWARD}>
             <FlashCard item={vocab[cardIndex]} index={cardIndex} total={vocab.length} flipped={flipped} onFlipToggle={() => setFlipped((f) => !f)} />
             <div className="flex items-center justify-between mt-6">
               <Button variant="secondary" onClick={() => { setFlipped(false); setCardIndex((i) => i - 1); }} disabled={cardIndex === 0}>
@@ -424,7 +425,7 @@ export function Assignment() {
         )}
 
         {phase === 'exercises' && !submitting && (
-          <motion.div key={`exercise-${exerciseIndex}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ type: 'spring', damping: 26, stiffness: 320 }} className="space-y-4">
+          <motion.div key={`exercise-${exerciseIndex}`} {...STEP_FORWARD} className="space-y-4">
             <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">
               {exerciseIndex + 1} of {exercises.length}
             </p>

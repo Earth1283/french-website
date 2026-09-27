@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, BookOpen, Home, User, MessageSquare, Settings, Timer, Gauge, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { TAP_TRANSITION, NO_OVERSHOOT_SPRING } from '../../utils/motion';
 import { useProgressStore } from '../../stores/progressStore';
-import { TAP_SPRING } from '../../utils/motion';
 import { FrenchFlag } from '../ui/FrenchFlag';
 import { isNavActive } from '../../utils/navMatch';
 
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const { darkMode, setDarkMode, xp, streak } = useProgressStore();
+  const hasProgressChip = streak > 0 || xp > 0;
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
 
@@ -42,9 +43,9 @@ export function Navbar() {
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
-          <Link to="/learn" className="flex items-center gap-2 no-underline">
+      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        <motion.div whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION} className="shrink-0">
+          <Link to="/learn" className="flex items-center gap-2 no-underline whitespace-nowrap">
             <FrenchFlag size={20} className="rounded-[2px]" />
             <span className="font-bold text-[1.05rem] text-primary font-display">
               Bonjour Survival
@@ -54,8 +55,8 @@ export function Navbar() {
 
         <div className="flex items-center gap-1.5">
           {/* Streak + XP — compact tappable chip, visible on mobile too */}
-          {(streak > 0 || xp > 0) && (
-            <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
+          {hasProgressChip && (
+            <motion.div whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION}>
               <Link
                 to="/profile"
                 aria-label="Your progress"
@@ -77,23 +78,26 @@ export function Navbar() {
             {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
               const isActive = isNavActive(location.pathname, to);
               return (
-                <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
+                <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION}>
                   <Link
                     to={to}
                     className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors isolate"
+                    aria-label={label}
+                    title={label}
                     style={{ color: isActive ? '#fff' : 'var(--text-secondary)' }}
                   >
                     {isActive && (
                       <motion.span
                         layoutId="desktop-nav-pill"
+                        layoutDependency={to}
                         className="absolute inset-0 rounded-full"
                         style={{ backgroundColor: 'var(--accent)', zIndex: 0 }}
-                        transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+                        transition={NO_OVERSHOOT_SPRING}
                       />
                     )}
                     <span className="relative z-10 flex items-center gap-1.5">
                       <Icon size={15} strokeWidth={isActive ? 2.2 : 2} />
-                      <span>{label}</span>
+                      <span className={hasProgressChip ? 'hidden xl:inline' : 'hidden lg:inline'}>{label}</span>
                     </span>
                   </Link>
                 </motion.div>
@@ -101,7 +105,7 @@ export function Navbar() {
             })}
           </nav>
 
-          <motion.div whileTap={{ scale: 0.97 }} transition={TAP_SPRING} className="hidden sm:block">
+          <motion.div whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION} className="hidden sm:block">
             <Link
               to="/settings"
               className="flex p-2 rounded-full transition-colors no-underline ios-press"
@@ -115,8 +119,8 @@ export function Navbar() {
           {/* Dark mode toggle — animated, reachable on mobile */}
           <motion.button
             onClick={() => setDarkMode(!darkMode)}
-            whileTap={{ scale: 0.97, rotate: darkMode ? -40 : 40 }}
-            transition={TAP_SPRING}
+            whileTap={{ scale: 0.97 }}
+            transition={TAP_TRANSITION}
             className="p-2 rounded-full cursor-pointer"
             style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
             aria-label="Toggle dark mode"

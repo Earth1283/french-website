@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FADE } from '../../utils/motion';
 import { ChevronLeft, Plus, Pencil, Trash2 } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
@@ -27,7 +28,7 @@ export function ContentLibrary() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <Link
             to="/classes"
@@ -43,9 +44,9 @@ export function ContentLibrary() {
             <Plus size={14} /> New
           </Button>
         </Link>
-      </motion.div>
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
+      <div className="inset-group">
         {content === null && <p className="p-4 text-sm text-muted">Loading…</p>}
         {content?.length === 0 && (
           <p className="p-4 text-sm text-muted">
@@ -71,9 +72,7 @@ export function ContentLibrary() {
                 {confirmId === c.id ? (
                   <motion.div
                     key="confirm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    {...FADE}
                     className="flex items-center gap-1"
                   >
                     <button
@@ -94,9 +93,7 @@ export function ContentLibrary() {
                 ) : (
                   <motion.button
                     key="trigger"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    {...FADE}
                     onClick={() => setConfirmId(c.id)}
                     aria-label="Delete"
                     className="p-1.5 rounded-full cursor-pointer"
@@ -109,7 +106,7 @@ export function ContentLibrary() {
             </div>
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { TestResult } from '../../types';
 import { getTopicMeta } from '../../data/testItemBank';
@@ -22,9 +21,7 @@ export function TestResultBreakdown({ result, compact = false }: TestResultBreak
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
         className="text-center"
       >
         <span className="chip text-sm px-3 py-1.5">
@@ -36,7 +33,7 @@ export function TestResultBreakdown({ result, compact = false }: TestResultBreak
         <p className="text-xs text-muted mt-1">
           {new Date(result.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
-      </motion.div>
+      </div>
 
       {/* Desktop-only: richer charts. The list below remains the accessible
           "table view" twin on every screen size, so nothing is chart-gated. */}

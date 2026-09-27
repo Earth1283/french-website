@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { TAP_TRANSITION } from '../../utils/motion';
 import { ChevronRight, Timer, BookOpen, MessageSquare, Play, ArrowRight } from 'lucide-react';
 import { useProgressStore } from '../../stores/progressStore';
 import { useLearningPath } from '../../hooks/useLearningPath';
 
-const TAP = { type: 'spring', damping: 18, stiffness: 480 } as const;
 
 /** Frosted-glass pill styling for actions floating over the photo. */
 const glassPill =
@@ -36,7 +36,7 @@ export function Launcher() {
 
       {/* Primary CTA — continue / start the next lesson */}
       {next && (
-        <motion.div whileTap={{ scale: 0.97 }} transition={TAP} className="w-full max-w-sm">
+        <motion.div whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION} className="w-full max-w-sm">
           <Link
             to={`/unit/${next.unit.slug}/lesson/${next.lesson.id}`}
             className="no-underline flex items-center justify-between gap-3 rounded-2xl border border-white/20 bg-white/15 px-4 py-3 backdrop-blur-xl transition-colors hover:bg-white/25"
@@ -59,22 +59,22 @@ export function Launcher() {
 
       {/* Secondary launcher pills */}
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <motion.div whileTap={{ scale: 0.94 }} transition={TAP}>
+        <motion.div whileTap={{ scale: 0.94 }} transition={TAP_TRANSITION}>
           <Link to="/focus" className={glassPill}>
             <Timer size={15} /> Focus
           </Link>
         </motion.div>
-        <motion.div whileTap={{ scale: 0.94 }} transition={TAP}>
+        <motion.div whileTap={{ scale: 0.94 }} transition={TAP_TRANSITION}>
           <Link to="/phrasebook" className={glassPill}>
             <BookOpen size={15} /> Phrasebook
           </Link>
         </motion.div>
-        <motion.div whileTap={{ scale: 0.94 }} transition={TAP}>
+        <motion.div whileTap={{ scale: 0.94 }} transition={TAP_TRANSITION}>
           <Link to="/converse" className={glassPill}>
             <MessageSquare size={15} /> Converse
           </Link>
         </motion.div>
-        <motion.div whileTap={{ scale: 0.94 }} transition={TAP}>
+        <motion.div whileTap={{ scale: 0.94 }} transition={TAP_TRANSITION}>
           <Link
             to="/learn"
             className="no-underline pointer-events-auto flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition-transform hover:gap-2.5"

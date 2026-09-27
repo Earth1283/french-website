@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { FADE } from '../../utils/motion';
 
 interface TooltipState {
   openId: string | null;
@@ -105,7 +106,7 @@ export function TooltipBubble({ id, open, children }: { id: string; open: boolea
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.14 }}
+            transition={FADE.transition}
             className="rounded-xl px-3 py-2 text-left text-xs leading-snug"
             style={{
               backgroundColor: 'var(--bg-card)',

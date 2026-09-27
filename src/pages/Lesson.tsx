@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TAP_TRANSITION, STEP_FORWARD } from '../utils/motion';
 import { ArrowRight, ChevronLeft, ChevronRight, Bookmark, BookOpen, Sparkles } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { getDeepLessonPages } from '../content/deepLessons';
@@ -15,7 +16,6 @@ import { LessonComplete } from '../components/lesson/LessonComplete';
 import { DeepLessonReader } from '../components/lesson/DeepLessonReader';
 import { ProgressBar } from '../components/layout/ProgressBar';
 import { Button } from '../components/ui/Button';
-import { TAP_SPRING } from '../utils/motion';
 
 const InteractivePlayer = lazy(() => import('../interactive/InteractivePlayer').then(m => ({ default: m.InteractivePlayer })));
 
@@ -163,10 +163,7 @@ export function Lesson() {
           <ChevronLeft size={20} strokeWidth={2.4} className="-ml-1.5" /> {unit.title}
         </Link>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+        <div
           className="space-y-6"
         >
           <span
@@ -215,7 +212,7 @@ export function Lesson() {
               Let's go! <ArrowRight size={17} />
             </Button>
           )}
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -311,7 +308,7 @@ export function Lesson() {
         </span>
         <motion.button
           whileTap={{ scale: 0.97 }}
-          transition={TAP_SPRING}
+          transition={TAP_TRANSITION}
           onClick={() => toggleBookmark(lesson.id)}
           className="w-9 h-9 flex items-center justify-center rounded-full cursor-pointer flex-shrink-0"
           style={{
@@ -336,10 +333,7 @@ export function Lesson() {
         {phase === 'flashcards' && (
           <motion.div
             key={`card-${cardIndex}`}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            {...STEP_FORWARD}
           >
             <FlashCard
               item={lesson.vocab[cardIndex]}
@@ -375,10 +369,7 @@ export function Lesson() {
         {phase === 'exercises' && (
           <motion.div
             key={`exercise-${exerciseIndex}`}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            {...STEP_FORWARD}
             className="space-y-4"
           >
             <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">

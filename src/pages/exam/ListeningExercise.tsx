@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { REVEAL } from '../../utils/motion';
 import { ChevronLeft, RotateCcw, FileText } from 'lucide-react';
 import { getListeningDoc } from '../../data/exam/listening';
 import { ListeningPlayer } from '../../components/exam/ListeningPlayer';
@@ -105,7 +106,7 @@ export function ListeningExercise() {
       />
 
       {results && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card p-4 flex items-center justify-between">
+        <motion.div {...REVEAL} className="card p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-primary">
               {correct} / {doc.questions.length} correct

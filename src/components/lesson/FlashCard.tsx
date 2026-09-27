@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { TAP_TRANSITION } from '../../utils/motion';
 import { Volume2 } from 'lucide-react';
 import type { PanInfo } from 'framer-motion';
 import type { VocabItem } from '../../types';
@@ -48,6 +49,7 @@ export function FlashCard({ item, index, total, flipped, onFlipToggle }: FlashCa
         dragConstraints={{ left: 0, right: 0 }}
         onDragEnd={handleDragEnd}
         onClick={onFlipToggle}
+        transition={TAP_TRANSITION}
         whileTap={{ scale: 0.98 }}
       >
         <div className={`flip-card-inner absolute inset-0 ${flipped ? 'flipped' : ''}`}>

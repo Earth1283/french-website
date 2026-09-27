@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TAP_TRANSITION, ICON_SWAP } from '../utils/motion';
 import { Search, Volume2, Copy, Check, Zap } from 'lucide-react';
 import { UNITS, getAllVocab } from '../data/units';
 import { speak } from '../utils/speech';
-import { TAP_SPRING } from '../utils/motion';
 
 const PAGE_SIZE = 60;
 
@@ -46,12 +46,12 @@ export function Phrasebook() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-primary mb-1">Phrasebook</h1>
         <p className="text-secondary">
           Every phrase from every lesson, searchable. {allVocab.length} phrases total.
         </p>
-      </motion.div>
+      </div>
 
       {/* Search & filters */}
       <div className="mb-6 space-y-3">
@@ -70,7 +70,7 @@ export function Phrasebook() {
         <div className="flex flex-wrap gap-2 items-center">
           <motion.button
             whileTap={{ scale: 0.94 }}
-            transition={TAP_SPRING}
+            transition={TAP_TRANSITION}
             onClick={() => setEmergencyOnly(v => !v)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-colors"
             style={emergencyOnly
@@ -116,11 +116,8 @@ export function Phrasebook() {
         {filtered.slice(0, displayCount).map((v) => {
           const id = `${v.unitId}-${v.lessonId}-${v.french}`;
           return (
-            <motion.div
+            <div
               key={id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.015 }}
               className="phrasebook-row p-4 flex items-start gap-4"
             >
               <div className="flex-1 min-w-0">
@@ -161,18 +158,18 @@ export function Phrasebook() {
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {copiedId === id ? (
-                      <motion.span key="check" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={TAP_SPRING} className="flex">
+                      <motion.span key="check" {...ICON_SWAP} className="flex">
                         <Check size={14} />
                       </motion.span>
                     ) : (
-                      <motion.span key="copy" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={TAP_SPRING} className="flex">
+                      <motion.span key="copy" {...ICON_SWAP} className="flex">
                         <Copy size={13} />
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </button>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>}

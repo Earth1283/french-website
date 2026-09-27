@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Lock, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { TAP_TRANSITION } from '../../utils/motion';
 import { ProgressBar } from '../layout/ProgressBar';
 import { AdvancedLevelTag } from '../ui/LevelTag';
 import type { Unit } from '../../types';
@@ -10,19 +11,16 @@ interface UnitCardProps {
   progress: number;
   isLocked: boolean;
   testedOut?: boolean;
-  index: number;
 }
 
-export function UnitCard({ unit, progress, isLocked, testedOut = false, index }: UnitCardProps) {
+export function UnitCard({ unit, progress, isLocked, testedOut = false }: UnitCardProps) {
   const isComplete = progress === 100;
   const lessonCount = unit.lessons.length;
 
   const content = (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
+      transition={TAP_TRANSITION}
       whileTap={isLocked ? {} : { scale: 0.97 }}
-      transition={{ delay: index * 0.04, type: 'spring', damping: 24, stiffness: 300 }}
       className={`card card-lift p-5 flex flex-col gap-3 relative cursor-pointer h-full ${
         isLocked ? 'opacity-60' : ''
       }`}

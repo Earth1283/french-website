@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FILL_TRANSITION, REVEAL, FADE, COLLAPSE } from '../utils/motion';
 import { Trophy, Flame, Zap, RotateCcw, GraduationCap, Gauge, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import { useProgressStore, BADGES } from '../stores/progressStore';
 import { useTestStore } from '../stores/testStore';
@@ -29,10 +30,10 @@ export function Profile() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-7">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold text-primary">Your Progress</h1>
         <p className="text-secondary text-sm mt-1 font-display italic">C'est magnifique!</p>
-      </motion.div>
+      </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
@@ -40,14 +41,8 @@ export function Profile() {
           { icon: Zap, label: 'XP Earned', value: xp, color: 'var(--gold)' },
           { icon: Flame, label: 'Day Streak', value: streak, color: 'var(--accent)' },
           { icon: Trophy, label: 'Units Done', value: `${completedUnits}/${UNITS.length}`, color: 'var(--success)' },
-        ].map(({ icon: Icon, label, value, color }, i) => (
-          <motion.div
-            key={label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06, type: 'spring', damping: 24, stiffness: 300 }}
-            className="card p-4 text-center"
-          >
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} className="card p-4 text-center">
             <span
               className="mx-auto mb-2 w-9 h-9 rounded-full flex items-center justify-center"
               style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` }}
@@ -56,12 +51,12 @@ export function Profile() {
             </span>
             <p className="text-xl font-bold text-primary">{value}</p>
             <p className="text-xs text-muted">{label}</p>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Level card */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <div>
         <div className="card p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -83,9 +78,8 @@ export function Profile() {
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
-                initial={{ scaleX: 0 }}
                 animate={{ scaleX: Math.min(1, levelInfo.currentLevelXP / levelInfo.levelSpan) }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
+                transition={FILL_TRANSITION}
               />
             </div>
           )}
@@ -94,7 +88,7 @@ export function Profile() {
           )}
           <p className="text-xs text-muted mt-2">Level {levelInfo.level} of {MAX_LEVEL}</p>
         </div>
-      </motion.div>
+      </div>
 
       {/* Overall progress */}
       <div className="card p-5">
@@ -106,9 +100,8 @@ export function Profile() {
           <motion.div
             className="h-full rounded-full"
             style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
-            initial={{ scaleX: 0 }}
             animate={{ scaleX: overallPct / 100 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
+            transition={FILL_TRANSITION}
           />
         </div>
         <p className="text-right text-xs text-muted mt-1">{overallPct}%</p>
@@ -191,10 +184,7 @@ export function Profile() {
           {showA1 && (
             <motion.div
               key="a1-roadmap-body"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              {...COLLAPSE}
               className="p-4 space-y-2 overflow-hidden"
               style={{ borderTop: '0.5px solid var(--hairline)' }}
             >
@@ -288,9 +278,8 @@ export function Profile() {
                       <motion.div
                         className="h-full rounded-full"
                         style={{ backgroundColor: unit.color, width: '100%', transformOrigin: 'left' }}
-                        initial={{ scaleX: 0 }}
                         animate={{ scaleX: pct / 100 }}
-                        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+                        transition={FILL_TRANSITION}
                       />
                     </div>
                     <span className="text-xs text-muted whitespace-nowrap">{done}/{unit.lessons.length}</span>
@@ -308,10 +297,7 @@ export function Profile() {
           {!confirmReset ? (
             <motion.button
               key="trigger"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              {...FADE}
               onClick={() => setConfirmReset(true)}
               className="flex items-center gap-2 text-sm text-muted transition-colors cursor-pointer hover:text-[var(--danger)]"
               style={{ background: 'transparent', border: 'none' }}
@@ -321,10 +307,7 @@ export function Profile() {
           ) : (
             <motion.div
               key="confirm"
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              {...REVEAL}
               className="card p-4 space-y-3"
               style={{ borderColor: 'color-mix(in srgb, var(--danger) 35%, transparent)' }}
             >

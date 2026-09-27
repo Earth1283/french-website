@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { REVEAL } from '../utils/motion';
 import { Backdrop } from '../components/ambient/Backdrop';
 import { AmbientClock } from '../components/ambient/AmbientClock';
 import { Greeting } from '../components/ambient/Greeting';
@@ -17,9 +18,7 @@ export function Landing() {
 
       {/* Top: clock + greeting */}
       <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 24, stiffness: 220 }}
+        {...REVEAL}
         className="relative z-10 flex flex-col items-center gap-5 pt-6"
       >
         <AmbientClock size="lg" />
@@ -33,9 +32,8 @@ export function Landing() {
 
       {/* Bottom: launcher */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: 'spring', damping: 24, stiffness: 220 }}
+        {...REVEAL}
+        transition={{ ...REVEAL.transition, delay: 0.06 }}
         className="relative z-10 w-full pb-[env(safe-area-inset-bottom)]"
       >
         <Launcher />

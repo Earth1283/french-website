@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { STEP_FORWARD } from '../utils/motion';
 import { ArrowRight, RotateCcw } from 'lucide-react';
 import { ITEM_BANK, resolveTestItemExercise } from '../data/testItemBank';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
@@ -172,10 +173,7 @@ export function AdaptiveTest() {
   if (view === 'intro') {
     return (
       <div className="max-w-xl mx-auto px-4 py-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+        <div
           className="space-y-6"
         >
           <span
@@ -212,13 +210,10 @@ export function AdaptiveTest() {
             </span>
             <ArrowRight size={16} className="text-muted" />
           </Link>
-        </motion.div>
+        </div>
 
         {history.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+          <div
             className="mt-10 text-left"
           >
             <p className="section-label" style={{ paddingLeft: 0 }}>Past attempts</p>
@@ -234,7 +229,7 @@ export function AdaptiveTest() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     );
@@ -251,9 +246,7 @@ export function AdaptiveTest() {
 
         <motion.div
           key={currentItem.id}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          {...STEP_FORWARD}
         >
           {exercise.type === 'multiple-choice' && (
             <MultipleChoice
@@ -301,10 +294,10 @@ export function AdaptiveTest() {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+      <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-primary">Your Level</h1>
         <p className="text-secondary text-sm mt-1">This is an informal estimate, not a certified placement.</p>
-      </motion.div>
+      </div>
 
       <TestResultBreakdown result={result} />
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { REVEAL } from '../../utils/motion';
 import { X, GraduationCap } from 'lucide-react';
 import { useProgressStore } from '../../stores/progressStore';
 
@@ -15,10 +16,7 @@ export function A1Banner() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, y: -20, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.96 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+          {...REVEAL}
           className="mb-6 p-4 flex items-center gap-3"
           style={{
             backgroundColor: 'var(--success-light)',

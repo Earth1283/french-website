@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { EASE_OUT, EASE_IN, DURATION, FADE } from '../../utils/motion';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -14,8 +15,6 @@ interface ModalProps {
 // Mobile: iOS sheet sliding up from the bottom with a grabber.
 // Desktop (sm+): centered card with a spring scale-in.
 export function Modal({ open, onClose, children, title, closeable = true }: ModalProps) {
-  const reduceMotion = useReducedMotion();
-
   useEffect(() => {
     if (!open || !closeable || !onClose) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -24,17 +23,14 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
   }, [open, closeable, onClose]);
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-  const offscreenY = reduceMotion ? 0 : (isMobile ? '100%' : 24);
+  const hidden = isMobile ? { y: '100%' } : { y: 8, scale: 0.98, opacity: 0 };
 
   return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+          {...FADE}
           role="dialog"
           aria-modal="true"
         >
@@ -51,19 +47,10 @@ export function Modal({ open, onClose, children, title, closeable = true }: Moda
               border: '0.5px solid var(--hairline)',
               paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
             }}
-            initial={{ y: offscreenY, scale: reduceMotion ? 1 : 0.96, opacity: 0 }}
-            animate={{
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              transition: { type: 'spring', damping: 28, stiffness: 320 },
-            }}
-            exit={{
-              y: offscreenY,
-              scale: reduceMotion ? 1 : 0.96,
-              opacity: 0,
-              transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] },
-            }}
+            initial={hidden}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ ...hidden, transition: { duration: DURATION.fast, ease: EASE_IN } }}
+            transition={{ duration: isMobile ? DURATION.slow : DURATION.base, ease: EASE_OUT }}
           >
             {/* Sheet grabber — mobile only */}
             <div

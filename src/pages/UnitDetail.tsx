@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { TAP_TRANSITION } from '../utils/motion';
 import { ChevronLeft, CheckCircle2, Circle, ChevronRight, Lock, BookOpen, Sparkles } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { hasDeepLesson } from '../content/deepLessons';
 import { hasInteractive } from '../interactive/registry';
 import { useProgressStore } from '../stores/progressStore';
 import { Button } from '../components/ui/Button';
-import { TAP_SPRING } from '../utils/motion';
 import { AdvancedLevelTag } from '../components/ui/LevelTag';
 
 export function UnitDetail() {
@@ -56,7 +56,7 @@ export function UnitDetail() {
         <ChevronLeft size={20} strokeWidth={2.4} className="-ml-1.5" /> Units
       </Link>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 24, stiffness: 300 }}>
+      <div>
         {/* Header */}
         <div className="card p-6 mb-6 relative overflow-hidden">
           <div className="flex items-start gap-4">
@@ -109,19 +109,14 @@ export function UnitDetail() {
           {unit.lessons.map((lesson, i) => {
             const done = completedLessons.includes(lesson.id);
             return (
-              <motion.div
-                key={lesson.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.04 }}
-              >
+              <div key={lesson.id}>
                 <Link
                   to={`/unit/${unit.slug}/lesson/${lesson.id}`}
                   className="no-underline block"
                 >
                   <motion.div
                     whileTap={{ scale: 0.98 }}
-                    transition={TAP_SPRING}
+                    transition={TAP_TRANSITION}
                     className="inset-row transition-colors hover:bg-[var(--bg-card-hover)]"
                     style={i > 0 ? { borderTop: '0.5px solid var(--hairline)' } : undefined}
                   >
@@ -147,11 +142,11 @@ export function UnitDetail() {
                     </div>
                   </motion.div>
                 </Link>
-              </motion.div>
+              </div>
             );
           })}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

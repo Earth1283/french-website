@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TAP_TRANSITION, NO_OVERSHOOT_SPRING, REWARD_SPRING, REVEAL, COLLAPSE } from '../utils/motion';
 import {
   ChevronLeft, ArrowUp, Eye, EyeOff, RefreshCw, CheckCircle2, XCircle,
   Bot, Key, ChevronDown, ChevronUp,
@@ -8,7 +9,6 @@ import { SCENARIOS } from '../data/scenarios';
 import { useConversationStore } from '../stores/conversationStore';
 import { Button } from '../components/ui/Button';
 import type { Scenario, Difficulty } from '../types';
-import { TAP_SPRING } from '../utils/motion';
 import { callGemini } from '../lib/gemini';
 
 interface ChatMessage {
@@ -168,7 +168,7 @@ export function Conversation() {
   if (view === 'picker') {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <h1 className="text-3xl font-bold text-primary mb-1">Conversation Mode</h1>
           <p className="text-secondary mb-6">
             Practice real French conversations. Pick a scenario and survive.
@@ -191,7 +191,7 @@ export function Conversation() {
                       layoutId="conversation-difficulty-seg"
                       className="absolute inset-0 rounded-[10px]"
                       style={{ backgroundColor: 'var(--bg-card)', boxShadow: 'var(--shadow-1)', zIndex: 0 }}
-                      transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+                      transition={NO_OVERSHOOT_SPRING}
                     />
                   )}
                   <span style={{ position: 'relative', zIndex: 1 }}>
@@ -229,13 +229,11 @@ export function Conversation() {
 
           {/* Scenario cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {SCENARIOS.map((s, i) => (
+            {SCENARIOS.map(s => (
               <motion.button
                 key={s.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                transition={TAP_TRANSITION}
                 whileTap={{ scale: 0.97 }}
-                transition={{ delay: i * 0.06, type: 'spring', damping: 24, stiffness: 300 }}
                 onClick={() => startScenario(s)}
                 className="card card-lift p-5 text-left w-full group cursor-pointer"
               >
@@ -307,8 +305,7 @@ export function Conversation() {
 
             {showKeySection && (
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
+                {...COLLAPSE}
                 className="p-4 space-y-3"
                 style={{ borderTop: '0.5px solid var(--hairline)' }}
               >
@@ -348,7 +345,7 @@ export function Conversation() {
               </motion.div>
             )}
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -359,26 +356,23 @@ export function Conversation() {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
         <motion.div
-          initial={{ scale: 0.9, rotate: -15 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', damping: 14, stiffness: 280 }}
+          initial={{ scale: 0.6 }}
+          animate={{ scale: 1 }}
+          transition={REWARD_SPRING}
           className="text-6xl mb-5"
         >
           {missionSuccess ? '🎉' : '💪'}
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <div>
           <h2 className="text-3xl font-bold text-primary mb-1 font-display">
             {missionSuccess ? 'Mission accomplie !' : 'Bonne tentative !'}
           </h2>
           <p className="text-secondary">
             You had {exchangeCount} exchange{exchangeCount !== 1 ? 's' : ''} with {activeScenario?.npcName}.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+        <div
           className="flex gap-3 justify-center flex-wrap mt-8"
         >
           <Button variant="secondary" onClick={() => startScenario(activeScenario!)}>
@@ -387,7 +381,7 @@ export function Conversation() {
           <Button variant="primary" onClick={() => setView('picker')}>
             New scenario
           </Button>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -442,9 +436,7 @@ export function Conversation() {
           {messages.map((msg, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 10, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: 'spring', damping: 24, stiffness: 360 }}
+              {...REVEAL}
               className={`flex ${msg.role === 'player' ? 'justify-end' : 'justify-start'}`}
             >
               <div className={`max-w-[80%] ${msg.role === 'player' ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
@@ -579,7 +571,7 @@ export function Conversation() {
               <motion.button
                 key={option}
                 whileTap={{ scale: 0.97 }}
-                transition={TAP_SPRING}
+                transition={TAP_TRANSITION}
                 onClick={() => handleOptionClick(option)}
                 className="text-left px-4 py-2.5 text-sm text-primary font-medium font-display cursor-pointer transition-colors hover:bg-[var(--bg-card-hover)]"
                 style={{
@@ -615,7 +607,7 @@ export function Conversation() {
             />
             <motion.button
               whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', damping: 18, stiffness: 500 }}
+              transition={TAP_TRANSITION}
               onClick={handleSubmit}
               disabled={!playerInput.trim() || isLoading}
               aria-label="Send"

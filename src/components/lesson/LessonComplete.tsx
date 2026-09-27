@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { REWARD_SPRING } from '../../utils/motion';
 import { Link } from 'react-router-dom';
 import { Trophy, ArrowRight, Home, RotateCcw, XCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -61,9 +62,9 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
     <div className="w-full max-w-lg mx-auto text-center py-8 space-y-6">
       <div className="relative inline-block">
         <motion.div
-          initial={{ scale: 0.9, rotate: -20 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+          initial={{ scale: 0.6 }}
+          animate={{ scale: 1 }}
+          transition={REWARD_SPRING}
           className="text-6xl"
         >
           🎉
@@ -71,15 +72,15 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
         <Confetti />
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <div>
         <h2 className="text-3xl font-bold text-primary">Lesson Complete!</h2>
         <p className="text-secondary mt-1">You absolute legend.</p>
-      </motion.div>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, type: 'spring', damping: 16, stiffness: 320 }}
+        transition={{ ...REWARD_SPRING, delay: 0.12 }}
         className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xl"
         style={{ backgroundColor: 'var(--gold-light)', color: '#b86a20', boxShadow: 'var(--shadow-1)' }}
       >
@@ -88,10 +89,7 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
       </motion.div>
 
       {newBadges.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+        <div
           className="space-y-2"
         >
           <p className="text-sm font-semibold text-muted">New badges earned:</p>
@@ -113,14 +111,11 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
               </div>
             );
           })}
-        </motion.div>
+        </div>
       )}
 
       {missedItems && missedItems.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+        <div
           className="text-left w-full"
         >
           <p className="section-label" style={{ paddingLeft: 0 }}>
@@ -141,13 +136,10 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+      <div
         className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center"
       >
         <Link to={`/unit/${unitSlug}`} className="flex flex-col">
@@ -165,7 +157,7 @@ export function LessonComplete({ xpEarned, newBadges, unitSlug, nextLessonId, on
             </Button>
           </Link>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

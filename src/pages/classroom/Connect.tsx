@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ExternalLink, ServerCog, ShieldCheck, ArrowRight } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
@@ -42,15 +41,12 @@ export function Connect() {
   if (backendUrl && !certTrusted) {
     return (
       <div className="max-w-xl mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <h1 className="text-3xl font-bold text-primary mb-1">Trust this server</h1>
           <p className="text-secondary text-sm font-display italic">Une seule fois.</p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+        <div
           className="card p-5 mt-6 space-y-4"
         >
           <div className="flex items-start gap-3">
@@ -97,22 +93,19 @@ export function Connect() {
           >
             Use a different server address
           </button>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold text-primary mb-1">Connect to a Class</h1>
         <p className="text-secondary text-sm font-display italic">Votre professeur a l'adresse.</p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
+      <div
         className="card p-5 mt-6 space-y-4"
       >
         <div className="flex items-start gap-3">
@@ -167,7 +160,7 @@ export function Connect() {
             </div>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

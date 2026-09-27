@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion, KeyRound } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
@@ -53,7 +52,7 @@ export function StudentHome() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary mb-1">My Classes</h1>
           <p className="text-secondary text-sm">{profile?.name}</p>
@@ -77,13 +76,13 @@ export function StudentHome() {
             <LogOut size={12} /> Log out
           </button>
         </div>
-      </motion.div>
+      </div>
 
       <Modal open={privacyOpen} onClose={() => setPrivacyOpen(false)} title="Your Data">
         <ClassroomPrivacyNotice />
       </Modal>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-4">
+      <div className="card p-4">
         <div className="flex gap-2">
           <input
             value={joinCode}
@@ -101,15 +100,15 @@ export function StudentHome() {
             {error}
           </p>
         )}
-      </motion.div>
+      </div>
 
       {classes === null && <p className="text-sm text-muted text-center py-8">Loading…</p>}
       {classes?.length === 0 && (
         <p className="text-sm text-muted text-center py-8">Not enrolled in any classes yet — join one above.</p>
       )}
 
-      {classes?.map((cls, i) => (
-        <motion.section key={cls.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * i }}>
+      {classes?.map(cls => (
+        <section key={cls.id}>
           <div className="section-label">{cls.name}</div>
           <div className="inset-group">
             {cls.assignments.length === 0 && <p className="p-4 text-sm text-muted">Nothing assigned yet.</p>}
@@ -141,7 +140,7 @@ export function StudentHome() {
               </Link>
             ))}
           </div>
-        </motion.section>
+        </section>
       ))}
     </div>
   );

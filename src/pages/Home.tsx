@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TAP_TRANSITION, REVEAL, FADE } from '../utils/motion';
 import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
@@ -9,7 +10,6 @@ import { UnitCard } from '../components/home/UnitCard';
 import { OnboardingModal } from '../components/home/OnboardingModal';
 import { A1Banner } from '../components/home/A1Banner';
 import { ProgressBar } from '../components/layout/ProgressBar';
-import { TAP_SPRING } from '../utils/motion';
 import { useHomeInsights } from '../hooks/useHomeInsights';
 import { useLearningPath } from '../hooks/useLearningPath';
 import { PathPanel } from '../components/home/PathPanel';
@@ -51,16 +51,13 @@ export function Home() {
 
       {/* Continue CTA — mobile only, only after starting at least one lesson */}
       {nextUp && onboardingDone && completedLessons.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', damping: 24, stiffness: 300 }}
+        <div
           className="sm:hidden mb-5"
         >
           <Link to={`/unit/${nextUp.unit.slug}/lesson/${nextUp.lesson.id}`} className="no-underline block">
             <motion.div
               whileTap={{ scale: 0.97 }}
-              transition={TAP_SPRING}
+              transition={TAP_TRANSITION}
               className="glass-card p-4 flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -84,18 +81,16 @@ export function Home() {
               </span>
             </motion.div>
           </Link>
-        </motion.div>
+        </div>
       )}
 
       {/* "Up Next" — desktop only; mobile gets the Continue CTA above */}
       {todoItems.length > 0 && onboardingDone && (
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
           className="card hidden sm:block overflow-hidden mb-6"
         >
           <UpNextList items={todoItems} />
-        </motion.div>
+        </div>
       )}
 
       <A1Banner />
@@ -104,9 +99,7 @@ export function Home() {
 
       {/* Streak + XP row */}
       {(streak > 0 || xp > 0) && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        <div
           className="flex items-center gap-2.5 mb-4 flex-wrap"
         >
           {streak > 0 && (
@@ -120,13 +113,13 @@ export function Home() {
             </div>
           )}
           <p className="text-xs text-muted">Keep it up!</p>
-        </motion.div>
+        </div>
       )}
 
       {/* Exam goal — point straight at the listening/writing practice */}
       {preparingForExam && (
         <Link to="/exam" className="no-underline block mb-4">
-          <motion.div whileTap={{ scale: 0.98 }} transition={TAP_SPRING} className="card p-4 flex items-center gap-3">
+          <motion.div whileTap={{ scale: 0.98 }} transition={TAP_TRANSITION} className="card p-4 flex items-center gap-3">
             <span className="text-2xl" aria-hidden>🎓</span>
             <div className="flex-1">
               <p className="text-sm font-semibold text-primary">DELF Prep</p>
@@ -140,11 +133,11 @@ export function Home() {
       {/* Review banner */}
       <AnimatePresence mode="wait">
         {dueCount > 0 ? (
-          <motion.div key="due" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-6">
+          <motion.div key="due" {...REVEAL} className="mb-6">
             <Link to="/review" className="no-underline block">
               <motion.div
                 whileTap={{ scale: 0.98 }}
-                transition={TAP_SPRING}
+                transition={TAP_TRANSITION}
                 className="card card-lift p-4 flex items-center justify-between gap-3"
                 style={{ backgroundColor: 'var(--accent-soft-bg)' }}
               >
@@ -167,7 +160,7 @@ export function Home() {
             </Link>
           </motion.div>
         ) : nextReviewDate && completedLessons.length > 0 ? (
-          <motion.div key="caught-up" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6">
+          <motion.div key="caught-up" {...FADE} className="mb-6">
             <div className="card p-3 flex items-center gap-3 opacity-70">
               <RotateCcw size={14} className="text-muted flex-shrink-0" />
               <p className="text-xs text-muted">
@@ -183,10 +176,7 @@ export function Home() {
 
       {/* Weak spots recommendation */}
       {fixUps.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div
           className="mb-6"
         >
           <div className="card p-4">
@@ -217,14 +207,11 @@ export function Home() {
               ))}
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 24, stiffness: 260 }}
+      <div
         className="mb-10 text-center"
       >
         <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-3">
@@ -246,11 +233,11 @@ export function Home() {
             <ProgressBar value={overallProgress} height={8} />
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Bookmarked lessons */}
       {bookmarkDetails.length > 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8">
+        <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <Bookmark size={13} style={{ color: 'var(--accent)', fill: 'var(--accent)' }} />
             <h2 className="text-xs font-semibold text-muted uppercase tracking-wider">Saved for later</h2>
@@ -267,7 +254,7 @@ export function Home() {
               </Link>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Unit Search */}
@@ -284,11 +271,11 @@ export function Home() {
 
       {/* Unit Grid — grouped by level, or flat filtered results */}
       {(() => {
-        const unitWithMeta = UNITS.map((unit, i) => {
+        const unitWithMeta = UNITS.map(unit => {
           const completedCount = unit.lessons.filter(l => completedLessons.includes(l.id)).length;
           const progress = Math.round((completedCount / unit.lessons.length) * 100);
           const isLocked = unit.id === 'slang' && !unit12Unlocked;
-          return { unit, progress, isLocked, index: i };
+          return { unit, progress, isLocked };
         });
 
         if (searchQuery.trim()) {
@@ -297,8 +284,8 @@ export function Home() {
           );
           return results.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {results.map(({ unit, progress, isLocked, index }) => (
-                <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} testedOut={testedOutUnitIds.has(unit.id)} index={index} />
+              {results.map(({ unit, progress, isLocked }) => (
+                <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} testedOut={testedOutUnitIds.has(unit.id)} />
               ))}
             </div>
           ) : (
@@ -323,8 +310,8 @@ export function Home() {
                 <div key={label}>
                   <p className="section-label">{label}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {units.map(({ unit, progress, isLocked, index }) => (
-                      <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} testedOut={testedOutUnitIds.has(unit.id)} index={index} />
+                    {units.map(({ unit, progress, isLocked }) => (
+                      <UnitCard key={unit.id} unit={unit} progress={progress} isLocked={isLocked} testedOut={testedOutUnitIds.has(unit.id)} />
                     ))}
                   </div>
                 </div>
@@ -334,14 +321,11 @@ export function Home() {
         );
       })()}
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+      <p
         className="text-center text-xs text-muted mt-10"
       >
         All units are skippable. No judgment. Learn what you need.
-      </motion.p>
+      </p>
     </div>
   );
 }

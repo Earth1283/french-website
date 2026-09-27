@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen, BarChart3, Flag, Archive, ArchiveRestore, KeyRound } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
@@ -96,7 +95,7 @@ export function ClassDetail() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <Link
           to="/classes"
           className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
@@ -105,7 +104,7 @@ export function ClassDetail() {
           <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Classes
         </Link>
         <h1 className="text-3xl font-bold text-primary">{cls.name}</h1>
-      </motion.div>
+      </div>
 
       {cls.archived_at && (
         <div
@@ -125,7 +124,7 @@ export function ClassDetail() {
         </div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-5">
+      <div className="card p-5">
         <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Join code — share with students</p>
         <div className="flex items-center gap-2">
           <span
@@ -145,9 +144,9 @@ export function ClassDetail() {
         >
           <RefreshCw size={11} /> Generate a new code (invalidates the old one)
         </button>
-      </motion.div>
+      </div>
 
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <section>
         <div className="section-label">Assignments</div>
         <div className="inset-group">
           {assignments?.length === 0 && (
@@ -219,9 +218,9 @@ export function ClassDetail() {
             )}
           </div>
         </div>
-      </motion.section>
+      </section>
 
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+      <section>
         <div className="section-label">Roster</div>
         <div className="inset-group">
           {roster?.length === 0 && <p className="p-4 text-sm text-muted">No students enrolled yet.</p>}
@@ -282,10 +281,10 @@ export function ClassDetail() {
             </div>
           ))}
         </div>
-      </motion.section>
+      </section>
 
       {!cls.archived_at && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <section>
           {!confirmArchive ? (
             <button
               onClick={() => setConfirmArchive(true)}
@@ -310,7 +309,7 @@ export function ClassDetail() {
               </div>
             </div>
           )}
-        </motion.section>
+        </section>
       )}
     </div>
   );

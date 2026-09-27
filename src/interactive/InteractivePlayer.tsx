@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { REVEAL, STEP_FORWARD } from '../utils/motion';
 import { ArrowRight, ChevronLeft, ChevronRight, Lock, MousePointerClick, Sparkles, Undo2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import type { InteractiveLesson, Role, Scene } from './types';
@@ -100,9 +101,9 @@ export function InteractivePlayer({
       {/* Enter-only transition: an exiting scene left in the DOM would sit on top of the new one and swallow clicks. */}
       <motion.div
         key={scene.id}
-        initial={calm ? false : { opacity: 0, x: 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+        initial={calm ? false : STEP_FORWARD.initial}
+        animate={STEP_FORWARD.animate}
+        transition={STEP_FORWARD.transition}
       >
         <SceneView
           scene={scene}
@@ -206,9 +207,10 @@ function SceneView({ scene, number, total, solved, calm, onSolved }: SceneViewPr
           {seenFrench.has(sentenceIndex) && (
             <motion.div
               key={`aligned-${sentenceIndex}`}
-              initial={calm ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              initial={calm ? false : REVEAL.initial}
+              animate={REVEAL.animate}
+              exit={REVEAL.exit}
+              transition={REVEAL.transition}
             >
               <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--hairline)' }}>
                 <p className="text-xs text-muted inline-flex items-center gap-1.5">

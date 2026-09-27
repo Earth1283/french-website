@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { NO_OVERSHOOT_SPRING } from '../../utils/motion';
 
 export function ToggleSwitch({
   checked,
@@ -23,7 +24,7 @@ export function ToggleSwitch({
         className="absolute top-[2px] left-[2px] w-[27px] h-[27px] bg-white rounded-full"
         style={{ boxShadow: '0 2px 5px rgba(0,0,0,0.2), 0 0.5px 1px rgba(0,0,0,0.1)' }}
         animate={{ x: checked ? 20 : 0 }}
-        transition={{ type: 'spring', damping: 24, stiffness: 420 }}
+        transition={NO_OVERSHOOT_SPRING}
       />
     </button>
   );

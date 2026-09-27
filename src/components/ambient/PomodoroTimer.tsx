@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useAnimationControls } from 'framer-motion';
+import { TAP_TRANSITION, NO_OVERSHOOT_SPRING } from '../../utils/motion';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
 type Mode = 'pomodoro' | 'break' | 'long';
@@ -108,7 +109,7 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
               <motion.span
                 layoutId="pomo-seg"
                 className="absolute inset-0 rounded-full bg-white"
-                transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+                transition={NO_OVERSHOOT_SPRING}
               />
             )}
             <span className="relative z-10">{m.label}</span>
@@ -152,6 +153,7 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
       <div className="flex items-center gap-3">
         <motion.button
           whileTap={{ scale: 0.92 }}
+          transition={TAP_TRANSITION}
           onClick={() => (secondsLeft === 0 ? reset() : setRunning(r => !r))}
           className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-neutral-900 shadow-lg"
           aria-label={running ? 'Pause' : 'Start'}
@@ -160,6 +162,7 @@ export function PomodoroTimer({ onComplete }: { onComplete?: () => void }) {
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.92 }}
+          transition={TAP_TRANSITION}
           onClick={reset}
           className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/85 backdrop-blur-md"
           aria-label="Reset"

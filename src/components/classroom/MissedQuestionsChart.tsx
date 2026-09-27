@@ -54,7 +54,7 @@ export function MissedQuestionsChart({ questions }: MissedQuestionsChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 36, bottom: 4, left: 4 }} barCategoryGap={10}>
+      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 52, bottom: 4, left: 4 }} barCategoryGap={10}>
         <CartesianGrid horizontal={false} stroke="var(--hairline)" />
         <XAxis
           type="number"

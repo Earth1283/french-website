@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ChevronLeft, KeyRound, Check, ShieldAlert } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
@@ -63,7 +62,7 @@ export function AccountSettings() {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <Link
           to="/classes"
           className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
@@ -73,9 +72,9 @@ export function AccountSettings() {
         </Link>
         <h1 className="text-3xl font-bold text-primary mb-1">Account</h1>
         <p className="text-secondary text-sm">{profile?.name} · {profile?.email}</p>
-      </motion.div>
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
+      <div className="inset-group">
         <div className="p-4 space-y-3">
           <p className="text-sm font-semibold text-primary flex items-center gap-2">
             <KeyRound size={14} style={{ color: 'var(--accent)' }} /> Change Password
@@ -125,9 +124,9 @@ export function AccountSettings() {
               : " Lost that too? The server's README explains the recovery script you can run on the machine it's hosted on."}
           </p>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="inset-group">
+      <div className="inset-group">
         <div className="p-4 space-y-3">
           <p className="text-sm font-semibold text-primary flex items-center gap-2">
             <ShieldAlert size={14} style={{ color: '#f59e0b' }} /> Recovery Code
@@ -179,7 +178,7 @@ export function AccountSettings() {
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

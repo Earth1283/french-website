@@ -4,7 +4,6 @@ import { Button } from '../../components/ui/Button';
 import { RUBRIC_CRITERIA } from '../../data/exam/rubric';
 import type { DelfLevel, RubricBand, RubricCriterionId } from '../../types/exam';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ChevronLeft, Flag, Check } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { MissedQuestionsChart } from '../../components/classroom/MissedQuestionsChart';
@@ -118,7 +117,7 @@ export function AssignmentResults() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <Link
           to={`/classes/${classId}`}
           className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
@@ -127,10 +126,10 @@ export function AssignmentResults() {
           <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Class
         </Link>
         <h1 className="text-3xl font-bold text-primary">{content?.title ?? 'Results'}</h1>
-      </motion.div>
+      </div>
 
       {writingLevel ? (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <section>
           <div className="section-label">
             Submissions · {submissions.filter(s => !s.reviewedAt).length} to mark
           </div>
@@ -140,17 +139,17 @@ export function AssignmentResults() {
               <SubmissionReview key={`${s.attemptId}-${s.reviewedAt ?? ''}-${s.submittedAt}`} submission={s} level={writingLevel} onSaved={load} />
             ))}
           </div>
-        </motion.section>
+        </section>
       ) : (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <section>
           <div className="section-label">Most missed questions</div>
           <div className="card p-4">
             <MissedQuestionsChart questions={questions} />
           </div>
-        </motion.section>
+        </section>
       )}
 
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <section>
         <div className="section-label">Flagged by students</div>
         <div className="inset-group">
           {unresolvedFirst.length === 0 && <p className="p-4 text-sm text-muted">No flags on this assignment.</p>}
@@ -189,7 +188,7 @@ export function AssignmentResults() {
             );
           })}
         </div>
-      </motion.section>
+      </section>
     </div>
   );
 }

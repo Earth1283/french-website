@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ChevronRight, Headphones, PenLine, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { LISTENING_DOCS } from '../../data/exam/listening';
 import { WRITING_TASKS } from '../../data/exam/writing';
@@ -50,13 +49,13 @@ export function ExamHub() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold text-primary">DELF Prep</h1>
         <p className="text-secondary mt-1 text-sm">
           Listening and writing practice in the format of the DELF tout public papers. Everything here is original material
           written to the official task types and marked with the current grid.
         </p>
-      </motion.div>
+      </div>
 
       <div className="seg-control" role="tablist" aria-label="DELF level">
         {LEVELS.map(l => (

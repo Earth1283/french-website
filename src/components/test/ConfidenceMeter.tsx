@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { FILL_TRANSITION } from '../../utils/motion';
 import { SE_STOP_THRESHOLD } from '../../utils/irt';
 
 interface ConfidenceMeterProps {
@@ -22,7 +23,7 @@ export function ConfidenceMeter({ se, questionNumber }: ConfidenceMeterProps) {
           className="h-full rounded-full"
           style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
           animate={{ scaleX: confidence }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={FILL_TRANSITION}
         />
       </div>
       <span className="text-xs text-muted whitespace-nowrap">

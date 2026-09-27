@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BookOpen, MessageSquare, User, Settings, Timer, Gauge, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { TAP_TRANSITION, NO_OVERSHOOT_SPRING } from '../../utils/motion';
 import { useProgressStore } from '../../stores/progressStore';
-import { TAP_SPRING } from '../../utils/motion';
 import { isNavActive } from '../../utils/navMatch';
 
 const NAV_ITEMS = [
@@ -15,8 +15,6 @@ const NAV_ITEMS = [
   { to: '/profile', icon: User, label: 'Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
-
-const POP_SPRING = { type: 'spring', damping: 12, stiffness: 420 } as const;
 
 export function BottomNav() {
   const { pathname } = useLocation();
@@ -73,7 +71,7 @@ export function BottomNav() {
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
           const active = isNavActive(pathname, to);
           return (
-            <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_SPRING}>
+            <motion.div key={to} whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION}>
               <Link
                 to={to}
                 aria-label={label}
@@ -89,20 +87,15 @@ export function BottomNav() {
                 {active && (
                   <motion.span
                     layoutId="bottom-nav-bubble"
+                    layoutDependency={to}
                     className="absolute inset-0 rounded-full"
                     style={{ backgroundColor: 'var(--accent-tint)', zIndex: 0 }}
-                    transition={{ type: 'spring', damping: 22, stiffness: 380 }}
+                    transition={NO_OVERSHOOT_SPRING}
                   />
                 )}
-                <motion.span
-                  key={to}
-                  animate={{ scale: active ? [0.68, 1] : 1 }}
-                  transition={POP_SPRING}
-                  className="relative flex"
-                  style={{ zIndex: 10 }}
-                >
+                <span className="relative flex" style={{ zIndex: 10 }}>
                   <Icon size={20} strokeWidth={active ? 2.2 : 1.5} />
-                </motion.span>
+                </span>
                 <span
                   className="relative text-[9px] font-semibold leading-none"
                   style={{ zIndex: 10 }}

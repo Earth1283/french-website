@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useNavigationType } from 'react-router-dom';
+import { REVEAL } from '../../utils/motion';
 import type { ReactNode } from 'react';
 
 interface PageTransitionProps {
@@ -7,19 +7,10 @@ interface PageTransitionProps {
   keyProp: string;
 }
 
-// iOS push/pop: forward navigations slide in from the right with a spring,
-// back navigations from the left. Entrance only — an exit-wait deadlocks on rapid navigation.
+// Entrance only — waiting on an exit deadlocks rapid navigation.
 export function PageTransition({ children, keyProp }: PageTransitionProps) {
-  const navType = useNavigationType();
-  const x = navType === 'POP' ? -32 : 32;
-
   return (
-    <motion.div
-      key={keyProp}
-      initial={{ opacity: 0, x }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ type: 'spring', damping: 26, stiffness: 280, mass: 0.9 }}
-    >
+    <motion.div key={keyProp} initial={REVEAL.initial} animate={REVEAL.animate} transition={REVEAL.transition}>
       {children}
     </motion.div>
   );

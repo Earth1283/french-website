@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { STEP_FORWARD } from '../../utils/motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowRight, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -65,10 +66,7 @@ export function DeepLessonReader({ pages, accentColor, onComplete, completeLabel
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={pageIndex}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -24 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          {...STEP_FORWARD}
         >
           {page.title && (
             <h2 className="font-display text-2xl sm:text-3xl font-bold mb-5" style={{ color: 'var(--text-primary)' }}>

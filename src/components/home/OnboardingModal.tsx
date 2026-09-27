@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { REVEAL, STEP_FORWARD } from '../../utils/motion';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { FrenchFlag } from '../ui/FrenchFlag';
@@ -20,9 +21,7 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
       {step === 'personalize' ? (
         <motion.div
           key="personalize"
-          initial={{ opacity: 0, x: 16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
+          {...STEP_FORWARD}
         >
           <h2 className="text-xl font-bold text-primary mb-1 font-display">Make it yours</h2>
           <p className="text-xs text-muted mb-5">
@@ -32,9 +31,7 @@ export function OnboardingModal({ open }: OnboardingModalProps) {
         </motion.div>
       ) : (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
+          {...REVEAL}
         >
           <div className="text-center mb-5">
             <div className="mb-3 flex justify-center">

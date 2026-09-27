@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { REVEAL } from '../../utils/motion';
 import { Volume2 } from 'lucide-react';
 import { phraseOfDay } from '../../data/phrases';
 import { speak } from '../../utils/speech';
@@ -9,9 +10,8 @@ export function PhraseOfDay() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35, type: 'spring', damping: 24, stiffness: 220 }}
+      {...REVEAL}
+      transition={{ ...REVEAL.transition, delay: 0.12 }}
       className="mx-auto max-w-md text-center text-white"
     >
       <p className="mb-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/45">

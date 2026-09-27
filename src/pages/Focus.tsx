@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BASE_TRANSITION, REVEAL } from '../utils/motion';
 import { X, Volume2 } from 'lucide-react';
 import { Backdrop } from '../components/ambient/Backdrop';
 import { AmbientClock } from '../components/ambient/AmbientClock';
@@ -65,7 +66,7 @@ export function Focus() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.4 }}
+            transition={BASE_TRANSITION}
             className="flex flex-col items-center"
           >
             <div className="flex items-center gap-2">
@@ -88,10 +89,7 @@ export function Focus() {
       <AnimatePresence>
         {reward && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 320 }}
+            {...REVEAL}
             className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 shadow-xl"
           >
             🎉 {reward}

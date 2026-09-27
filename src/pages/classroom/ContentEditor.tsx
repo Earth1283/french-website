@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ChevronLeft, Plus, Trash2, Save, Eye, Pencil } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -184,7 +183,7 @@ export function ContentEditor() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <Link
           to="/classes"
           className="inline-flex items-center gap-0.5 text-sm font-medium mb-3 no-underline"
@@ -193,9 +192,9 @@ export function ContentEditor() {
           <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Classes
         </Link>
         <h1 className="text-3xl font-bold text-primary">{isEditing ? 'Edit Content' : 'New Content'}</h1>
-      </motion.div>
+      </div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="inset-group">
+      <div className="inset-group">
         <div className="p-4 space-y-3">
           <div className="seg-control">
             {KINDS.map((k) => (
@@ -229,10 +228,10 @@ export function ContentEditor() {
             </label>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {kind === 'lesson' && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <section>
           <div className="section-label">Vocabulary</div>
           <div className="inset-group">
             {vocab.map((v, i) => (
@@ -273,23 +272,23 @@ export function ContentEditor() {
               </Button>
             </div>
           </div>
-        </motion.section>
+        </section>
       )}
 
       {kind === 'listening' && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <div>
           <ListeningEditor value={listening} onChange={setListening} onImportTitle={(t) => { if (!title.trim()) setTitle(t); }} />
-        </motion.div>
+        </div>
       )}
 
       {kind === 'writing' && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <div>
           <WritingEditor value={writing} onChange={setWriting} onImportTitle={(t) => { if (!title.trim()) setTitle(t); }} />
-        </motion.div>
+        </div>
       )}
 
       {(kind === 'lesson' || kind === 'quiz') && (
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+      <section>
         <div className="section-label">{kind === 'lesson' ? 'Exercises' : 'Questions'}</div>
         <div className="inset-group">
           {exercises.map((ex, i) => (
@@ -351,11 +350,11 @@ export function ContentEditor() {
             </Button>
           </div>
         </div>
-      </motion.section>
+      </section>
       )}
 
       {kind === 'reading' && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <section>
           <div className="flex items-center justify-between mb-1">
             <div className="section-label !mb-0">Pages</div>
             <button
@@ -408,7 +407,7 @@ export function ContentEditor() {
               <Plus size={14} /> Add page
             </Button>
           </div>
-        </motion.section>
+        </section>
       )}
 
       {error && (

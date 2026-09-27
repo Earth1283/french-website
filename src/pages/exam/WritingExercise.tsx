@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { REVEAL } from '../../utils/motion';
 import { ChevronLeft, ChevronDown, Sparkles, PenLine, AlertTriangle, BookOpenCheck } from 'lucide-react';
 import { getWritingTask } from '../../data/exam/writing';
 import { RUBRIC_CRITERIA, buildEvaluation, countWords, toOutOf25 } from '../../data/exam/rubric';
@@ -186,7 +187,7 @@ export function WritingExercise() {
       )}
 
       {phase === 'result' && shown && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <motion.div {...REVEAL} className="space-y-4">
           {error && (
             <div className="card p-3 flex items-start gap-2">
               <AlertTriangle size={16} style={{ color: 'var(--danger)', flexShrink: 0 }} />

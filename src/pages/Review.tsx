@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TAP_TRANSITION, FILL_TRANSITION, REVEAL, STEP_FORWARD } from '../utils/motion';
 import { ChevronLeft, Volume2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react';
 import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
@@ -8,7 +9,6 @@ import { buildReviewSession } from '../utils/reviewQueue';
 import { speak } from '../utils/speech';
 import { Button } from '../components/ui/Button';
 import type { VocabItem } from '../types';
-import { TAP_SPRING } from '../utils/motion';
 
 interface ReviewCard extends VocabItem {
   key: string;
@@ -115,7 +115,7 @@ export function Review() {
   if (deck.length === 0) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 22, stiffness: 300 }} className="space-y-5">
+        <div className="space-y-5">
           <div className="text-5xl">✅</div>
           <h1 className="text-2xl font-bold text-primary">All caught up!</h1>
           <p className="text-secondary">
@@ -153,7 +153,7 @@ export function Review() {
           <Link to="/learn" className="inline-block">
             <Button variant="tinted">Back to Home</Button>
           </Link>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function Review() {
     const pct = total > 0 ? Math.round((tally.correct / total) * 100) : 0;
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', damping: 18, stiffness: 280 }} className="space-y-4">
+        <motion.div {...REVEAL} className="space-y-4">
           <div className="text-5xl">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
           <h1 className="text-2xl font-bold text-primary">Session complete!</h1>
           <p className="text-secondary">
@@ -209,7 +209,7 @@ export function Review() {
               className="h-full rounded-full"
               style={{ backgroundColor: 'var(--accent)', width: '100%', transformOrigin: 'left' }}
               animate={{ scaleX: idx / queue.length }}
-              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
+              transition={FILL_TRANSITION}
             />
           </div>
         </div>
@@ -219,15 +219,12 @@ export function Review() {
         {showing === 'front' ? (
           <motion.div
             key={`front-${idx}`}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            {...STEP_FORWARD}
             className="space-y-4"
           >
             <motion.div
               whileTap={{ scale: 0.98 }}
-              transition={TAP_SPRING}
+              transition={TAP_TRANSITION}
               className="card p-8 text-center min-h-[240px] flex flex-col items-center justify-center gap-3 cursor-pointer select-none"
               style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
               onClick={handleReveal}
@@ -254,7 +251,7 @@ export function Review() {
             <motion.button
               onClick={handleReveal}
               whileTap={{ scale: 0.97 }}
-              transition={TAP_SPRING}
+              transition={TAP_TRANSITION}
               className="w-full py-3.5 text-sm font-medium text-muted rounded-2xl cursor-pointer transition-colors hover:text-primary"
               style={{ border: '1.5px dashed var(--border)', background: 'transparent' }}
             >
@@ -264,10 +261,7 @@ export function Review() {
         ) : (
           <motion.div
             key={`back-${idx}`}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            {...REVEAL}
             className="space-y-4"
           >
             <div
@@ -294,7 +288,7 @@ export function Review() {
             <div className="grid grid-cols-2 gap-3">
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                transition={TAP_SPRING}
+                transition={TAP_TRANSITION}
                 onClick={() => handleRate(false)}
                 className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
                 style={{
@@ -307,7 +301,7 @@ export function Review() {
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                transition={TAP_SPRING}
+                transition={TAP_TRANSITION}
                 onClick={() => handleRate(true)}
                 className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold cursor-pointer"
                 style={{

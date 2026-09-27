@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TAP_TRANSITION, NO_OVERSHOOT_SPRING, REVEAL, FADE, COLLAPSE } from '../utils/motion';
 import {
   Palette, BookOpen, MessageSquare, Database, AlertTriangle,
   ChevronDown, ChevronUp, Key, Download, Upload, RotateCcw, RefreshCw, Route,
@@ -65,15 +66,13 @@ export function Settings() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-7">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold text-primary mb-1">Settings</h1>
         <p className="text-secondary text-sm font-display italic">Personnalisez votre expérience.</p>
-      </motion.div>
+      </div>
 
       {/* ── Appearance ── */}
-      <motion.section
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-      >
+      <section>
         <GroupLabel icon={<Palette size={12} />} title="Appearance" />
         <div className="inset-group">
           <SettingRow label="Dark Mode" description="Easy on the eyes at night.">
@@ -90,7 +89,7 @@ export function Settings() {
                 <motion.button
                   key={hex}
                   whileTap={{ scale: 0.97 }}
-                  transition={{ type: 'spring', damping: 18, stiffness: 500 }}
+                  transition={TAP_TRANSITION}
                   title={label}
                   onClick={() => setAccentColor(hex)}
                   aria-label={`Set accent to ${label}`}
@@ -128,12 +127,10 @@ export function Settings() {
             </SettingRow>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* ── Learning ── */}
-      <motion.section
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-      >
+      <section>
         <GroupLabel icon={<BookOpen size={12} />} title="Learning" />
         <div className="inset-group p-4">
           <p className="text-sm font-semibold text-primary mb-0.5">Unit 12 Access (Slang & Swearing)</p>
@@ -184,12 +181,10 @@ export function Settings() {
             </p>
           )}
         </div>
-      </motion.section>
+      </section>
 
       {/* ── Conversation AI ── */}
-      <motion.section
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-      >
+      <section>
         <GroupLabel icon={<MessageSquare size={12} />} title="Conversation AI" />
         <div className="inset-group">
           <div className="p-4">
@@ -208,7 +203,7 @@ export function Settings() {
                       layoutId="settings-difficulty-seg"
                       className="absolute inset-0 rounded-[10px]"
                       style={{ backgroundColor: 'var(--bg-card)', boxShadow: 'var(--shadow-1)', zIndex: 0 }}
-                      transition={{ type: 'spring', damping: 26, stiffness: 380 }}
+                      transition={NO_OVERSHOOT_SPRING}
                     />
                   )}
                   <span style={{ position: 'relative', zIndex: 1 }}>
@@ -261,11 +256,9 @@ export function Settings() {
             )}
           </div>
         </div>
-      </motion.section>
+      </section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-      >
+      <section>
         <GroupLabel icon={<Route size={12} />} title="Learning Path" />
         <div className="inset-group">
           <div className="inset-row justify-between">
@@ -302,12 +295,10 @@ export function Settings() {
             </div>
           )}
         </div>
-      </motion.section>
+      </section>
 
       {/* ── Data & Privacy ── */}
-      <motion.section
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-      >
+      <section>
         <GroupLabel icon={<Database size={12} />} title="Data & Privacy" />
         <div className="inset-group">
           <div className="inset-row justify-between">
@@ -348,16 +339,15 @@ export function Settings() {
             <p className="text-xs text-muted">v0.1.0</p>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* ── Danger Zone ── */}
-      <motion.section
+      <section
         className="overflow-hidden"
         style={{
           borderRadius: 'var(--radius)',
           border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
         }}
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
       >
         <button
           onClick={() => setDangerOpen(v => !v)}
@@ -381,10 +371,7 @@ export function Settings() {
           {dangerOpen && (
             <motion.div
               key="danger-body"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              {...COLLAPSE}
               className="overflow-hidden"
             >
               <div className="p-5 space-y-6" style={{ backgroundColor: 'var(--bg-card)' }}>
@@ -433,10 +420,7 @@ export function Settings() {
                     {!confirmOnboarding ? (
                       <motion.button
                         key="trigger"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
+                        {...FADE}
                         onClick={() => setConfirmOnboarding(true)}
                         className="flex items-center gap-2 text-sm cursor-pointer hover:underline"
                         style={{ color: '#ea7317', background: 'transparent', border: 'none' }}
@@ -446,10 +430,7 @@ export function Settings() {
                     ) : (
                       <motion.div
                         key="confirm"
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                        {...REVEAL}
                         className="space-y-3"
                       >
                         <p className="text-sm text-primary">
@@ -482,10 +463,7 @@ export function Settings() {
                     {!confirmReset ? (
                       <motion.button
                         key="trigger"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
+                        {...FADE}
                         onClick={() => setConfirmReset(true)}
                         className="flex items-center gap-2 text-sm cursor-pointer hover:underline"
                         style={{ color: 'var(--danger)', background: 'transparent', border: 'none' }}
@@ -495,10 +473,7 @@ export function Settings() {
                     ) : (
                       <motion.div
                         key="confirm"
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                        {...REVEAL}
                         className="p-4 space-y-3"
                         style={{
                           borderRadius: 'var(--radius-sm)',
@@ -529,7 +504,7 @@ export function Settings() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.section>
+      </section>
 
       <div className="h-4" />
 
