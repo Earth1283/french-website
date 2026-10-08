@@ -63,6 +63,21 @@ export const foodLessons: Lesson[] = [
         answer: 'La carte, s\'il vous plaît',
         options: ['Le menu, s\'il vous plaît', 'La carte, s\'il vous plaît', 'La liste', 'Les options'],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Un café au ___, s\'il vous plaît (coffee with milk)',
+        answer: 'lait',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'C\'est ___ ! (It\'s delicious!)',
+        answer: 'délicieux',
+      },
+      {
+        type: 'translation',
+        prompt: 'Ask for a croissant, please',
+        answer: 'un croissant, s\'il vous plaît',
+      },
     ],
   },
   {
@@ -129,6 +144,22 @@ export const foodLessons: Lesson[] = [
         answer: 'carafe',
         hint: 'The container that holds the water',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you say "I\'m allergic to nuts"?',
+        answer: 'Je suis allergique aux noix',
+        options: ['Je suis allergique aux noix', 'J\'ai allergique aux noix', 'Je suis allergie aux noix', 'Je suis allergique de noix'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'C\'est trop ___ ! (It\'s too salty!)',
+        answer: 'salé',
+      },
+      {
+        type: 'translation',
+        prompt: 'Ask the waiter "What do you recommend?"',
+        answer: 'Qu\'est-ce que vous recommandez ?',
+      },
     ],
   },
   {
@@ -174,6 +205,27 @@ export const foodLessons: Lesson[] = [
         prompt: 'How do you ask "How much is it?"',
         answer: "C'est combien ?",
         hint: 'It literally means "It\'s how much?"',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'What is a "pain au chocolat"?',
+        answer: 'A flaky pastry with chocolate inside',
+        options: ['A chocolate bar', 'A flaky pastry with chocolate inside', 'Bread with chocolate spread', 'A hot chocolate drink'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Une baguette, s\'il vous ___ (a baguette, please)',
+        answer: 'plaît',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Un pain au ___ (a chocolate croissant)',
+        answer: 'chocolat',
+      },
+      {
+        type: 'translation',
+        prompt: 'Ask for a baguette, please',
+        answer: 'une baguette, s\'il vous plaît',
       },
     ],
   },

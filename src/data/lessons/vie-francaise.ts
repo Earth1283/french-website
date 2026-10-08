@@ -85,6 +85,21 @@ export const vieFrancaiseLessons: Lesson[] = [
           'A sign you added too much water',
         ],
       },
+      {
+        type: 'fill-blank',
+        prompt: '___ ! (Cheers! Informal)',
+        answer: 'Santé',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Un ___ is white wine with blackcurrant liqueur',
+        answer: 'kir',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "To your health!" (formal)',
+        answer: 'À votre santé !',
+      },
     ],
   },
   {
@@ -171,6 +186,21 @@ export const vieFrancaiseLessons: Lesson[] = [
           'A wine classification system',
         ],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Le ___ is the cheese seller',
+        answer: 'fromager',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Les fraises sont ___ saison (Strawberries are in season)',
+        answer: 'de',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Please don\'t touch"',
+        answer: 'Ne touchez pas, s\'il vous plaît',
+      },
     ],
   },
   {
@@ -250,6 +280,21 @@ export const vieFrancaiseLessons: Lesson[] = [
           'Window shopping without buying',
           'Getting lost in a foreign city',
         ],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Une ___ is a café terrace',
+        answer: 'terrasse',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Se ___ means "to stroll around"',
+        answer: 'balader',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "I\'ll just have a coffee"',
+        answer: 'Je prends juste un café',
       },
     ],
   },

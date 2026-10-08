@@ -62,6 +62,22 @@ export const shoppingLessons: Lesson[] = [
         answer: 'essayer',
         hint: 'The verb "to try on"',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'You love the shirt and want to buy it. What do you say?',
+        answer: 'Je vais le prendre',
+        options: ['Je vais le prendre', 'Je cherche une chemise', 'C\'est trop petit', 'Ce n\'est pas ce que je cherche'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'C\'est trop ___ (It\'s too small)',
+        answer: 'petit',
+      },
+      {
+        type: 'translation',
+        prompt: 'Ask "Do you have this in size 40?"',
+        answer: 'Avez-vous ça en taille 40 ?',
+      },
     ],
   },
   {
@@ -117,6 +133,27 @@ export const shoppingLessons: Lesson[] = [
         prompt: 'What is a "pharmacie" identified by?',
         answer: 'A green cross',
         options: ['A red cross', 'A green cross', 'A blue circle', 'A white snake'],
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'What is "une ordonnance"?',
+        answer: 'A prescription',
+        options: ['A prescription', 'A pharmacy', 'An ointment', 'A fever'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'J\'ai de la ___ (I have a fever)',
+        answer: 'fièvre',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Avez-vous de l\'___ ? (Do you have aspirin?)',
+        answer: 'aspirine',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "I need aspirin"',
+        answer: 'J\'ai besoin d\'aspirine',
       },
     ],
   },

@@ -70,6 +70,22 @@ export const trainsLessons: Lesson[] = [
         answer: 'Un aller simple pour Paris, s\'il vous plaît',
         hint: 'Un aller simple pour [city]',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'What is "le guichet"?',
+        answer: 'The ticket counter',
+        options: ['The platform', 'The ticket counter', 'The ticket inspector', 'The departures board'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'En quelle ___ ? (Which class?)',
+        answer: 'classe',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "to validate your ticket" (use "votre")?',
+        answer: 'composter votre billet',
+      },
     ],
   },
   {
@@ -145,6 +161,21 @@ export const trainsLessons: Lesson[] = [
         prompt: 'How do you say "I have a connection in Lyon"?',
         answer: 'J\'ai une correspondance à Lyon',
         hint: '"J\'ai une correspondance à..."',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Le train est en ___ (The train is late)',
+        answer: 'retard',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Le train part du ___ numéro 5 (platform 5)',
+        answer: 'quai',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "the connection"',
+        answer: 'la correspondance',
       },
     ],
   },

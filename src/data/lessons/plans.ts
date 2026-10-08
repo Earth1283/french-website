@@ -64,6 +64,22 @@ export const plansLessons: Lesson[] = [
         answer: 'demie',
         hint: 'Half = demie',
       },
+      {
+        type: 'multiple-choice',
+        prompt: '"Il est six heures et quart" means:',
+        answer: 'It\'s quarter past six',
+        options: ['It\'s quarter to six', 'It\'s quarter past six', 'It\'s half past six', 'It\'s six o\'clock sharp'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il est deux heures ___ le quart (quarter to two)',
+        answer: 'moins',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "It\'s midnight"',
+        answer: 'il est minuit',
+      },
     ],
   },
   {
@@ -137,6 +153,22 @@ export const plansLessons: Lesson[] = [
         answer: 'retrouve',
         hint: 'Se retrouver = to meet up',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you say "next week"?',
+        answer: 'la semaine prochaine',
+        options: ['la semaine dernière', 'la semaine prochaine', 'cette semaine', 'chaque semaine'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Je suis ___ à 18 heures (I\'m free at 6pm)',
+        answer: 'libre',
+      },
+      {
+        type: 'translation',
+        prompt: 'Ask "Does that work for you?" (formal)',
+        answer: 'Ça vous convient ?',
+      },
     ],
   },
   {
@@ -202,6 +234,22 @@ export const plansLessons: Lesson[] = [
         prompt: 'Je ___ réserver une chambre. (I\'d like to book a room)',
         answer: 'voudrais',
         hint: 'Conditional of vouloir',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'The restaurant asks "Pour combien de personnes ?" What do they want to know?',
+        answer: 'How many people the booking is for',
+        options: ['Your name', 'How many people the booking is for', 'What time you will arrive', 'Your phone number'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Je voudrais ___ la réservation (I\'d like to cancel the booking)',
+        answer: 'annuler',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "It\'s under the name of Dupont"',
+        answer: 'C\'est au nom de Dupont',
       },
     ],
   },

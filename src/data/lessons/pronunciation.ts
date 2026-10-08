@@ -63,6 +63,22 @@ export const pronunciationLessons: Lesson[] = [
         answer: 'Bon',
         hint: 'The nasal bɔ̃ sound',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'The "é" in "café" is a ___ "e" sound (closed or open?)',
+        answer: 'closed',
+        hint: 'é is sharp and bright; è is the open one',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The French word for "two", which rhymes with "feu", is "___"',
+        answer: 'deux',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "summer" in French? (an é on both sides of a t)',
+        answer: 'été',
+      },
     ],
   },
   {
@@ -114,6 +130,21 @@ export const pronunciationLessons: Lesson[] = [
         prompt: 'How do you say "a lot" in French? (the P at the end is silent)',
         answer: 'beaucoup',
         hint: 'bo-koo',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The "h" in "hôtel" is always ___ (silent or pronounced?)',
+        answer: 'silent',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The word "trop" (too much) ends with a silent ___',
+        answer: 'p',
+      },
+      {
+        type: 'translation',
+        prompt: 'Spell the French word for "hour" (it starts with a silent h)',
+        answer: 'heure',
       },
     ],
   },
@@ -172,6 +203,22 @@ export const pronunciationLessons: Lesson[] = [
         prompt: '"de + le marché" contracts to?',
         answer: 'du marché',
         options: ['de le marché', 'du marché', 'del marché', 'des marché'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'à + le cinéma contracts to "___ cinéma"',
+        answer: 'au',
+      },
+      {
+        type: 'fill-blank',
+        prompt: '"You have" is "vous ___", with the s linking to the next word as a "z"',
+        answer: 'avez',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "a friend" (male)?',
+        answer: 'un ami',
+        hint: 'Un + ami: the n links to the vowel',
       },
     ],
   },

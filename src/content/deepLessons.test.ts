@@ -10,6 +10,20 @@ const expandedLessons = [
   ['numbers', 'numbers-2'],
   ['grammar', 'grammar-2'],
   ['grammar', 'grammar-3'],
+  ['pronunciation', 'pronunciation-2'],
+  ['pronunciation', 'pronunciation-3'],
+  ['grammar', 'grammar-1'],
+  ['identity', 'identity-1'],
+  ['identity', 'identity-2'],
+  ['identity', 'identity-3'],
+  ['plans', 'plans-1'],
+  ['weather', 'weather-1'],
+  ['medical', 'medical-1'],
+  ['culture', 'culture-2'],
+  ['vie-francaise', 'vie-francaise-2'],
+  ['false-friends', 'false-friends-1'],
+  ['slang', 'slang-2'],
+  ['trains', 'trains-1'],
 ] as const;
 
 describe('built-in deep lesson curriculum', () => {

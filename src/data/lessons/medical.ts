@@ -94,6 +94,11 @@ export const medicalLessons: Lesson[] = [
         answer: "J'ai de la fièvre",
         hint: '"J\'ai de la" + fièvre. Mind the accents.',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Je ___ (I\'m vomiting)',
+        answer: 'vomis',
+      },
     ],
   },
   {
@@ -197,6 +202,11 @@ export const medicalLessons: Lesson[] = [
         answer: 'A glowing green cross',
         options: ['A red cross sign', 'A glowing green cross', 'A blue shield', 'A white snake symbol'],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Je dois prendre un ___ (I have to take a medicine)',
+        answer: 'médicament',
+      },
     ],
   },
   {
@@ -296,6 +306,11 @@ export const medicalLessons: Lesson[] = [
         prompt: '"J\'ai perdu connaissance" means:',
         answer: 'I lost consciousness',
         options: ['I lost my bag', 'I lost consciousness', 'I can\'t remember', 'I lost my phone'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'J\'ai eu un ___ (I\'ve had an accident)',
+        answer: 'accident',
       },
     ],
   },

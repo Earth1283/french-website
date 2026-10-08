@@ -94,6 +94,22 @@ export const buildingBlocksLessons: Lesson[] = [
         answer: 'orange',
         options: ['blanc', 'vert', 'orange', 'violet'],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Un chat ___ (a black cat)',
+        answer: 'noir',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Une maison ___ (a white house, so feminine)',
+        answer: 'blanche',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "a brown dog" (un chien = dog)',
+        answer: 'un chien marron',
+        hint: 'Colors go after the noun',
+      },
     ],
   },
   {
@@ -175,6 +191,22 @@ export const buildingBlocksLessons: Lesson[] = [
         answer: 'au',
         hint: 'Au + jour + d\'hui',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'The French week starts on Monday. Which day ends it?',
+        answer: 'dimanche',
+        options: ['lundi', 'samedi', 'dimanche', 'vendredi'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Après-___ means "the day after tomorrow"',
+        answer: 'demain',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "Friday"?',
+        answer: 'vendredi',
+      },
     ],
   },
   {
@@ -240,6 +272,21 @@ export const buildingBlocksLessons: Lesson[] = [
         prompt: 'How do you say "the 1st of March"?',
         answer: 'le premier mars',
         options: ['le un mars', 'le premier mars', 'le 1 mars', 'une mars'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Le premier ___ is New Year\'s Day (1st of January)',
+        answer: 'janvier',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The month after novembre is ___',
+        answer: 'décembre',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "in winter"?',
+        answer: 'en hiver',
       },
     ],
   },

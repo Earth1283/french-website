@@ -48,6 +48,27 @@ export const smalltalkLessons: Lesson[] = [
         answer: 'Il fait froid',
         hint: '"Il fait" + the temperature adjective',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'You\'re sweating in July. What do you say?',
+        answer: 'Il fait chaud',
+        options: ['Il fait froid', 'Il fait chaud', 'Il neige', 'Il pleut'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il fait ___ (It\'s hot)',
+        answer: 'chaud',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il ___ (It\'s snowing)',
+        answer: 'neige',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "The weather is bad"?',
+        answer: 'il fait mauvais',
+      },
     ],
   },
   {
@@ -115,6 +136,22 @@ export const smalltalkLessons: Lesson[] = [
         prompt: '"C\'est ___ !" (It\'s magnificent!)',
         answer: 'magnifique',
         hint: 'The French cognate of "magnificent"',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you politely say you don\'t really like something?',
+        answer: 'Je n\'aime pas trop ça',
+        options: ['Je n\'aime pas trop ça', 'C\'est incroyable !', 'J\'adore ça !', 'Vous êtes très sympa'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'J\'___ ça ! (I love that!)',
+        answer: 'adore',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "I\'m happy" (you are a man)',
+        answer: 'je suis content',
       },
     ],
   },

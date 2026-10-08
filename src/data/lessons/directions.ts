@@ -81,6 +81,16 @@ export const directionsLessons: Lesson[] = [
         answer: 'Où',
         hint: 'The French word for "where". Mind the accents.',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Tournez à ___ (Turn right)',
+        answer: 'droite',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you ask "Is it far?"',
+        answer: 'c\'est loin ?',
+      },
     ],
   },
   {
@@ -114,10 +124,10 @@ export const directionsLessons: Lesson[] = [
         pronunciation: 'a kɛl œʁ paʁ lə tʁɛ̃',
       },
       {
-        french: 'Composez votre billet !',
+        french: 'Compostez votre billet !',
         english: 'Validate your ticket!',
-        pronunciation: 'kɔ̃poze vɔtʁ bijɛ',
-        funnyNote: 'The yellow machines on the platform. ALWAYS stamp your ticket before boarding or face a fine. This is how they get tourists.',
+        pronunciation: 'kɔ̃pɔste vɔtʁ bijɛ',
+        funnyNote: 'The yellow machines on the platform. Paper tickets marked "à composter" must be stamped before you board, or you risk a fine. E-tickets and reserved-seat tickets do not need it.',
       },
     ],
     exercises: [
@@ -132,6 +142,27 @@ export const directionsLessons: Lesson[] = [
         prompt: 'You\'re buying a one-way train ticket. What do you ask for?',
         answer: 'Un aller simple',
         options: ['Un ticket simple', 'Un aller simple', 'Un aller seul', 'Un billet unique'],
+      },
+      {
+        type: 'multiple-choice',
+        prompt: '"À quelle heure part le train ?" asks:',
+        answer: 'What time the train leaves',
+        options: ['Where the train goes', 'What time the train leaves', 'How much the ticket costs', 'Which platform it leaves from'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Appelez-moi un ___, s\'il vous plaît (a taxi)',
+        answer: 'taxi',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Un aller ___ (a one-way ticket)',
+        answer: 'simple',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Call me a taxi, please"',
+        answer: 'Appelez-moi un taxi, s\'il vous plaît',
       },
     ],
   },

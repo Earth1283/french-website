@@ -70,6 +70,22 @@ export const identityLessons: Lesson[] = [
         answer: 'habite',
         hint: 'habiter → first person singular',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you say "I live in Lyon"?',
+        answer: 'J\'habite à Lyon',
+        options: ['J\'habite à Lyon', 'Je habite à Lyon', 'J\'habite de Lyon', 'Je suis habite Lyon'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Je suis ___ (I am American, masculine)',
+        answer: 'américain',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "I speak English"',
+        answer: 'je parle anglais',
+      },
     ],
   },
   {
@@ -141,6 +157,22 @@ export const identityLessons: Lesson[] = [
         prompt: 'Qu\'est-ce que vous ___ ? (What do you do?)',
         answer: 'faites',
         hint: 'Faire conjugated for vous',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'What does "Je suis à la retraite" mean?',
+        answer: 'I am retired',
+        options: ['I am retired', 'I am late', 'I am on holiday', 'I am at the station'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Je suis ___ (I am a student, masculine)',
+        answer: 'étudiant',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "I am a nurse" (you are a woman)',
+        answer: 'je suis infirmière',
       },
     ],
   },
@@ -214,6 +246,22 @@ export const identityLessons: Lesson[] = [
         prompt: 'Mon ___ s\'appelle Thomas. (My son\'s name is Thomas)',
         answer: 'fils',
         hint: 'The L is silent, but the S is pronounced',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you say "my parents"?',
+        answer: 'mes parents',
+        options: ['mon parents', 'ma parents', 'mes parents', 'mes parent'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Je suis ___ (I am single)',
+        answer: 'célibataire',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "my husband"',
+        answer: 'mon mari',
       },
     ],
   },

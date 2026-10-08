@@ -63,6 +63,21 @@ export const greetingsLessons: Lesson[] = [
         answer: 'Good evening',
         hint: 'Used in the evening, not morning',
       },
+      {
+        type: 'fill-blank',
+        prompt: '"___" means "Good evening"',
+        answer: 'bonsoir',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Before bed you say "Bonne ___" (Good night)',
+        answer: 'nuit',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "Goodbye"?',
+        answer: 'au revoir',
+      },
     ],
   },
   {
@@ -128,6 +143,22 @@ export const greetingsLessons: Lesson[] = [
         answer: 'Ça',
         hint: 'The short casual greeting',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'Which is the formal way to ask "How are you?"',
+        answer: 'Comment allez-vous ?',
+        options: ['Ça va ?', 'Comment allez-vous ?', 'Comment tu t\'appelles ?', 'Salut !'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Comment vous ___-vous ? (What is your name?)',
+        answer: 'appelez',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Very well, thank you"',
+        answer: 'très bien, merci',
+      },
     ],
   },
   {
@@ -183,6 +214,27 @@ export const greetingsLessons: Lesson[] = [
         prompt: 'Someone thanks you. How do you say "You\'re welcome"?',
         answer: 'De rien',
         hint: 'Literally "of nothing"',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'You bump into someone on the metro. What do you say?',
+        answer: 'Pardon',
+        options: ['De rien', 'Pardon', 'Bonne nuit', 'Merci beaucoup'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'De ___ (You\'re welcome)',
+        answer: 'rien',
+      },
+      {
+        type: 'fill-blank',
+        prompt: '___-moi, monsieur (Excuse me, sir)',
+        answer: 'Excusez',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Thank you very much"',
+        answer: 'Merci beaucoup',
       },
     ],
   },

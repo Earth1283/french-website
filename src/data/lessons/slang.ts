@@ -59,6 +59,26 @@ export const slangLessons: Lesson[] = [
         answer: 'Zut !',
         options: ['Merci !', 'Bonjour !', 'Zut !', 'De rien'],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'C\'est ___ (It\'s a hassle, slang)',
+        answer: 'galère',
+      },
+      {
+        type: 'fill-blank',
+        prompt: '___ ! (Cool! Nice!)',
+        answer: 'Sympa',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Forget it" (informal)',
+        answer: 'laisse tomber',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "It\'s rubbish" (slang)',
+        answer: 'c\'est nul',
+      },
     ],
   },
   {
@@ -110,6 +130,27 @@ export const slangLessons: Lesson[] = [
         prompt: 'Your friend describes something as "chelou". What do they mean?',
         answer: 'sketchy or weird',
         hint: 'Verlan of "louche" — the shady one',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: '"Relou" is verlan for "lourd". It means:',
+        answer: 'Annoying',
+        options: ['Annoying', 'Delicious', 'Friendly', 'Tired'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Une ___ is verlan for "femme"',
+        answer: 'meuf',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Un ___ is verlan for "mec" (guy)',
+        answer: 'keum',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "That\'s crazy!" using the verlan for "fou"',
+        answer: 'c\'est ouf',
       },
     ],
   },

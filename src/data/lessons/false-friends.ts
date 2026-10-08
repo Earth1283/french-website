@@ -101,6 +101,21 @@ export const falseFriendsLessons: Lesson[] = [
         answer: 'attendre',
         hint: 'The deceptive cognate of "attend"',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Je suis ___ (I\'m injured, NOT "blessed")',
+        answer: 'blessé',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Je vais ___ à la maison (I\'m going to stay home, NOT "rest")',
+        answer: 'rester',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "to ask" (NOT "to demand")?',
+        answer: 'demander',
+      },
     ],
   },
 ];

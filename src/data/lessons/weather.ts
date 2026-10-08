@@ -32,7 +32,7 @@ export const weatherLessons: Lesson[] = [
         french: 'Il pleut',
         english: 'It\'s raining',
         pronunciation: 'il plø',
-        funnyNote: '"Pleuvoir" is conjugated in the third person only. It just "il pleut". That\'s it. The verb exists for no other subject.',
+        funnyNote: '"Pleuvoir" is conjugated in the third person only. It is just "il pleut". That\'s it. The verb exists for no other subject.',
       },
       {
         french: 'Il neige',
@@ -70,6 +70,22 @@ export const weatherLessons: Lesson[] = [
         prompt: 'Il y a du ___ (It\'s windy)',
         answer: 'vent',
         hint: '"Du vent" = some wind',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'How do you ask "What\'s the weather like?"',
+        answer: 'Quel temps fait-il ?',
+        options: ['Quelle heure est-il ?', 'Quel temps fait-il ?', 'Comment ça va ?', 'Quel âge as-tu ?'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il fait ___ (The weather is nice)',
+        answer: 'beau',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "It\'s snowing"',
+        answer: 'il neige',
       },
     ],
   },
@@ -143,6 +159,21 @@ export const weatherLessons: Lesson[] = [
         prompt: '"En été" means?',
         answer: 'In summer',
         options: ['In autumn', 'In winter', 'In spring', 'In summer'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'En ___ (in autumn)',
+        answer: 'automne',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il fait combien de ___ ? (What\'s the temperature?)',
+        answer: 'degrés',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "a heatwave"',
+        answer: 'une canicule',
       },
     ],
   },

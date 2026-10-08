@@ -77,6 +77,16 @@ export const emergencyLessons: Lesson[] = [
         answer: 'anglais',
         hint: 'The French word for English',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Appelez la ___ ! (Call the police!)',
+        answer: 'police',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "I am lost" (you are a man)',
+        answer: 'je suis perdu',
+      },
     ],
   },
   {
@@ -117,6 +127,22 @@ export const emergencyLessons: Lesson[] = [
         type: 'fill-blank',
         prompt: 'Five in French is "___ "',
         answer: 'cinq',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'The fire brigade is 18. How do you say 18?',
+        answer: 'dix-huit',
+        options: ['dix-sept', 'dix-huit', 'dix-neuf', 'seize'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The ambulance number 15 is "___"',
+        answer: 'quinze',
+      },
+      {
+        type: 'translation',
+        prompt: 'Write the French word for 4',
+        answer: 'quatre',
       },
     ],
   },

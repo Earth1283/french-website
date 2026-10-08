@@ -47,6 +47,21 @@ export const numbersLessons: Lesson[] = [
         answer: 'huit',
         hint: 'IPA: /ɥit/',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'The number 3 in French is "___"',
+        answer: 'trois',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The number 11 in French is "___"',
+        answer: 'onze',
+      },
+      {
+        type: 'translation',
+        prompt: 'Write the French word for 13',
+        answer: 'treize',
+      },
     ],
   },
   {
@@ -98,6 +113,21 @@ export const numbersLessons: Lesson[] = [
         prompt: 'Write 100 in French',
         answer: 'cent',
         hint: 'Like the English word "sent"',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'The number 30 in French is "___"',
+        answer: 'trente',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Quatre-vingt-___ is 90 (four twenties and ten)',
+        answer: 'dix',
+      },
+      {
+        type: 'translation',
+        prompt: 'Write 40 in French',
+        answer: 'quarante',
       },
     ],
   },
@@ -162,6 +192,22 @@ export const numbersLessons: Lesson[] = [
         prompt: '"C\'est ___ ?" (How much is it?)',
         answer: 'combien',
         hint: 'The French word for "how much/how many"',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: '"Il est midi" means:',
+        answer: 'It\'s noon',
+        options: ['It\'s midnight', 'It\'s noon', 'It\'s half past', 'It\'s one o\'clock'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il est trois ___ (It\'s three o\'clock)',
+        answer: 'heures',
+      },
+      {
+        type: 'translation',
+        prompt: 'Ask "Do you have change?"',
+        answer: 'Avez-vous de la monnaie ?',
       },
     ],
   },

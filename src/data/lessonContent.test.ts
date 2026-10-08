@@ -31,6 +31,15 @@ describe('lesson content', () => {
   });
 });
 
+describe.each(allLessons.map(({ lesson }) => [lesson.id, lesson] as const))('lesson %s', (_id, lesson) => {
+  it('practises every exercise type at least twice', () => {
+    const count = (type: string) => lesson.exercises.filter(ex => ex.type === type).length;
+    expect(count('multiple-choice')).toBeGreaterThanOrEqual(2);
+    expect(count('fill-blank')).toBeGreaterThanOrEqual(2);
+    expect(count('translation')).toBeGreaterThanOrEqual(2);
+  });
+});
+
 describe.each(advancedLessons.map(({ unit, lesson }) => [lesson.id, unit.slug, lesson] as const))(
   'advanced lesson %s',
   (_id, unitSlug, lesson) => {

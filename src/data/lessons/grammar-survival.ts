@@ -53,6 +53,21 @@ export const grammarLessons: Lesson[] = [
         answer: 'du',
         hint: 'Partitive article for masculine nouns: de + le. Mind the accents.',
       },
+      {
+        type: 'fill-blank',
+        prompt: '___ pomme (an apple, feminine)',
+        answer: 'une',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "the friends" (plural; friends = amis)',
+        answer: 'les amis',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "some water" (eau starts with a vowel)',
+        answer: 'de l\'eau',
+      },
     ],
   },
   {
@@ -126,6 +141,21 @@ export const grammarLessons: Lesson[] = [
         answer: 'You are (formal)',
         options: ['We are', 'They are', 'You are (informal)', 'You are (formal)'],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Il ___ content (He is happy)',
+        answer: 'est',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Tu ___ faim (You are hungry)',
+        answer: 'as',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "we are"?',
+        answer: 'nous sommes',
+      },
     ],
   },
   {
@@ -185,6 +215,27 @@ export const grammarLessons: Lesson[] = [
           'Avez vous une réservation ?',
           'Question : réservation ?',
         ],
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'Which question word means "When?"',
+        answer: 'Quand ?',
+        options: ['Pourquoi ?', 'Quand ?', 'Comment ?', 'Où ?'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il ne parle ___ (He doesn\'t speak)',
+        answer: 'pas',
+      },
+      {
+        type: 'fill-blank',
+        prompt: '___-ce que tu aimes le café ? (Do you like coffee?)',
+        answer: 'Est',
+      },
+      {
+        type: 'translation',
+        prompt: 'Make this negative: "Je parle" (I speak)',
+        answer: 'Je ne parle pas',
       },
     ],
   },

@@ -70,6 +70,22 @@ export const cinemaLessons: Lesson[] = [
         answer: 'Deux places, s\'il vous plaît',
         hint: 'In cinemas, a ticket is called "une place"',
       },
+      {
+        type: 'multiple-choice',
+        prompt: 'You want the film dubbed into French. What do you ask for?',
+        answer: 'La version française (VF)',
+        options: ['La version originale (VO)', 'La version française (VF)', 'Les sous-titres', 'La salle'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Les ___ (the subtitles)',
+        answer: 'sous-titres',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "the auditorium" (the screening room)',
+        answer: 'la salle',
+      },
     ],
   },
   {
@@ -140,6 +156,22 @@ export const cinemaLessons: Lesson[] = [
         prompt: 'How do you say "There is a long queue"?',
         answer: 'Il y a une grande file d\'attente',
         hint: '"Il y a" = there is, "grande" = long/big',
+      },
+      {
+        type: 'multiple-choice',
+        prompt: 'A sign reads "Interdit de toucher". It means:',
+        answer: 'Do not touch',
+        options: ['Free entry', 'Do not touch', 'No photos', 'Please queue'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'L\'exposition ___ (the temporary exhibition)',
+        answer: 'temporaire',
+      },
+      {
+        type: 'translation',
+        prompt: 'How do you say "paid" as opposed to "gratuit"?',
+        answer: 'payant',
       },
     ],
   },

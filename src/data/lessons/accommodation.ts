@@ -85,6 +85,11 @@ export const accommodationLessons: Lesson[] = [
         answer: 'Ma clé, s\'il vous plaît',
         hint: '"Ma" + the word for key (mind the accent) + "s\'il vous plaît"',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Ma ___, s\'il vous plaît (My room, please)',
+        answer: 'chambre',
+      },
     ],
   },
   {
@@ -193,6 +198,11 @@ export const accommodationLessons: Lesson[] = [
         prompt: 'What is "l\'ascenseur"?',
         answer: 'The lift / elevator',
         options: ['The staircase', 'The lift / elevator', 'The lobby', 'The corridor'],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Le ___ ne fonctionne pas (The heating isn\'t working)',
+        answer: 'chauffage',
       },
     ],
   },
@@ -305,6 +315,11 @@ export const accommodationLessons: Lesson[] = [
           '"La note" is a tip; "la facture" is the bill',
           '"La facture" is only used at restaurants',
         ],
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Il y a une ___ sur la note (There\'s an error on the bill)',
+        answer: 'erreur',
       },
     ],
   },

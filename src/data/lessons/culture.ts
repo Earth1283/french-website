@@ -73,6 +73,21 @@ export const cultureLessons: Lesson[] = [
           'A hug and a pat on the back',
         ],
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Faire la ___ (to do the cheek-kiss greeting)',
+        answer: 'bise',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "You\'re welcome" (formal)',
+        answer: 'je vous en prie',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Pleased to meet you" (you are a man)',
+        answer: 'enchanté',
+      },
     ],
   },
   {
@@ -149,6 +164,21 @@ export const cultureLessons: Lesson[] = [
         answer: 'carte',
         hint: 'The word for card',
       },
+      {
+        type: 'fill-blank',
+        prompt: 'Le ___ est compris (Service is included)',
+        answer: 'service',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "Closed on Sunday"',
+        answer: 'fermé le dimanche',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "a public holiday"',
+        answer: 'un jour férié',
+      },
     ],
   },
   {
@@ -218,6 +248,21 @@ export const cultureLessons: Lesson[] = [
         prompt: 'What do you say before everyone starts eating?',
         answer: 'Bon appétit !',
         hint: 'The host always says this first',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'Le ___ is the after-dinner drink',
+        answer: 'digestif',
+      },
+      {
+        type: 'fill-blank',
+        prompt: 'C\'est ___ (It\'s warm and sociable)',
+        answer: 'convivial',
+      },
+      {
+        type: 'translation',
+        prompt: 'Say "the main course"',
+        answer: 'le plat principal',
       },
     ],
   },
