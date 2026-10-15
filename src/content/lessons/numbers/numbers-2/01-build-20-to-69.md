@@ -38,6 +38,6 @@ The conjunction does not appear before other units: 22 is *vingt-deux*, not *vin
 
 The final consonant of a number may behave differently depending on context. *Six* can sound roughly like *seess* when said alone, like *see* before a consonant (*six personnes*), and with a /z/ link before a vowel (*six amis*). Do not let these variants stop you from speaking; the number remains recognizable.
 
-In *vingt*, the final *t* is usually silent, including in *vingt-deux*. A linking /t/ may be heard before a vowel in expressions such as *vingt et un*. Learn the complete spoken chunk rather than forcing a single pronunciation rule into every context.
+In *vingt*, the final *t* is silent on its own but pronounced from 21 to 29: *vingt et un* /vɛ̃.te.œ̃/, *vingt-deux* /vɛ̃t.dø/. Learn the complete spoken chunk rather than forcing a single pronunciation rule into every context.
 
 To practice, choose a ten and count its decade aloud: *trente, trente et un, trente-deux… trente-neuf*. Patterned counting builds the system much faster than a random list.

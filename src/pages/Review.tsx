@@ -16,7 +16,11 @@ interface ReviewCard extends VocabItem {
   unitEmoji: string;
   /** A second look at a card missed earlier this session; it doesn't change the schedule. */
   retry?: boolean;
+  /** Well-known cards ask for the French from the English, which is the harder, more useful direction. */
+  produce: boolean;
 }
+
+const PRODUCE_AFTER_REPS = 2;
 
 const RETRY_GAP = 3;
 
@@ -36,10 +40,15 @@ export function Review() {
 
   // Built once at mount: srsData changes as we review, but the deck shouldn't shift mid-session.
   const [{ deck, deferred }] = useState(() => {
-    const { items, deferred } = buildReviewSession(completedLessons, useProgressStore.getState().srsData);
-    const deck: ReviewCard[] = shuffle(items).map(({ key, unit, lesson, vocab }) => (
-      { ...vocab, key, lessonTitle: lesson.title, unitEmoji: unit.emoji }
-    ));
+    const { srsData } = useProgressStore.getState();
+    const { items, deferred } = buildReviewSession(completedLessons, srsData);
+    const deck: ReviewCard[] = shuffle(items).map(({ key, unit, lesson, vocab }) => ({
+      ...vocab,
+      key,
+      lessonTitle: lesson.title,
+      unitEmoji: unit.emoji,
+      produce: (srsData[key]?.reps ?? 0) >= PRODUCE_AFTER_REPS,
+    }));
     return { deck, deferred };
   });
   const [queue, setQueue] = useState<ReviewCard[]>(deck);
@@ -51,8 +60,13 @@ export function Review() {
 
   const handleReveal = () => {
     setShowing('back');
-    if (queue[idx]) speak(queue[idx].french);
+    if (queue[idx]?.produce) speak(queue[idx].french);
   };
+
+  useEffect(() => {
+    const card = queue[idx];
+    if (card && !card.produce) speak(card.french);
+  }, [idx, queue]);
 
   const handleRate = (correct: boolean) => {
     const card = queue[idx];
@@ -164,17 +178,19 @@ export function Review() {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
         <motion.div {...REVEAL} className="space-y-4">
-          <div className="text-5xl">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
-          <h1 className="text-2xl font-bold text-primary">Session complete!</h1>
+          <h1 className="text-2xl font-bold text-primary font-display">Review done.</h1>
           <p className="text-secondary">
             {tally.correct} correct out of {total} · {pct}%
           </p>
           {deferred > 0 && (
             <p className="text-sm text-muted">{deferred} more card{deferred !== 1 ? 's' : ''} waiting — they'll be ready in your next session.</p>
           )}
+          {tally.wrong > 0 && (
+            <p className="text-sm text-muted">The {tally.wrong} you missed come back tomorrow. That’s the system working, not you failing.</p>
+          )}
           {sessionXP > 0 && (
             <div className="inline-flex items-center gap-1.5 xp-badge text-sm px-3 py-1.5">
-              ⚡ +{sessionXP} XP earned
+              +{sessionXP} XP
             </div>
           )}
           <div className="mt-6">
@@ -232,20 +248,30 @@ export function Review() {
               <p className="text-xs font-semibold text-muted uppercase tracking-wider">
                 {card.retry ? '🔁 Another look' : `${card.unitEmoji} ${card.lessonTitle}`}
               </p>
-              <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>
-                {card.french}
-              </p>
-              {card.pronunciation && (
-                <p className="text-sm text-muted italic">/{card.pronunciation}/</p>
+              {card.produce ? (
+                <>
+                  <p className="text-2xl font-bold text-primary">{card.english}</p>
+                  <p className="text-sm text-muted">How do you say it in French? Out loud counts.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>
+                    {card.french}
+                  </p>
+                  {card.pronunciation && (
+                    <p className="text-sm text-muted italic">/{card.pronunciation}/</p>
+                  )}
+                  <p className="text-sm text-muted">What does it mean?</p>
+                  <button
+                    onClick={e => { e.stopPropagation(); speak(card.french); }}
+                    className="mt-1 w-10 h-10 flex items-center justify-center rounded-full ios-press cursor-pointer"
+                    style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
+                    aria-label="Play pronunciation"
+                  >
+                    <Volume2 size={18} />
+                  </button>
+                </>
               )}
-              <button
-                onClick={e => { e.stopPropagation(); speak(card.french); }}
-                className="mt-1 w-10 h-10 flex items-center justify-center rounded-full ios-press cursor-pointer"
-                style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
-                aria-label="Play pronunciation"
-              >
-                <Volume2 size={18} />
-              </button>
             </motion.div>
 
             <motion.button
@@ -268,8 +294,26 @@ export function Review() {
               className="card p-8 min-h-[240px] flex flex-col items-center justify-center gap-3 text-center"
               style={{ borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-2)' }}
             >
-              <p className="text-xs font-semibold text-muted uppercase tracking-wider">English</p>
-              <p className="text-2xl font-bold text-primary">{card.english}</p>
+              {card.produce ? (
+                <>
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wider">{card.english}</p>
+                  <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>{card.french}</p>
+                  {card.pronunciation && <p className="text-sm text-muted italic">/{card.pronunciation}/</p>}
+                  <button
+                    onClick={() => speak(card.french)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full ios-press cursor-pointer"
+                    style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
+                    aria-label="Play pronunciation"
+                  >
+                    <Volume2 size={18} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wider">{card.french}</p>
+                  <p className="text-2xl font-bold text-primary">{card.english}</p>
+                </>
+              )}
 
               {card.example && (
                 <div className="mt-2 p-3 text-left w-full" style={{ backgroundColor: 'var(--bg-inset)', borderRadius: 'var(--radius-sm)' }}>
@@ -297,7 +341,7 @@ export function Review() {
                   border: 'none',
                 }}
               >
-                <XCircle size={20} /> Not quite
+                <XCircle size={20} /> Didn’t know it
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -310,10 +354,10 @@ export function Review() {
                   border: 'none',
                 }}
               >
-                <CheckCircle2 size={20} /> Got it
+                <CheckCircle2 size={20} /> Knew it
               </motion.button>
             </div>
-            <p className="text-center text-xs text-muted">← Not quite · Got it →</p>
+            <p className="text-center text-xs text-muted">Be honest: a wrong “Knew it” just hides the word from you. ← / →</p>
           </motion.div>
         )}
       </AnimatePresence>

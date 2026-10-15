@@ -27,7 +27,7 @@ function fuzzyMatch(query: string, target: string): boolean {
 }
 
 export function Home() {
-  const { completedLessons, onboardingDone, isUnit12Unlocked, streak, xp, bookmarkedLessons, srsData } = useProgressStore();
+  const { completedLessons, onboardingDone, isUnit12Unlocked, bookmarkedLessons, srsData } = useProgressStore();
   const [searchQuery, setSearchQuery] = useState('');
   const preparingForExam = useLearnerStore(s => s.profile?.goals.includes('exam') ?? false);
   const unit12Unlocked = isUnit12Unlocked();
@@ -96,25 +96,6 @@ export function Home() {
       <A1Banner />
 
       {onboardingDone && <PathPanel path={path} />}
-
-      {/* Streak + XP row */}
-      {(streak > 0 || xp > 0) && (
-        <div
-          className="flex items-center gap-2.5 mb-4 flex-wrap"
-        >
-          {streak > 0 && (
-            <div className="chip" style={{ color: '#ea7317', backgroundColor: 'var(--gold-light)', border: 'none' }}>
-              🔥 {streak} day streak
-            </div>
-          )}
-          {xp > 0 && (
-            <div className="xp-badge text-sm px-3 py-1.5">
-              ⚡ {xp} XP total
-            </div>
-          )}
-          <p className="text-xs text-muted">Keep it up!</p>
-        </div>
-      )}
 
       {/* Exam goal — point straight at the listening/writing practice */}
       {preparingForExam && (

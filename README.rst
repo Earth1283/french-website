@@ -22,9 +22,12 @@ Features
 ========
 
 *   **Ambient Landing & Focus Mode:** The front door is a calm, full-bleed ambient screen — a giant live clock, a time-aware French greeting (*Bonjour* / *Bon après-midi* / *Bonsoir*), a *phrase du jour* with audio, and a glass launcher into the app. The date shows in French and morphs to English on hover. A dedicated **Focus mode** (``/#/focus``) adds a Pomodoro study timer with a rotating French *mot du moment*. Backdrops are fetched live from Unsplash — French scenes by day, a cosmic night sky in the small hours (1–4:30 AM) — and gracefully fall back to gradient skins when no key is set.
-*   **Interactive Lessons:** Flashcards, multiple choice, and translation challenges that actually matter.
+*   **Lessons That Explain Themselves:** Every lesson opens with four short reading chapters (or an interactive walkthrough) on the why: the grammar, the sound, the cultural trap. Then come flashcards, multiple choice, fill-in-the-blank and "say it in French" exercises.
+*   **Mistakes That Teach:** A wrong answer doesn't flash red and vanish. You see what you wrote, the right answer with audio, and a one-line explanation of *why*, and the lesson waits until you continue. Anything you miss comes back once at the end of the lesson, so you finish by getting it right.
+*   **An Honest Finish:** The end of a lesson shows how many you got right first time, every phrase you can now say (tap to hear it), and the explanations for your misses. No confetti.
 *   **Unit-Based Learning:** From A1 basics to "Unlocked: The Good Stuff" (slang).
-*   **Spaced Repetition Review:** SM-2 algorithm schedules vocab reviews at the optimal moment — 1 day, then 3, then a week, then longer. A review banner on the home screen tells you when cards are due.
+*   **Spaced Repetition Review:** SM-2 algorithm schedules vocab reviews at the optimal moment — 1 day, then 3, then a week, then longer. New cards ask what the French means; once you know a card, it flips and asks you to *produce* the French from the English, which is the direction you need when you're ordering. A review banner on the home screen tells you when cards are due.
+*   **No Streak Guilt:** Progress counts the days you've practised in total. Miss a week and nothing resets.
 *   **Audio Pronunciation:** Tap any 🔊 button to hear French spoken aloud. Available on flashcards, phrasebook, and on answer reveals in exercises. Uses the Web Speech API — no API key, works offline.
 *   **Lesson Bookmarks:** Save any lesson for later with the bookmark icon in the lesson header. Bookmarked lessons appear as quick-links on the home screen.
 *   **Keyboard Shortcuts:** In lessons — ``←`` / ``→`` navigate flashcards, ``Space`` / ``F`` flips a card, ``1``–``4`` selects a multiple-choice option.

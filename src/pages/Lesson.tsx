@@ -21,11 +21,20 @@ const InteractivePlayer = lazy(() => import('../interactive/InteractivePlayer').
 
 type Phase = 'intro' | 'read' | 'explore' | 'flashcards' | 'exercises' | 'complete';
 
-function loadSavedProgress(lessonId: string | undefined): { phase: Phase; cardIndex: number; exerciseIndex: number; sceneIndex?: number } | null {
+interface SavedProgress {
+  phase: Phase;
+  cardIndex: number;
+  queuePos: number;
+  queue: number[];
+  sceneIndex?: number;
+}
+
+function loadSavedProgress(lessonId: string | undefined): SavedProgress | null {
   if (!lessonId) return null;
   try {
     const raw = sessionStorage.getItem(`lesson-progress-${lessonId}`);
-    return raw ? JSON.parse(raw) : null;
+    const saved = raw ? JSON.parse(raw) : null;
+    return saved && Array.isArray(saved.queue) ? saved : null;
   } catch {
     return null;
   }
@@ -46,12 +55,17 @@ export function Lesson() {
   const [phase, setPhase] = useState<Phase>(() => saved?.phase ?? 'intro');
   const [cardIndex, setCardIndex] = useState(() => saved?.cardIndex ?? 0);
   const [flipped, setFlipped] = useState(false);
-  const [exerciseIndex, setExerciseIndex] = useState(() => saved?.exerciseIndex ?? 0);
+  const [queue, setQueue] = useState<number[]>(() => saved?.queue ?? lesson?.exercises.map((_, i) => i) ?? []);
+  const [queuePos, setQueuePos] = useState(() => saved?.queuePos ?? 0);
+  const exerciseIndex = queue[queuePos] ?? 0;
+  const firstPassLength = lesson?.exercises.length ?? 0;
+  const isRetry = queuePos >= firstPassLength;
   const [sceneIndex, setSceneIndex] = useState(() => saved?.sceneIndex ?? 0);
   const [keyboardSelect, setKeyboardSelect] = useState<number | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [newBadges, setNewBadges] = useState<string[]>([]);
-  const [missedExercises, setMissedExercises] = useState<Array<{ prompt: string; answer: string }>>([]);
+  const [newlyCompleted, setNewlyCompleted] = useState(false);
+  const [missedExercises, setMissedExercises] = useState<Array<{ prompt: string; answer: string; explanation?: string }>>([]);
 
   // Persist progress to sessionStorage so back-navigate can resume
   useEffect(() => {
@@ -59,15 +73,15 @@ export function Lesson() {
       sessionStorage.removeItem(`lesson-progress-${lessonId}`);
       return;
     }
-    sessionStorage.setItem(`lesson-progress-${lessonId}`, JSON.stringify({ phase, cardIndex, exerciseIndex, sceneIndex }));
-  }, [lessonId, phase, cardIndex, exerciseIndex, sceneIndex]);
+    sessionStorage.setItem(`lesson-progress-${lessonId}`, JSON.stringify({ phase, cardIndex, queuePos, queue, sceneIndex }));
+  }, [lessonId, phase, cardIndex, queuePos, queue, sceneIndex]);
 
   const isBookmarked = lesson ? bookmarkedLessons.includes(lesson.id) : false;
 
   // Reset keyboard selection when exercise changes
   useEffect(() => {
     setKeyboardSelect(null);
-  }, [exerciseIndex]);
+  }, [queuePos]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -112,6 +126,10 @@ export function Lesson() {
     return () => window.removeEventListener('keydown', handler);
   }, [phase, cardIndex, exerciseIndex, lesson]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [phase, queuePos]);
+
   if (!unit || !lesson) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
@@ -129,6 +147,7 @@ export function Lesson() {
   const handleFinish = () => {
     sessionStorage.removeItem(`lesson-progress-${lesson.id}`);
     if (!completedLessons.includes(lesson.id)) {
+      setNewlyCompleted(true);
       completeAction(lesson.id, lesson.xpReward);
       const { earnedBadges: newAllBadges } = useProgressStore.getState();
       setNewBadges(newAllBadges.filter(b => !earnedBadgesBefore.includes(b)));
@@ -141,15 +160,17 @@ export function Lesson() {
     setPhase('flashcards');
     setCardIndex(0);
     setFlipped(false);
-    setExerciseIndex(0);
-    setCorrectCount(0);
+    setQueue(lesson!.exercises.map((_, i) => i));
+    setQueuePos(0);
+    setFirstTryCorrect(0);
+    setNewlyCompleted(false);
     setNewBadges([]);
     setMissedExercises([]);
   };
 
-  const totalSteps = lesson.vocab.length + lesson.exercises.length;
+  const totalSteps = lesson.vocab.length + queue.length;
   const currentStep = phase === 'flashcards' ? cardIndex
-    : phase === 'exercises' ? lesson.vocab.length + exerciseIndex
+    : phase === 'exercises' ? lesson.vocab.length + queuePos
     : phase === 'complete' ? totalSteps : 0;
 
   if (phase === 'intro') {
@@ -273,6 +294,10 @@ export function Lesson() {
     return (
       <div className="max-w-xl mx-auto px-4 py-8">
         <LessonComplete
+          vocab={lesson.vocab}
+          firstTryCorrect={firstTryCorrect}
+          exerciseCount={lesson.exercises.length}
+          alreadyCompleted={!newlyCompleted}
           xpEarned={lesson.xpReward}
           newBadges={newBadges}
           unitSlug={slug!}
@@ -368,41 +393,54 @@ export function Lesson() {
 
         {phase === 'exercises' && (
           <motion.div
-            key={`exercise-${exerciseIndex}`}
+            key={`exercise-${queuePos}`}
             {...STEP_FORWARD}
             className="space-y-4"
           >
-            <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">
-              Exercise {exerciseIndex + 1} of {lesson.exercises.length}
-            </p>
+            {isRetry ? (
+              <div className="text-center space-y-1">
+                <p className="text-xs text-muted font-semibold uppercase tracking-wider">
+                  Second look · {queuePos - firstPassLength + 1} of {queue.length - firstPassLength}
+                </p>
+                <p className="text-xs text-muted">You missed this one earlier. Recalling it now is what makes it stick.</p>
+              </div>
+            ) : (
+              <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">
+                Exercise {queuePos + 1} of {firstPassLength}
+              </p>
+            )}
 
             {(() => {
               const ex = lesson.exercises[exerciseIndex];
-              const advance = () => {
-                if (exerciseIndex < lesson.exercises.length - 1) {
-                  setExerciseIndex(i => i + 1);
-                } else {
-                  handleFinish();
-                }
+              const advance = (requeue: boolean) => {
+                const length = queue.length + (requeue ? 1 : 0);
+                if (requeue) setQueue(q => [...q, exerciseIndex]);
+                if (queuePos < length - 1) setQueuePos(p => p + 1);
+                else handleFinish();
               };
 
               const captureCorrect = () => {
-                recordExercise(lesson.id, exerciseIndex, true);
-                setCorrectCount(c => c + 1);
-                setTimeout(advance, 600);
+                if (!isRetry) {
+                  recordExercise(lesson.id, exerciseIndex, true);
+                  setFirstTryCorrect(c => c + 1);
+                }
+                advance(false);
               };
 
               const captureWrong = () => {
-                recordExercise(lesson.id, exerciseIndex, false);
-                setMissedExercises(prev => [...prev, { prompt: ex.prompt, answer: ex.answer }]);
-                setTimeout(advance, 1400);
+                if (!isRetry) {
+                  recordExercise(lesson.id, exerciseIndex, false);
+                  setMissedExercises(prev => [...prev, { prompt: ex.prompt, answer: ex.answer, explanation: ex.explanation }]);
+                }
+                advance(!isRetry);
               };
 
               if (ex.type === 'multiple-choice') {
                 return (
                   <MultipleChoice
-                    key={exerciseIndex}
+                    key={queuePos}
                     exercise={ex}
+                    teach
                     onCorrect={captureCorrect}
                     onWrong={captureWrong}
                     keyboardSelect={keyboardSelect}
@@ -412,8 +450,9 @@ export function Lesson() {
               if (ex.type === 'fill-blank') {
                 return (
                   <FillInBlank
-                    key={exerciseIndex}
+                    key={queuePos}
                     exercise={ex}
+                    teach
                     onCorrect={captureCorrect}
                     onWrong={captureWrong}
                   />
@@ -422,8 +461,9 @@ export function Lesson() {
               if (ex.type === 'translation') {
                 return (
                   <TranslationChallenge
-                    key={exerciseIndex}
+                    key={queuePos}
                     exercise={ex}
+                    teach
                     onCorrect={captureCorrect}
                     onWrong={captureWrong}
                   />

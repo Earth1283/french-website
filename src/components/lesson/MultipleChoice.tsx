@@ -2,12 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, XCircle, Volume2 } from 'lucide-react';
 import type { Exercise } from '../../types';
 import { speak } from '../../utils/speech';
+import { AnswerFeedback } from './AnswerFeedback';
 
 interface MultipleChoiceProps {
   exercise: Exercise;
   onCorrect: (answerGiven?: string) => void;
   onWrong: (answerGiven?: string) => void;
   keyboardSelect?: number | null;
+  /** Pause on a miss to show the answer and explanation until the learner continues. */
+  teach?: boolean;
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -19,21 +22,25 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }: MultipleChoiceProps) {
+export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect, teach = false }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<string | null>(null);
   // Authored option order is not reliably randomized (the correct answer is
   // often first) — shuffle once per question so position carries no signal.
   const [options] = useState(() => shuffle(exercise.options ?? []));
   const answered = selected !== null;
+  const missed = answered && selected !== exercise.answer;
   const prevKeyboardSelect = useRef<number | null>(null);
 
   const handleSelect = (option: string) => {
     if (answered) return;
     setSelected(option);
+    const correct = option === exercise.answer;
+    if (correct) speak(option);
+    if (teach && !correct) return;
     setTimeout(() => {
-      if (option === exercise.answer) onCorrect(option);
+      if (correct) onCorrect(option);
       else onWrong(option);
-    }, 800);
+    }, correct ? 700 : 1400);
   };
 
   useEffect(() => {
@@ -82,61 +89,52 @@ export function MultipleChoice({ exercise, onCorrect, onWrong, keyboardSelect }:
           }
 
           return (
-            <button
+            <div
               key={option}
-              onClick={() => handleSelect(option)}
-              disabled={answered}
-              className={`w-full p-4 text-left text-sm font-medium text-primary flex items-center gap-3 transition-all ios-press ${answered ? 'cursor-default' : 'cursor-pointer'}`}
+              className="flex items-center transition-all"
               style={{ ...stateStyle, borderRadius: 'var(--radius-sm)' }}
             >
-              <span
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[0.7rem] font-bold flex-shrink-0"
-                style={{ backgroundColor: 'var(--bg-inset)', color: 'var(--text-muted)' }}
-              >
-                {i + 1}
-              </span>
-              <span className="flex-1">{option}</span>
               <button
-                onClick={e => { e.stopPropagation(); speak(option); }}
-                tabIndex={answered ? -1 : 0}
-                className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ios-press"
-                style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                aria-label={`Hear ${option}`}
                 type="button"
+                onClick={() => handleSelect(option)}
+                disabled={answered}
+                className={`flex-1 min-w-0 p-4 pr-1 text-left text-sm font-medium text-primary flex items-center gap-3 ios-press ${answered ? 'cursor-default' : 'cursor-pointer'}`}
+                style={{ background: 'transparent', border: 'none' }}
+              >
+                <span
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[0.7rem] font-bold flex-shrink-0"
+                  style={{ backgroundColor: 'var(--bg-inset)', color: 'var(--text-muted)' }}
+                >
+                  {i + 1}
+                </span>
+                <span className="flex-1">{option}</span>
+                {answered && isCorrect && <CheckCircle2 size={18} className="flex-shrink-0" style={{ color: 'var(--success)' }} />}
+                {answered && isSelected && !isCorrect && <XCircle size={18} className="flex-shrink-0" style={{ color: 'var(--danger)' }} />}
+              </button>
+              <button
+                type="button"
+                onClick={() => speak(option)}
+                className="w-9 h-9 mr-2 flex items-center justify-center rounded-full flex-shrink-0 ios-press cursor-pointer"
+                style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
+                aria-label={`Hear ${option}`}
               >
                 <Volume2 size={14} />
               </button>
-              {answered && isCorrect && <CheckCircle2 size={18} className="flex-shrink-0" style={{ color: 'var(--success)' }} />}
-              {answered && isSelected && !isCorrect && <XCircle size={18} className="flex-shrink-0" style={{ color: 'var(--danger)' }} />}
-            </button>
+            </div>
           );
         })}
       </div>
 
-      {answered && selected !== exercise.answer && (
-        <div
-          className="flex items-center gap-2 p-3"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--danger) 8%, var(--bg-card))',
-            border: '1px solid color-mix(in srgb, var(--danger) 25%, transparent)',
-            borderRadius: 'var(--radius-sm)',
-          }}
-        >
-          <p className="text-sm text-muted flex-1">
-            Correct answer: <strong className="text-primary">{exercise.answer}</strong>
-          </p>
-          <button
-            onClick={() => speak(exercise.answer)}
-            className="w-7 h-7 flex items-center justify-center rounded-full ios-press cursor-pointer flex-shrink-0"
-            style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}
-            aria-label="Hear correct answer"
-          >
-            <Volume2 size={15} />
-          </button>
-        </div>
+      {missed && (
+        <AnswerFeedback
+          tone="wrong"
+          answer={exercise.answer}
+          explanation={teach ? exercise.explanation : undefined}
+          onContinue={teach ? () => onWrong(selected ?? undefined) : undefined}
+        />
       )}
 
-      <p className="text-center text-xs text-muted">Press 1–{options.length} to select</p>
+      {!answered && <p className="text-center text-xs text-muted">Press 1–{options.length} to select</p>}
     </div>
   );
 }

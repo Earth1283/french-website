@@ -30,19 +30,24 @@ export interface LessonMastery {
   evidence: number;
   lastExerciseMisses: number;
   weakVocabCards: number;
+  overdueVocabCards: number;
+  testMisses: number;
 }
 
 /**
- * How well a card is remembered, 0–1: how long it has stayed remembered
- * (interval, capped at MATURE_INTERVAL_DAYS), discounted for past lapses and
- * for however long it has sat overdue. A card failed on its latest review is 0.
+ * How likely the card is to be recalled right now, 0–1: a card answered
+ * correctly and still on schedule is strong however young it is; past lapses
+ * and time spent overdue (relative to its interval) wear it down. A card
+ * failed on its latest review is 0.
  */
 export function cardStrength(card: SRSCard, today: string): number {
   if (card.reps === 0) return 0;
   const lapsePenalty = 1 / (1 + 0.25 * (card.lapses ?? 0));
-  const overdueDays = Math.max(0, daysBetween(card.nextReview, today));
-  const forgetting = 1 / (1 + overdueDays / Math.max(card.interval, 1));
-  return Math.min(1, card.interval / MATURE_INTERVAL_DAYS) * lapsePenalty * forgetting;
+  return lapsePenalty / (1 + overdueRatio(card, today));
+}
+
+function overdueRatio(card: SRSCard, today: string): number {
+  return Math.max(0, daysBetween(card.nextReview, today)) / Math.max(card.interval, 1);
 }
 
 function isWeakCard(card: SRSCard): boolean {
@@ -54,6 +59,8 @@ export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTe
   let weight = 0;
   let lastExerciseMisses = 0;
   let weakVocabCards = 0;
+  let overdueVocabCards = 0;
+  let testMisses = 0;
 
   lesson.exercises.forEach((_, idx) => {
     const stat = exerciseStats[exerciseKey(lesson.id, idx)];
@@ -69,6 +76,7 @@ export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTe
     successes += VOCAB_WEIGHT * cardStrength(card, today);
     weight += VOCAB_WEIGHT;
     if (isWeakCard(card)) weakVocabCards++;
+    else if (overdueRatio(card, today) >= 1) overdueVocabCards++;
   });
 
   const testItemPrefix = `lesson-${lesson.id}-`;
@@ -76,6 +84,7 @@ export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTe
     if (!r.itemId.startsWith(testItemPrefix)) return;
     successes += r.correct ? 1 : 0;
     weight += 1;
+    if (!r.correct) testMisses++;
   });
 
   return {
@@ -83,6 +92,8 @@ export function lessonMastery(lesson: Lesson, { exerciseStats, srsData, latestTe
     evidence: weight,
     lastExerciseMisses,
     weakVocabCards,
+    overdueVocabCards,
+    testMisses,
   };
 }
 
@@ -133,7 +144,11 @@ function describeWeakness(m: LessonMastery): string {
   if (m.weakVocabCards > 0) {
     return `${m.weakVocabCards} flashcard${m.weakVocabCards !== 1 ? 's' : ''} keep slipping`;
   }
-  return 'Missed on the placement test';
+  if (m.testMisses > 0) return 'Missed on the placement test';
+  if (m.overdueVocabCards > 0) {
+    return `${m.overdueVocabCards} flashcard${m.overdueVocabCards !== 1 ? 's' : ''} long overdue for review`;
+  }
+  return 'Shaky across the board';
 }
 
 function isWeak(m: LessonMastery): boolean {

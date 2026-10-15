@@ -53,6 +53,20 @@ describe('getFixUps', () => {
     expect(fixUps[0].reason).toMatch(/^Missed \d exercises? last time$/);
   });
 
+  it('leaves alone a lesson learned well and reviewed on schedule', () => {
+    const today = '2026-10-16';
+    const fresh = { interval: 1, ease: 2.5, nextReview: '2026-10-17', reps: 1, lapses: 0 };
+    const srsData = Object.fromEntries(gender.vocab.map((_, i) => [vocabKey(gender.id, i), fresh]));
+    expect(getFixUps([gender.id], { exerciseStats: {}, srsData, today }, noPrereqs)).toEqual([]);
+  });
+
+  it('says cards are fading rather than blaming a placement test nobody took', () => {
+    const stale = { interval: 3, ease: 2.5, nextReview: '2026-01-01', reps: 2, lapses: 0 };
+    const srsData = Object.fromEntries(gender.vocab.map((_, i) => [vocabKey(gender.id, i), stale]));
+    const [fixUp] = getFixUps([gender.id], { exerciseStats: {}, srsData, today: '2026-10-16' }, noPrereqs);
+    expect(fixUp.reason).toMatch(/overdue/i);
+  });
+
   it('ignores lessons that are not completed yet', () => {
     expect(getFixUps([], { ...none, exerciseStats: statsFor(gender.id, gender.exercises.length, missed) }, noPrereqs)).toEqual([]);
   });

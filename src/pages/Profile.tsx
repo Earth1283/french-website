@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FILL_TRANSITION, REVEAL, FADE, COLLAPSE } from '../utils/motion';
-import { Trophy, Flame, Zap, RotateCcw, GraduationCap, Gauge, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
+import { Trophy, CalendarDays, Zap, RotateCcw, GraduationCap, Gauge, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import { useProgressStore, BADGES } from '../stores/progressStore';
 import { useTestStore } from '../stores/testStore';
 import { UNITS } from '../data/units';
@@ -12,7 +12,7 @@ import { getLevelProgress, MAX_LEVEL } from '../utils/levels';
 import { A1_COMPETENCIES } from '../data/a1Competencies';
 
 export function Profile() {
-  const { xp, streak, completedLessons, earnedBadges, isA1Complete, getCompletedUnits, resetProgress } = useProgressStore();
+  const { xp, daysPracticed, completedLessons, earnedBadges, isA1Complete, getCompletedUnits, resetProgress } = useProgressStore();
   const latestTestResult = useTestStore(s => s.latestResult());
   const a1Complete = isA1Complete();
   const completedUnits = getCompletedUnits();
@@ -39,7 +39,7 @@ export function Profile() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { icon: Zap, label: 'XP Earned', value: xp, color: 'var(--gold)' },
-          { icon: Flame, label: 'Day Streak', value: streak, color: 'var(--accent)' },
+          { icon: CalendarDays, label: 'Days Practised', value: daysPracticed, color: 'var(--accent)' },
           { icon: Trophy, label: 'Units Done', value: `${completedUnits}/${UNITS.length}`, color: 'var(--success)' },
         ].map(({ icon: Icon, label, value, color }) => (
           <div key={label} className="card p-4 text-center">

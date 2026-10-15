@@ -5,6 +5,8 @@ import { UNITS, A1_UNIT_IDS } from '../data/units';
 import { defaultCard, updateCard } from '../utils/srs';
 import { buildReviewSession } from '../utils/reviewQueue';
 import { computeNewStreak, todayString } from '../utils/streak';
+
+const countDay = (s: ProgressState) => s.daysPracticed + (s.lastStudiedDate === todayString() ? 0 : 1);
 import { useLearnerStore } from './learnerStore';
 
 interface ProgressStore extends ProgressState {
@@ -52,6 +54,7 @@ export const useProgressStore = create<ProgressStore>()(
       completedLessons: [],
       xp: 0,
       streak: 0,
+      daysPracticed: 0,
       lastStudiedDate: '',
       earnedBadges: [],
       darkMode: false,
@@ -100,6 +103,7 @@ export const useProgressStore = create<ProgressStore>()(
           completedLessons: newCompleted,
           xp: newXP,
           streak: newStreak,
+          daysPracticed: countDay(state),
           lastStudiedDate: today,
           earnedBadges: newBadges,
         });
@@ -128,6 +132,7 @@ export const useProgressStore = create<ProgressStore>()(
         set({
           xp: s.xp + amount,
           streak: computeNewStreak(s.lastStudiedDate, s.streak),
+          daysPracticed: countDay(s),
           lastStudiedDate: todayString(),
         });
       },
@@ -144,6 +149,7 @@ export const useProgressStore = create<ProgressStore>()(
           completedLessons: [],
           xp: 0,
           streak: 0,
+          daysPracticed: 0,
           lastStudiedDate: '',
           earnedBadges: [],
           srsData: {},
@@ -201,6 +207,11 @@ export const useProgressStore = create<ProgressStore>()(
     }),
     {
       name: 'french-progress',
+      version: 1,
+      migrate: (persisted, version) => {
+        const state = persisted as ProgressState;
+        return version < 1 ? { ...state, daysPracticed: state.streak ?? 0 } : state;
+      },
     }
   )
 );

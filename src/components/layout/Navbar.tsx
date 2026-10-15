@@ -18,8 +18,8 @@ const NAV_ITEMS = [
 ];
 
 export function Navbar() {
-  const { darkMode, setDarkMode, xp, streak } = useProgressStore();
-  const hasProgressChip = streak > 0 || xp > 0;
+  const { darkMode, setDarkMode, xp } = useProgressStore();
+  const hasProgressChip = xp > 0;
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
 
@@ -54,7 +54,6 @@ export function Navbar() {
         </motion.div>
 
         <div className="flex items-center gap-1.5">
-          {/* Streak + XP — compact tappable chip, visible on mobile too */}
           {hasProgressChip && (
             <motion.div whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION}>
               <Link
@@ -66,9 +65,7 @@ export function Navbar() {
                   color: darkMode ? 'var(--gold)' : '#b86a20',
                 }}
               >
-                {streak > 0 && <span>🔥 {streak}</span>}
-                {streak > 0 && xp > 0 && <span className="opacity-40">·</span>}
-                {xp > 0 && <span>⚡ {xp}</span>}
+                <span>⚡ {xp}</span>
               </Link>
             </motion.div>
           )}

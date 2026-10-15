@@ -12,18 +12,17 @@ const glassPill =
   'border border-white/20 bg-white/10 backdrop-blur-md transition-colors hover:bg-white/20';
 
 export function Launcher() {
-  const { completedLessons, streak, xp } = useProgressStore();
+  const { completedLessons, daysPracticed, xp } = useProgressStore();
   const next = useLearningPath().path.steps[0];
   const started = completedLessons.length > 0;
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Streak / XP — compact glass chips */}
-      {(streak > 0 || xp > 0) && (
+      {(daysPracticed > 0 || xp > 0) && (
         <div className="flex items-center gap-2 text-xs font-semibold text-white/85">
-          {streak > 0 && (
+          {daysPracticed > 0 && (
             <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 backdrop-blur-md">
-              🔥 {streak} day{streak !== 1 ? 's' : ''}
+              {daysPracticed} day{daysPracticed !== 1 ? 's' : ''} practised
             </span>
           )}
           {xp > 0 && (

@@ -26,6 +26,8 @@ export interface Exercise {
   answer: string;
   options?: string[];
   hint?: string;
+  /** Why the answer is right, shown after a miss. */
+  explanation?: string;
 }
 
 export interface Lesson {
@@ -128,6 +130,8 @@ export interface ProgressState {
   completedLessons: string[];
   xp: number;
   streak: number;
+  /** Distinct days with any study; never resets. */
+  daysPracticed: number;
   lastStudiedDate: string;
   earnedBadges: string[];
   darkMode: boolean;
