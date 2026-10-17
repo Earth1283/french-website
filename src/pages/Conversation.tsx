@@ -3,13 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TAP_TRANSITION, NO_OVERSHOOT_SPRING, REWARD_SPRING, REVEAL, COLLAPSE } from '../utils/motion';
 import {
   ChevronLeft, ArrowUp, Eye, EyeOff, RefreshCw, CheckCircle2, XCircle,
-  Bot, Key, ChevronDown, ChevronUp,
+  Bot, Key, ChevronDown, ChevronUp, Volume2, VolumeX,
 } from 'lucide-react';
 import { SCENARIOS } from '../data/scenarios';
 import { useConversationStore } from '../stores/conversationStore';
 import { Button } from '../components/ui/Button';
 import type { Scenario, Difficulty } from '../types';
 import { callGemini } from '../lib/gemini';
+import { speak } from '../utils/speech';
+import { listenErrorMessage } from '../utils/recognition';
+import { useSpeechInput } from '../hooks/useSpeechInput';
+import { useSpeechStore } from '../stores/speechStore';
+import { MicButton } from '../components/ui/MicButton';
 
 interface ChatMessage {
   role: 'npc' | 'player';
@@ -53,6 +58,11 @@ export function Conversation() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isAiMode = !!geminiApiKey;
+  const { autoSpeakReplies, setAutoSpeakReplies } = useSpeechStore();
+  const mic = useSpeechInput(readings => {
+    setPlayerInput(readings[0]);
+    inputRef.current?.focus();
+  });
 
   const currentTurn = activeScenario?.turns[turnIndex];
   const shuffledOptions = useMemo(
@@ -79,6 +89,7 @@ export function Conversation() {
       translation: difficulty === 1 ? firstTurn.npcEnglish : undefined,
     }]);
     setAiHistory([{ role: 'model', text: firstTurn.npcFrench }]);
+    if (autoSpeakReplies) speak(firstTurn.npcFrench);
     setPlayerInput('');
     setAiError(null);
     setShowHint(false);
@@ -88,6 +99,7 @@ export function Conversation() {
 
   function pushNpc(text: string, translation?: string, feedback?: string) {
     setMessages(prev => [...prev, { role: 'npc', text, translation, feedback }]);
+    if (autoSpeakReplies) speak(text);
   }
 
   function pushPlayer(text: string, correct?: boolean, feedback?: string) {
@@ -419,6 +431,15 @@ export function Conversation() {
           </p>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          <button
+            onClick={() => setAutoSpeakReplies(!autoSpeakReplies)}
+            aria-label={autoSpeakReplies ? 'Stop reading replies aloud' : 'Read replies aloud'}
+            aria-pressed={autoSpeakReplies}
+            className="w-8 h-8 flex items-center justify-center rounded-full ios-press cursor-pointer"
+            style={{ color: autoSpeakReplies ? 'var(--accent)' : 'var(--text-muted)', background: 'transparent', border: 'none' }}
+          >
+            {autoSpeakReplies ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
           {isAiMode && (
             <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--success)' }}>
               <Bot size={12} /> AI
@@ -462,8 +483,19 @@ export function Conversation() {
                       }
                   }
                 >
-                  <p className={msg.role === 'npc' ? 'font-display' : undefined}>
+                  <p className={msg.role === 'npc' ? 'font-display' : undefined} lang={msg.role === 'npc' ? 'fr' : undefined}>
                     {msg.text}
+                    {msg.role === 'npc' && (
+                      <button
+                        type="button"
+                        onClick={() => speak(msg.text)}
+                        aria-label="Hear this line"
+                        className="inline-flex align-middle ml-1.5 cursor-pointer ios-press"
+                        style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none', padding: 0 }}
+                      >
+                        <Volume2 size={14} />
+                      </button>
+                    )}
                   </p>
                   {msg.translation && (
                     <p className="text-xs mt-1 opacity-60 italic">{msg.translation}</p>
@@ -588,23 +620,32 @@ export function Conversation() {
         )}
 
         {/* Text input (medium/hard scripted or AI) — iMessage pill + send */}
+        {showTextInput && mic.error && (
+          <p className="text-xs text-muted text-center" role="status">{listenErrorMessage(mic.error)}</p>
+        )}
         {showTextInput && (
           <div className="flex gap-2 items-center">
             <input
               ref={inputRef}
               type="text"
-              value={playerInput}
+              value={mic.listening ? mic.interim : playerInput}
               onChange={e => setPlayerInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleSubmit(); }}
               placeholder={
-                isAiMode
-                  ? `Reply to ${activeScenario?.npcName}…`
-                  : 'Type your response in French…'
+                mic.listening
+                  ? 'Listening…'
+                  : isAiMode
+                    ? `Reply to ${activeScenario?.npcName}…`
+                    : 'Type your response in French…'
               }
-              disabled={isLoading}
+              lang="fr"
+              disabled={isLoading || mic.listening}
               className="ios-input flex-1 font-display disabled:opacity-50"
               style={{ borderRadius: 99 }}
             />
+            {mic.available && (
+              <MicButton listening={mic.listening} onClick={mic.toggle} disabled={isLoading} idleLabel="Say your reply" diameter={36} />
+            )}
             <motion.button
               whileTap={{ scale: 0.97 }}
               transition={TAP_TRANSITION}

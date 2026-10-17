@@ -464,6 +464,7 @@ export function Lesson() {
                     key={queuePos}
                     exercise={ex}
                     teach
+                    speech
                     onCorrect={captureCorrect}
                     onWrong={captureWrong}
                   />

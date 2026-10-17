@@ -7,7 +7,11 @@ import { UNITS } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { buildReviewSession } from '../utils/reviewQueue';
 import { speak } from '../utils/speech';
+import { checkSpoken, type SpokenCheck } from '../utils/spokenAnswer';
+import { listenErrorMessage } from '../utils/recognition';
+import { useSpeechInput } from '../hooks/useSpeechInput';
 import { Button } from '../components/ui/Button';
+import { MicButton } from '../components/ui/MicButton';
 import type { VocabItem } from '../types';
 
 interface ReviewCard extends VocabItem {
@@ -21,6 +25,21 @@ interface ReviewCard extends VocabItem {
 }
 
 const PRODUCE_AFTER_REPS = 2;
+
+const VERDICT = {
+  correct: { Icon: CheckCircle2, color: 'var(--success)', label: 'Bien dit' },
+  close: { Icon: CheckCircle2, color: '#b45309', label: 'Nearly' },
+  wrong: { Icon: XCircle, color: 'var(--danger)', label: 'Not quite' },
+} as const;
+
+function SpokenVerdict({ check }: { check: SpokenCheck }) {
+  const { Icon, color, label } = VERDICT[check.result];
+  return (
+    <p className="text-sm flex items-center gap-1.5" style={{ color }} role="status">
+      <Icon size={14} /> {label}. We heard <span lang="fr" className="font-medium">“{check.heard}”</span>
+    </p>
+  );
+}
 
 const RETRY_GAP = 3;
 
@@ -57,11 +76,19 @@ export function Review() {
   const [showing, setShowing] = useState<'front' | 'back'>('front');
   const [tally, setTally] = useState({ correct: 0, wrong: 0 });
   const [sessionXP, setSessionXP] = useState(0);
+  const [spoken, setSpoken] = useState<SpokenCheck | null>(null);
 
   const handleReveal = () => {
     setShowing('back');
     if (queue[idx]?.produce) speak(queue[idx].french);
   };
+
+  const mic = useSpeechInput(readings => {
+    const card = queue[idx];
+    if (!card || showing !== 'front') return;
+    setSpoken(checkSpoken(readings, card.french));
+    handleReveal();
+  });
 
   useEffect(() => {
     const card = queue[idx];
@@ -88,6 +115,7 @@ export function Review() {
     }
     setIdx(i => i + 1);
     setShowing('front');
+    setSpoken(null);
   };
 
   useEffect(() => {
@@ -97,6 +125,9 @@ export function Review() {
         if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') {
           e.preventDefault();
           handleReveal();
+        } else if ((e.key === 'm' || e.key === 'M') && queue[idx]?.produce && mic.available) {
+          e.preventDefault();
+          mic.toggle();
         }
       } else {
         if (e.key === 'ArrowRight' || e.key === 'y' || e.key === 'Y') {
@@ -252,6 +283,14 @@ export function Review() {
                 <>
                   <p className="text-2xl font-bold text-primary">{card.english}</p>
                   <p className="text-sm text-muted">How do you say it in French? Out loud counts.</p>
+                  {mic.available && (
+                    <span onClick={e => e.stopPropagation()} className="flex flex-col items-center gap-2 mt-1">
+                      <MicButton listening={mic.listening} onClick={mic.toggle} idleLabel="Say it in French" />
+                      <span className="text-xs text-muted min-h-[1rem]" lang={mic.listening ? 'fr' : undefined}>
+                        {mic.listening ? mic.interim || 'Listening…' : mic.error ? listenErrorMessage(mic.error) : 'Tap the mic and say it · M'}
+                      </span>
+                    </span>
+                  )}
                 </>
               ) : (
                 <>
@@ -299,6 +338,7 @@ export function Review() {
                   <p className="text-xs font-semibold text-muted uppercase tracking-wider">{card.english}</p>
                   <p className="text-3xl font-bold font-display" style={{ color: 'var(--accent)' }}>{card.french}</p>
                   {card.pronunciation && <p className="text-sm text-muted italic">/{card.pronunciation}/</p>}
+                  {spoken && <SpokenVerdict check={spoken} />}
                   <button
                     onClick={() => speak(card.french)}
                     className="w-10 h-10 flex items-center justify-center rounded-full ios-press cursor-pointer"

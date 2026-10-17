@@ -1,10 +1,58 @@
-export function speak(text: string, lang = 'fr-FR'): void {
+import { geminiSpeech, previewGeminiVoice } from '../lib/geminiTts';
+import { useConversationStore } from '../stores/conversationStore';
+import { useSpeechStore } from '../stores/speechStore';
+
+let clipAudio: HTMLAudioElement | null = null;
+let latestSpeechRequest = 0;
+
+function deviceSpeak(text: string, lang: string): void {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = lang;
   utter.rate = 0.85;
   window.speechSynthesis.speak(utter);
+}
+
+export function stopSpeaking(): void {
+  latestSpeechRequest++;
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  clipAudio?.pause();
+  clipAudio = null;
+}
+
+function playClip(blob: Blob, token: number, onFail: () => void): void {
+  if (token !== latestSpeechRequest) return;
+  const url = URL.createObjectURL(blob);
+  const audio = new Audio(url);
+  clipAudio = audio;
+  const release = () => URL.revokeObjectURL(url);
+  audio.onended = release;
+  audio.onerror = () => { release(); if (token === latestSpeechRequest) onFail(); };
+  audio.play().catch(() => { release(); if (token === latestSpeechRequest) onFail(); });
+}
+
+export function speak(text: string, lang = 'fr-FR'): void {
+  stopSpeaking();
+  const token = latestSpeechRequest;
+  const { voiceEngine, geminiVoice } = useSpeechStore.getState();
+  const apiKey = useConversationStore.getState().geminiApiKey;
+  if (voiceEngine !== 'gemini' || !apiKey || !lang.startsWith('fr')) {
+    deviceSpeak(text, lang);
+    return;
+  }
+  const fallback = () => deviceSpeak(text, lang);
+  geminiSpeech(apiKey, text, geminiVoice).then(
+    blob => playClip(blob, token, fallback),
+    () => { if (token === latestSpeechRequest) fallback(); },
+  );
+}
+
+export async function previewVoice(apiKey: string, voice: string, text: string): Promise<void> {
+  stopSpeaking();
+  const token = latestSpeechRequest;
+  const blob = await previewGeminiVoice(apiKey, text, voice);
+  playClip(blob, token, () => {});
 }
 
 export function speechSupported(): boolean {
@@ -135,7 +183,7 @@ export function playScript(lines: ScriptLine[], voices: SpeechSynthesisVoice[], 
     });
 
   const run = async (): Promise<'ended' | 'cancelled'> => {
-    synth.cancel();
+    stopSpeaking();
     for (let i = 0; i < lines.length; i++) {
       if (cancelled) return 'cancelled';
       opts.onLine?.(i);

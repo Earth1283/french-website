@@ -12,6 +12,7 @@ interface AnswerFeedbackProps {
   answer: string;
   heading?: string;
   given?: string;
+  givenLabel?: string;
   explanation?: string;
   onContinue?: () => void;
 }
@@ -29,7 +30,7 @@ const TONE_STYLE: Record<FeedbackTone, { background: string; border: string; lab
   },
 };
 
-export function AnswerFeedback({ tone, answer, heading, given, explanation, onContinue }: AnswerFeedbackProps) {
+export function AnswerFeedback({ tone, answer, heading, given, givenLabel = 'You wrote', explanation, onContinue }: AnswerFeedbackProps) {
   const style = TONE_STYLE[tone];
   const ref = useRef<HTMLDivElement>(null);
 
@@ -48,7 +49,7 @@ export function AnswerFeedback({ tone, answer, heading, given, explanation, onCo
         </p>
         {given && (
           <p className="text-sm text-muted">
-            You wrote <s>{given}</s>
+            {givenLabel} {tone === 'wrong' ? <s>{given}</s> : <span lang="fr">“{given}”</span>}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">

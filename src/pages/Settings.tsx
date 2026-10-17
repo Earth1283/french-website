@@ -10,6 +10,8 @@ import { useConversationStore } from '../stores/conversationStore';
 import { useLearnerStore } from '../stores/learnerStore';
 import { Button } from '../components/ui/Button';
 import { ToggleSwitch } from '../components/ui/ToggleSwitch';
+import { GroupLabel, SettingRow } from '../components/settings/SettingsParts';
+import { SpeechSettings } from '../components/settings/SpeechSettings';
 import { PersonalizeModal } from '../components/home/PersonalizeModal';
 import type { Difficulty } from '../types';
 import { ACCENT_PRESETS, DIFFICULTY_LABELS } from '../data/settingsConstants';
@@ -258,6 +260,8 @@ export function Settings() {
         </div>
       </section>
 
+      <SpeechSettings />
+
       <section>
         <GroupLabel icon={<Route size={12} />} title="Learning Path" />
         <div className="inset-group">
@@ -333,8 +337,9 @@ export function Settings() {
           <div className="p-4 inset-divider space-y-1">
             <p className="text-xs text-muted">
               <span className="font-semibold">Bonjour Survival</span> — All data is stored locally in your browser.
-              Nothing is sent to any server, except your Gemini key being sent directly to Google's API when you
-              use Conversation mode.
+              Nothing is sent to any server, except your Gemini key and text going directly to Google's API when you
+              use Conversation mode, DELF marking or Gemini voices, and your voice going to your browser's speech
+              service when you answer out loud.
             </p>
             <p className="text-xs text-muted">v0.1.0</p>
           </div>
@@ -514,33 +519,3 @@ export function Settings() {
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
-
-function GroupLabel({ icon, title }: { icon: React.ReactNode; title: string }) {
-  return (
-    <div className="section-label flex items-center gap-1.5">
-      <span style={{ color: 'var(--accent)' }}>{icon}</span>
-      {title}
-    </div>
-  );
-}
-
-function SettingRow({
-  label,
-  description,
-  children,
-}: {
-  label: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="inset-row justify-between">
-      <div>
-        <p className="text-sm font-semibold text-primary">{label}</p>
-        {description && <p className="text-xs text-muted mt-0.5">{description}</p>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
