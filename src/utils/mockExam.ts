@@ -4,9 +4,6 @@ import { SPEAKING_TASKS } from '../data/exam/speaking';
 import { passesDelf, readingNeededToPass, toOutOf25 } from '../data/exam/rubric';
 import type { DelfLevel, MockExamResult } from '../types/exam';
 
-// A mock paper in the order of the real one: listening, then writing, then
-// speaking (reading isn't in the app). Times are the official section lengths.
-
 export const MOCK_MINUTES: Record<DelfLevel, { listening: number; writing: number }> = {
   a1: { listening: 20, writing: 30 },
   a2: { listening: 25, writing: 45 },
@@ -14,7 +11,6 @@ export const MOCK_MINUTES: Record<DelfLevel, { listening: number; writing: numbe
   b2: { listening: 30, writing: 60 },
 };
 
-/** The DELF level to suggest from a placement-test CEFR result. */
 export function delfLevelFromPlacement(cefr: string | undefined): DelfLevel {
   const l = cefr?.toLowerCase() ?? '';
   if (l.startsWith('b2') || l.startsWith('c')) return 'b2';
@@ -41,7 +37,7 @@ function pick<T>(items: T[], n: number, random: () => number): T[] {
   return out;
 }
 
-/** Draws a paper, preferring items the learner hasn't seen in earlier mocks. */
+/** Prefers items the learner hasn't seen in earlier mocks. */
 export function pickMockPaper(level: DelfLevel, previous: MockExamResult[] = [], random: () => number = Math.random): MockPaper {
   const seen = new Set(previous.flatMap(r => [...r.listeningDocIds, ...r.writingTaskIds, r.speakingTaskId]));
   const fresh = <T extends { id: string }>(items: T[], n: number) => {
@@ -54,7 +50,6 @@ export function pickMockPaper(level: DelfLevel, previous: MockExamResult[] = [],
   const speaking = fresh(SPEAKING_TASKS.filter(t => t.level === level), 1);
   return {
     level,
-    // Keep the paper's order: shorter, easier documents first, as on the day.
     listeningDocIds: LISTENING_DOCS.filter(d => listening.includes(d)).map(d => d.id),
     writingTaskIds: writing.map(t => t.id),
     speakingTaskId: speaking[0]?.id ?? '',

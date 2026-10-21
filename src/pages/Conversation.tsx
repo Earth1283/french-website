@@ -101,10 +101,7 @@ export function Conversation() {
     setView('chat');
   }
 
-  /**
-   * Ends the conversation and builds its debrief. `pending` holds messages
-   * pushed in the same handler, which this render's `messages` doesn't have yet.
-   */
+  /** `pending`: messages pushed in the same handler, which this render's `messages` doesn't have yet. */
   async function endConversation(success: boolean, pending: ChatMessage[] = []) {
     if (!activeScenario) return;
     const scenario = activeScenario;

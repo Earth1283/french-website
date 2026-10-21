@@ -14,7 +14,7 @@ const GENERATE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/ge
 
 type Part = { text: string } | { inline_data: { mime_type: string; data: string } };
 
-/** One JSON-mode generateContent call. The key goes in a header so it stays out of URLs and logs. */
+// The key goes in a header so it stays out of URLs and logs.
 async function generateJson(
   apiKey: string,
   systemPrompt: string,
@@ -163,10 +163,8 @@ Respond ONLY with JSON:
   return parseWritingEvaluation(parseJson(out, 'evaluation'), task, text);
 }
 
-// ─── Speaking evaluation (DELF production orale) ────────────────────────────
-
 export interface SpokenPart {
-  /** Base64 audio of the candidate only; null when the part was skipped. */
+  /** The candidate only: recording pauses while the examiner speaks. */
   audio: { mimeType: string; data: string } | null;
   seconds: number;
 }
@@ -175,7 +173,7 @@ export function expectedSpeakingSeconds(task: SpeakingTask): number {
   return task.parts.reduce((sum, p) => sum + p.speakMinutes * 60, 0);
 }
 
-/** Model output is untrusted: bands are clamped and the score recomputed, as for writing. */
+/** Model output is untrusted: bands are clamped and the score recomputed. */
 export function parseSpeakingEvaluation(raw: unknown, task: SpeakingTask, secondsPerPart: number[]): SpeakingEvaluation {
   const obj = asRecord(raw);
   const rawComments = asRecord(obj.comments);
@@ -237,8 +235,6 @@ Respond ONLY with JSON:
   const out = await generateJson(apiKey, systemPrompt, [{ role: 'user', parts: content }], 0.2);
   return parseSpeakingEvaluation(parseJson(out, 'evaluation'), task, parts.map(p => p.seconds));
 }
-
-// ─── Conversation debrief ────────────────────────────────────────────────────
 
 export function parseDebrief(raw: unknown): ConversationDebrief {
   const obj = asRecord(raw);

@@ -187,7 +187,6 @@ export interface DebriefPhrase {
   english: string;
 }
 
-/** What a learner takes away from a conversation: what went well, what to fix, what to reuse. */
 export interface ConversationDebrief {
   source: 'ai' | 'scripted';
   summary: string;

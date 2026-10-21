@@ -122,8 +122,6 @@ export function toOutOf25(score: number, max: number): number {
   return max === 0 ? 0 : Math.round((score / max) * 25 * 2) / 2;
 }
 
-// ─── Grids, so one scorecard can show either paper ───────────────────────────
-
 export interface RubricGrid<Id extends string = string> {
   title: string;
   criteria: RubricCriterion<Id>[];
@@ -134,11 +132,9 @@ export function writingGrid(level: DelfLevel): RubricGrid<RubricCriterionId> {
   return { title: `Grille DELF ${level.toUpperCase()} · écrit`, criteria: RUBRIC_CRITERIA, points: BAND_POINTS[level] };
 }
 
-// ─── Production orale ────────────────────────────────────────────────────────
-// The official speaking grids mix part-specific criteria with a shared
-// linguistic grid (lexique, morphosyntaxe, phonologie). This app folds them
-// into five criteria on the same four bands, 5 points each, for /25 at every
-// level. Descriptors are plain-English paraphrases, not the official wording.
+// A simplification of the official speaking grids, which mix part-specific
+// criteria with a shared linguistic grid: five criteria, 5 points each, /25 at
+// every level. Descriptors are paraphrases, not the official wording.
 
 export const SPEAKING_CRITERIA: RubricCriterion<SpeakingCriterionId>[] = [
   {
@@ -181,7 +177,6 @@ export function speakingGrid(level: DelfLevel): RubricGrid<SpeakingCriterionId> 
   return { title: `Grille DELF ${level.toUpperCase()} · oral`, criteria: SPEAKING_CRITERIA, points: SPEAKING_BAND_POINTS };
 }
 
-/** Under a quarter of the expected speaking time there is not enough to assess. */
 export function isSpeechTooShort(secondsSpoken: number, expectedSeconds: number): boolean {
   return secondsSpoken < expectedSeconds / 4;
 }
@@ -207,12 +202,10 @@ export function buildSpeakingEvaluation(
   };
 }
 
-// ─── Whole paper ─────────────────────────────────────────────────────────────
-
 export const PASS_MARK = 50;
 export const SECTION_MINIMUM = 5;
 
-/** The reading score needed to pass, given the other three sections; null if they already rule a pass out. */
+/** Null when the other three sections already rule a pass out. */
 export function readingNeededToPass(otherSections: number[]): number | null {
   if (otherSections.some(s => s < SECTION_MINIMUM)) return null;
   const needed = Math.max(SECTION_MINIMUM, PASS_MARK - otherSections.reduce((a, b) => a + b, 0));

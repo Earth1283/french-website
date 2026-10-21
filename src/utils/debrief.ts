@@ -6,11 +6,6 @@ export interface PlayerReply {
   correct?: boolean;
 }
 
-/**
- * The debrief for a scripted (no-AI) conversation, built from the scenario
- * itself: each missed turn becomes a correction, and the expected replies for
- * the turns reached are the phrases to keep.
- */
 export function scriptedDebrief(scenario: Scenario, replies: PlayerReply[], missionComplete: boolean): ConversationDebrief {
   const turns = scenario.turns.slice(0, replies.length);
   const firstTime = replies.filter(r => r.correct).length;

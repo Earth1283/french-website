@@ -1,8 +1,5 @@
 import { expect, test, type Page, type Request } from '@playwright/test';
 
-// A fake microphone (Chromium's synthetic audio device) so MediaRecorder
-// produces real audio, and instant speech synthesis so the examiner's lines
-// don't hold the test up.
 test.use({
   launchOptions: async ({ launchOptions }, use) => use({
     ...launchOptions,
@@ -31,7 +28,6 @@ async function withGeminiKey(page: Page) {
   });
 }
 
-/** Answers every Gemini call with `reply` and records the requests. */
 async function stubGemini(page: Page, reply: (body: string) => unknown) {
   const requests: Request[] = [];
   await page.route('https://generativelanguage.googleapis.com/**', async route => {
@@ -149,7 +145,6 @@ test('a scripted conversation ends with a debrief that is kept for later', async
   await page.goto('/#/converse');
   await page.getByRole('button', { name: /Un café, s'il vous plaît/ }).first().click();
 
-  // A wrong reply first, then end early.
   await page.getByRole('button', { name: 'Oui, je veux du café.' }).click();
   await page.getByRole('button', { name: 'End and see your debrief' }).click();
 

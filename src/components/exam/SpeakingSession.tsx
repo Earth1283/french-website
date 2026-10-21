@@ -10,7 +10,6 @@ import type { SpeakingPart, SpeakingTask } from '../../types/exam';
 
 interface SpeakingSessionProps {
   task: SpeakingTask;
-  /** Exam conditions: no English, no checklists or phrases, no redoing a part. */
   examMode: boolean;
   onComplete: (recordings: (Recording | null)[]) => void;
 }
@@ -194,7 +193,6 @@ interface PanelProps {
   onFinish: (recording: Recording | null) => void;
 }
 
-/** Records one part, pausing while the examiner's lines are read aloud. */
 function PartRecorderPanel({ part, examMode, onFinish }: PanelProps) {
   const recorder = useRef<PartRecorder | null>(null);
   const playback = useRef<PlaybackHandle | null>(null);

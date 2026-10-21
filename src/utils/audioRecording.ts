@@ -1,9 +1,5 @@
-// Microphone recording for the speaking exam. MediaRecorder works in every
-// current browser (unlike speech recognition), but each one records in its own
-// container — WebM in Chrome, Ogg in Firefox, MP4 in Safari — and Gemini only
-// takes a few audio types. So recordings are decoded and re-encoded as 16-bit
-// mono WAV before marking, at the highest sample rate that keeps a whole
-// paper inside one inline request.
+// Each browser records in its own container (WebM, Ogg, MP4) and Gemini only
+// takes a few audio types, so recordings are re-encoded as mono WAV for marking.
 
 export type RecorderError = 'unsupported' | 'not-allowed' | 'other';
 
@@ -26,11 +22,11 @@ export function recorderErrorMessage(code: RecorderError): string {
 
 export interface Recording {
   blob: Blob;
-  /** Seconds actually recorded, not counting pauses. */
+  /** Not counting pauses. */
   seconds: number;
 }
 
-/** Records one part. Pausing (while the examiner speaks) keeps the examiner's voice off the candidate's track. */
+/** Pausing while the examiner speaks keeps their voice off the candidate's track. */
 export class PartRecorder {
   private recorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
@@ -58,7 +54,6 @@ export class PartRecorder {
     return this.recorder?.state === 'recording';
   }
 
-  /** Seconds recorded so far, not counting pauses. */
   elapsed(): number {
     const live = this.recording ? performance.now() - this.startedAt : 0;
     return (this.recordedMs + live) / 1000;
@@ -89,7 +84,6 @@ export class PartRecorder {
     });
   }
 
-  /** Stops without keeping anything — on leaving the page. */
   discard(): void {
     if (this.recorder && this.recorder.state !== 'inactive') {
       this.recorder.onstop = null;
@@ -111,14 +105,12 @@ export class RecorderStartError extends Error {
   }
 }
 
-// ─── WAV encoding for marking ────────────────────────────────────────────────
-
 /** Gemini accepts up to 20 MB inline; base64 adds a third, so stay well under. */
 export const AUDIO_BUDGET_BYTES = 12_000_000;
 const PREFERRED_RATE = 16_000;
 const MIN_RATE = 8_000;
 
-/** The sample rate for a paper of this length, or null when it's too long to send even at telephone quality. */
+/** Null when the paper is too long to send even at telephone quality. */
 export function chooseSampleRate(totalSeconds: number, budgetBytes = AUDIO_BUDGET_BYTES): number | null {
   if (totalSeconds <= 0) return PREFERRED_RATE;
   const fits = Math.floor(budgetBytes / (2 * totalSeconds));
@@ -127,7 +119,6 @@ export function chooseSampleRate(totalSeconds: number, budgetBytes = AUDIO_BUDGE
   return Math.floor(fits / 1000) * 1000;
 }
 
-/** 16-bit PCM mono WAV. */
 export function encodeWav(samples: Float32Array, sampleRate: number): Uint8Array<ArrayBuffer> {
   const out = new Uint8Array(44 + samples.length * 2);
   const view = new DataView(out.buffer);
@@ -161,7 +152,6 @@ export function bytesToBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-/** Decodes whatever the browser recorded and resamples it to mono at `sampleRate`. */
 export async function toWavBase64(blob: Blob, sampleRate: number): Promise<string> {
   const ctx = new AudioContext();
   try {
@@ -185,7 +175,6 @@ export class RecordingTooLongError extends Error {
   }
 }
 
-/** Every part's recording as WAV, ready to send for marking; null for parts that weren't recorded. */
 export async function recordingsForMarking(
   recordings: (Recording | null)[],
 ): Promise<({ mimeType: 'audio/wav'; data: string; seconds: number } | null)[]> {

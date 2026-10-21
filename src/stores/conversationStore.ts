@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ConversationRecord, Difficulty } from '../types';
 
-// Debriefs are small, but keep the list bounded.
 const MAX_HISTORY = 100;
 
 interface ConversationStore {

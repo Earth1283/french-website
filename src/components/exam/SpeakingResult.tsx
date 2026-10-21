@@ -46,7 +46,6 @@ interface SpeakingMarkingProps {
   onEvaluated: (evaluation: SpeakingEvaluation) => void;
 }
 
-/** Marks a finished paper: by Gemini when there's a key, otherwise (or if that fails) by the learner. */
 export function SpeakingMarking({ task, recordings, apiKey, onEvaluated }: SpeakingMarkingProps) {
   const [mode, setMode] = useState<'ai' | 'self'>(apiKey ? 'ai' : 'self');
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +70,6 @@ export function SpeakingMarking({ task, recordings, apiKey, onEvaluated }: Speak
         setMode('self');
       }
     })();
-    // Runs once per finished paper.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
@@ -142,7 +140,7 @@ export function SpeakingMarking({ task, recordings, apiKey, onEvaluated }: Speak
 interface SpeakingFeedbackProps {
   task: SpeakingTask;
   evaluation: SpeakingEvaluation;
-  /** Present while the recordings are still in memory (this session only). */
+  /** Only while the recordings are still in memory. */
   recordings?: (Recording | null)[];
 }
 

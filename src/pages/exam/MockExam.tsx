@@ -50,7 +50,6 @@ interface WrittenText {
 
 const MIDDLE_BANDS = Object.fromEntries(RUBRIC_CRITERIA.map(c => [c.id, 2])) as Record<RubricCriterionId, RubricBand>;
 
-/** Elapsed time for the current section, against the official length. */
 function SectionClock({ minutes, label }: { minutes: number; label: string }) {
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
@@ -125,7 +124,6 @@ export function MockExam() {
       setStage({ kind: 'writing', task: index + 1 });
       return;
     }
-    // Mark the writing in the background while the speaking section runs.
     if (apiKey) {
       writingMarking.current = Promise.all(tasks.map((t, i) =>
         evaluateWriting(apiKey, t, next[i].text).catch(() => null),
@@ -161,7 +159,6 @@ export function MockExam() {
     const date = todayString();
     const stamp = Date.now();
 
-    // Each section also lands in that item's own history.
     const graded = docs.map((d, i) => gradeListening(d.questions, answers[i] ?? []));
     docs.forEach((d, i) => store.addListeningResult({
       id: `listening-${stamp}-${i}`, docId: d.id, date, mode: 'exam',
@@ -198,7 +195,6 @@ export function MockExam() {
     setStage({ kind: 'results' });
   }
 
-  // ─── Intro ──────────────────────────────────────────────────────────────────
   if (stage.kind === 'intro' || !paper) {
     const minutes = MOCK_MINUTES[level];
     const past = mockResults.filter(r => r.level === level).reverse();
@@ -277,7 +273,6 @@ export function MockExam() {
     );
   }
 
-  // ─── Sections ───────────────────────────────────────────────────────────────
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
       <div className="flex items-center gap-2 flex-wrap">
@@ -404,11 +399,9 @@ export function MockExam() {
   );
 }
 
-// ─── Results ──────────────────────────────────────────────────────────────────
-
 interface MockResultsProps {
   result: MockExamResult;
-  /** Straight after sitting the mock, with answers, texts and recordings to review; an older result shows scores only. */
+  /** Just sat, so answers, texts and recordings are still in memory to review. */
   fresh: boolean;
   docs: NonNullable<ReturnType<typeof getListeningDoc>>[];
   answers: (string | undefined)[][];

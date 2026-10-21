@@ -4,12 +4,8 @@ import { A2_SPEAKING } from './speaking/a2';
 import { B1_SPEAKING } from './speaking/b1';
 import { B2_SPEAKING } from './speaking/b2';
 
-// Original speaking subjects in the DELF tout public formats. Each task is a
-// whole production orale paper: every part, in order, as on exam day.
-
 export const SPEAKING_TASKS: SpeakingTask[] = [...A1_SPEAKING, ...A2_SPEAKING, ...B1_SPEAKING, ...B2_SPEAKING];
 
-/** The part sequence of each level's paper. */
 export const SPEAKING_FORMAT: Record<DelfLevel, SpeakingPartKind[]> = {
   a1: ['entretien', 'echange', 'interaction'],
   a2: ['entretien', 'monologue', 'interaction'],
