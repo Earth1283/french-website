@@ -90,3 +90,73 @@ export interface WritingSubmission {
   secondsSpent: number;
   evaluation: WritingEvaluation | null;
 }
+
+export type SpeakingPartKind = 'entretien' | 'echange' | 'interaction' | 'monologue' | 'point-de-vue' | 'debat';
+
+export interface SpeakingPart {
+  kind: SpeakingPartKind;
+  title: string;
+  consigne: string;
+  instructionsEn: string;
+  /** A B1/B2 article, or a role-play card. */
+  document?: string;
+  /** A1 échange d'informations only. */
+  cueCards?: string[];
+  prepMinutes: number;
+  speakMinutes: number;
+  /** Read aloud one at a time; empty when the candidate speaks alone. */
+  examinerLines: string[];
+  checklist: string[];
+  usefulPhrases: string[];
+  modelAnswer: string;
+}
+
+export interface SpeakingTask {
+  id: string;
+  level: DelfLevel;
+  title: string;
+  parts: SpeakingPart[];
+}
+
+export type SpeakingCriterionId = 'task' | 'interaction' | 'lexicon' | 'morphosyntax' | 'phonology';
+
+export interface SpeakingEvaluation {
+  source: 'ai' | 'self';
+  bands: Record<SpeakingCriterionId, RubricBand>;
+  comments: Partial<Record<SpeakingCriterionId, string>>;
+  score: number;
+  maxScore: number;
+  summary?: string;
+  corrections?: WritingCorrection[];
+  /** AI marking only, one per part. */
+  transcripts?: string[];
+  tooShort?: boolean;
+}
+
+export interface SpeakingAttempt {
+  id: string;
+  taskId: string;
+  date: string;
+  secondsPerPart: number[];
+  evaluation: SpeakingEvaluation | null;
+}
+
+export interface MockSectionScore {
+  /** Out of 25. */
+  score: number;
+  source: 'auto' | 'ai' | 'self';
+}
+
+export interface MockExamResult {
+  id: string;
+  level: DelfLevel;
+  date: string;
+  listening: MockSectionScore;
+  writing: MockSectionScore;
+  speaking: MockSectionScore;
+  /** Reading isn't in the app; the learner may enter a score from an official sample paper. */
+  reading: number | null;
+  listeningDocIds: string[];
+  writingTaskIds: string[];
+  speakingTaskId: string;
+}

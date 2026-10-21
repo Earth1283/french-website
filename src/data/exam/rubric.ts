@@ -1,4 +1,6 @@
-import type { DelfLevel, RubricBand, RubricCriterionId, WritingEvaluation } from '../../types/exam';
+import type {
+  DelfLevel, RubricBand, RubricCriterionId, SpeakingCriterionId, SpeakingEvaluation, WritingEvaluation,
+} from '../../types/exam';
 
 // The DELF production écrite grids (current format) score five criteria, each
 // on four performance bands. Only the points per band change by level:
@@ -8,8 +10,8 @@ import type { DelfLevel, RubricBand, RubricCriterionId, WritingEvaluation } from
 // A text under half the required word count scores 0 on every criterion.
 // Descriptors below are short English paraphrases, not the official wording.
 
-export interface RubricCriterion {
-  id: RubricCriterionId;
+export interface RubricCriterion<Id extends string = RubricCriterionId> {
+  id: Id;
   labelFr: string;
   labelEn: string;
   /** What the "at level" band looks like, in plain English. */
@@ -118,4 +120,100 @@ export function buildEvaluation(
 /** Official pass mark is 50/100 overall with at least 5/25 per skill; a section score is shown out of 25. */
 export function toOutOf25(score: number, max: number): number {
   return max === 0 ? 0 : Math.round((score / max) * 25 * 2) / 2;
+}
+
+export interface RubricGrid<Id extends string = string> {
+  title: string;
+  criteria: RubricCriterion<Id>[];
+  points: readonly [number, number, number, number];
+}
+
+export function writingGrid(level: DelfLevel): RubricGrid<RubricCriterionId> {
+  return { title: `Grille DELF ${level.toUpperCase()} · écrit`, criteria: RUBRIC_CRITERIA, points: BAND_POINTS[level] };
+}
+
+// A simplification of the official speaking grids, which mix part-specific
+// criteria with a shared linguistic grid: five criteria, 5 points each, /25 at
+// every level. Descriptors are paraphrases, not the official wording.
+
+export const SPEAKING_CRITERIA: RubricCriterion<SpeakingCriterionId>[] = [
+  {
+    id: 'task',
+    labelFr: 'Réalisation des tâches',
+    labelEn: 'Task completion',
+    atLevel: 'Does what each part asks: answers the questions, asks them, carries the role-play through, presents a point of view.',
+  },
+  {
+    id: 'interaction',
+    labelFr: 'Interaction et cohérence',
+    labelEn: 'Interaction and coherence',
+    atLevel: 'Reacts to the examiner, keeps the exchange going, and links ideas so they are easy to follow.',
+  },
+  {
+    id: 'lexicon',
+    labelFr: 'Lexique',
+    labelEn: 'Vocabulary',
+    atLevel: 'Vocabulary is broad and precise enough for the topics, with few words that block understanding.',
+  },
+  {
+    id: 'morphosyntax',
+    labelFr: 'Morphosyntaxe',
+    labelEn: 'Grammar',
+    atLevel: 'Sentence structures and verb forms are controlled for the level.',
+  },
+  {
+    id: 'phonology',
+    labelFr: 'Phonologie',
+    labelEn: 'Pronunciation',
+    atLevel: 'Sounds, liaisons and intonation are clear enough to follow without effort.',
+  },
+];
+
+export const SPEAKING_BAND_POINTS = [0, 1, 3, 5] as const;
+
+export const MAX_SPEAKING_SCORE = SPEAKING_BAND_POINTS[3] * SPEAKING_CRITERIA.length;
+
+export function speakingGrid(level: DelfLevel): RubricGrid<SpeakingCriterionId> {
+  return { title: `Grille DELF ${level.toUpperCase()} · oral`, criteria: SPEAKING_CRITERIA, points: SPEAKING_BAND_POINTS };
+}
+
+export function isSpeechTooShort(secondsSpoken: number, expectedSeconds: number): boolean {
+  return secondsSpoken < expectedSeconds / 4;
+}
+
+export function buildSpeakingEvaluation(
+  source: SpeakingEvaluation['source'],
+  rawBands: Partial<Record<SpeakingCriterionId, unknown>>,
+  secondsSpoken: number,
+  expectedSeconds: number,
+  extras: Pick<SpeakingEvaluation, 'comments' | 'summary' | 'corrections' | 'transcripts'> = { comments: {} },
+): SpeakingEvaluation {
+  const tooShort = isSpeechTooShort(secondsSpoken, expectedSeconds);
+  const bands = Object.fromEntries(
+    SPEAKING_CRITERIA.map(c => [c.id, tooShort ? 0 : clampBand(rawBands[c.id])]),
+  ) as Record<SpeakingCriterionId, RubricBand>;
+  return {
+    source,
+    bands,
+    score: SPEAKING_CRITERIA.reduce((sum, c) => sum + SPEAKING_BAND_POINTS[bands[c.id]], 0),
+    maxScore: MAX_SPEAKING_SCORE,
+    tooShort,
+    ...extras,
+  };
+}
+
+export const PASS_MARK = 50;
+export const SECTION_MINIMUM = 5;
+
+/** Null when the other three sections already rule a pass out. */
+export function readingNeededToPass(otherSections: number[]): number | null {
+  if (otherSections.some(s => s < SECTION_MINIMUM)) return null;
+  const needed = Math.max(SECTION_MINIMUM, PASS_MARK - otherSections.reduce((a, b) => a + b, 0));
+  return needed > 25 ? null : needed;
+}
+
+export function passesDelf(sections: number[]): boolean {
+  return sections.length === 4
+    && sections.every(s => s >= SECTION_MINIMUM)
+    && sections.reduce((a, b) => a + b, 0) >= PASS_MARK;
 }

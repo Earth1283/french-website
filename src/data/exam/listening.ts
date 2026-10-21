@@ -7,7 +7,6 @@ import type { ListeningDoc } from '../../types/exam';
 // People, places and figures are fictional.
 
 export const LISTENING_DOCS: ListeningDoc[] = [
-  // ─── A1 ───────────────────────────────────────────────────────────────────
   {
     id: 'a1-gare',
     level: 'a1',
@@ -176,7 +175,6 @@ export const LISTENING_DOCS: ListeningDoc[] = [
     ],
   },
 
-  // ─── A2 ───────────────────────────────────────────────────────────────────
   {
     id: 'a2-cabinet-medical',
     level: 'a2',
@@ -359,7 +357,6 @@ export const LISTENING_DOCS: ListeningDoc[] = [
     ],
   },
 
-  // ─── B1 ───────────────────────────────────────────────────────────────────
   {
     id: 'b1-velos',
     level: 'b1',
@@ -563,7 +560,6 @@ export const LISTENING_DOCS: ListeningDoc[] = [
     ],
   },
 
-  // ─── B2 ───────────────────────────────────────────────────────────────────
   {
     id: 'b2-teletravail',
     level: 'b2',
