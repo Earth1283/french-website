@@ -181,3 +181,26 @@ export interface ExerciseStat {
   correct: number;
   lastCorrect: boolean;
 }
+
+export interface DebriefPhrase {
+  french: string;
+  english: string;
+}
+
+/** What a learner takes away from a conversation: what went well, what to fix, what to reuse. */
+export interface ConversationDebrief {
+  source: 'ai' | 'scripted';
+  summary: string;
+  strengths: string[];
+  corrections: { original: string; corrected: string; explanation: string }[];
+  phrases: DebriefPhrase[];
+}
+
+export interface ConversationRecord {
+  id: string;
+  scenarioId: string;
+  date: string;
+  missionComplete: boolean;
+  exchanges: number;
+  debrief: ConversationDebrief;
+}

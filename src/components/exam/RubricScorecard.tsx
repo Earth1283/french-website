@@ -1,27 +1,36 @@
-import { BAND_POINTS, RUBRIC_CRITERIA, bandLabel, maxWritingScore, scoreBands, toOutOf25 } from '../../data/exam/rubric';
-import type { DelfLevel, RubricBand, RubricCriterionId, WritingEvaluation } from '../../types/exam';
+import { bandLabel, toOutOf25, writingGrid, type RubricGrid } from '../../data/exam/rubric';
+import type { DelfLevel, RubricBand } from '../../types/exam';
 
-interface RubricScorecardProps {
+interface ScoredEvaluation<Id extends string> {
+  bands: Record<Id, RubricBand>;
+  comments?: Partial<Record<Id, string>>;
+  score: number;
+  tooShort?: boolean;
+}
+
+interface RubricScorecardProps<Id extends string> {
   level: DelfLevel;
-  evaluation?: WritingEvaluation | null;
+  /** Defaults to the writing grid for the level. */
+  grid?: RubricGrid<Id>;
+  evaluation?: ScoredEvaluation<Id> | null;
   /** Editable mode: a band picker per criterion (self-assessment, teacher review). */
-  bands?: Record<RubricCriterionId, RubricBand>;
-  onBandChange?: (id: RubricCriterionId, band: RubricBand) => void;
+  bands?: Record<Id, RubricBand>;
+  onBandChange?: (id: Id, band: RubricBand) => void;
 }
 
 const BANDS: RubricBand[] = [0, 1, 2, 3];
 
-export function RubricScorecard({ level, evaluation, bands, onBandChange }: RubricScorecardProps) {
+export function RubricScorecard<Id extends string>({ level, grid, evaluation, bands, onBandChange }: RubricScorecardProps<Id>) {
+  const { title, criteria, points } = grid ?? (writingGrid(level) as unknown as RubricGrid<Id>);
   const editable = !!onBandChange && !!bands;
   const active = editable ? bands : evaluation?.bands;
-  const points = BAND_POINTS[level];
-  const max = maxWritingScore(level);
-  const score = editable ? scoreBands(level, bands) : evaluation?.score ?? 0;
+  const max = points[3] * criteria.length;
+  const score = editable ? criteria.reduce((sum, c) => sum + points[bands[c.id]], 0) : evaluation?.score ?? 0;
 
   return (
     <div className="card p-4 space-y-4">
       <div className="flex items-baseline justify-between">
-        <p className="text-sm font-semibold text-primary">Grille DELF {level.toUpperCase()}</p>
+        <p className="text-sm font-semibold text-primary">{title}</p>
         <p className="text-sm">
           <span className="text-2xl font-bold text-primary">{score}</span>
           <span className="text-muted"> / {max}</span>
@@ -31,12 +40,14 @@ export function RubricScorecard({ level, evaluation, bands, onBandChange }: Rubr
 
       {evaluation?.tooShort && (
         <p className="text-xs" style={{ color: 'var(--danger)' }}>
-          Under half the required length: the official grid gives 0 on every criterion.
+          {grid
+            ? 'Too little to assess: the grid gives 0 on every criterion.'
+            : 'Under half the required length: the official grid gives 0 on every criterion.'}
         </p>
       )}
 
       <div className="space-y-3">
-        {RUBRIC_CRITERIA.map(c => {
+        {criteria.map(c => {
           const band = active?.[c.id] ?? 0;
           const comment = evaluation?.comments?.[c.id];
           return (

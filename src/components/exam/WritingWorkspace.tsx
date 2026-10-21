@@ -17,7 +17,7 @@ interface WritingWorkspaceProps {
   submitLabel?: string;
 }
 
-function formatClock(totalSeconds: number): string {
+export function formatClock(totalSeconds: number): string {
   const sign = totalSeconds < 0 ? '−' : '';
   const s = Math.abs(totalSeconds);
   return `${sign}${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;

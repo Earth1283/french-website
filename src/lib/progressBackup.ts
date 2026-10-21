@@ -2,6 +2,7 @@ import { useProgressStore } from '../stores/progressStore';
 import { useTestStore } from '../stores/testStore';
 import { useLearnerStore } from '../stores/learnerStore';
 import { useExamStore } from '../stores/examStore';
+import { useConversationStore } from '../stores/conversationStore';
 
 export function exportProgress() {
   const progressState = useProgressStore.getState();
@@ -10,7 +11,7 @@ export function exportProgress() {
   const examState = useExamStore.getState();
 
   const data = {
-    version: 3,
+    version: 4,
     completedLessons: progressState.completedLessons,
     xp: progressState.xp,
     streak: progressState.streak,
@@ -28,7 +29,10 @@ export function exportProgress() {
       level: examState.level,
       listeningResults: examState.listeningResults,
       writingSubmissions: examState.writingSubmissions,
+      speakingAttempts: examState.speakingAttempts,
+      mockResults: examState.mockResults,
     },
+    conversationHistory: useConversationStore.getState().history,
     exportedAt: new Date().toISOString(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -83,7 +87,13 @@ export function importProgress(file: File): Promise<'ok' | 'error'> {
             ...(['a1', 'a2', 'b1', 'b2'].includes(exam.level) ? { level: exam.level } : {}),
             ...(Array.isArray(exam.listeningResults) ? { listeningResults: exam.listeningResults } : {}),
             ...(Array.isArray(exam.writingSubmissions) ? { writingSubmissions: exam.writingSubmissions } : {}),
+            ...(Array.isArray(exam.speakingAttempts) ? { speakingAttempts: exam.speakingAttempts } : {}),
+            ...(Array.isArray(exam.mockResults) ? { mockResults: exam.mockResults } : {}),
           });
+        }
+
+        if (Array.isArray(data.conversationHistory)) {
+          useConversationStore.setState({ history: data.conversationHistory });
         }
 
         resolve('ok');

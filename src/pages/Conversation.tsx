@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TAP_TRANSITION, NO_OVERSHOOT_SPRING, REWARD_SPRING, REVEAL, COLLAPSE } from '../utils/motion';
 import {
   ChevronLeft, ArrowUp, Eye, EyeOff, RefreshCw, CheckCircle2, XCircle,
-  Bot, Key, ChevronDown, ChevronUp, Volume2, VolumeX,
+  Bot, Key, ChevronDown, ChevronUp, Volume2, VolumeX, Flag, Sparkles,
 } from 'lucide-react';
 import { SCENARIOS } from '../data/scenarios';
 import { useConversationStore } from '../stores/conversationStore';
 import { Button } from '../components/ui/Button';
-import type { Scenario, Difficulty } from '../types';
-import { callGemini } from '../lib/gemini';
+import type { Scenario, Difficulty, ConversationRecord } from '../types';
+import { callGemini, debriefConversation } from '../lib/gemini';
+import { scriptedDebrief } from '../utils/debrief';
+import { todayString } from '../utils/streak';
 import { speak } from '../utils/speech';
 import { listenErrorMessage } from '../utils/recognition';
 import { useSpeechInput } from '../hooks/useSpeechInput';
@@ -42,7 +44,7 @@ const DIFFICULTY_LABELS: Record<Difficulty, { name: string; desc: string }> = {
 };
 
 export function Conversation() {
-  const { geminiApiKey, difficulty, setApiKey, setDifficulty } = useConversationStore();
+  const { geminiApiKey, difficulty, setApiKey, setDifficulty, history, addRecord } = useConversationStore();
   const [view, setView] = useState<View>('picker');
   const [activeScenario, setActiveScenario] = useState<Scenario | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -55,6 +57,8 @@ export function Conversation() {
   const [keyDraft, setKeyDraft] = useState('');
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiHistory, setAiHistory] = useState<{ role: 'user' | 'model'; text: string }[]>([]);
+  const [record, setRecord] = useState<ConversationRecord | null>(null);
+  const [debriefing, setDebriefing] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isAiMode = !!geminiApiKey;
@@ -97,6 +101,60 @@ export function Conversation() {
     setView('chat');
   }
 
+  /**
+   * Ends the conversation and builds its debrief. `pending` holds messages
+   * pushed in the same handler, which this render's `messages` doesn't have yet.
+   */
+  async function endConversation(success: boolean, pending: ChatMessage[] = []) {
+    if (!activeScenario) return;
+    const scenario = activeScenario;
+    const all = [...messages, ...pending];
+    const replies = all.filter(m => m.role === 'player');
+    setMissionSuccess(success);
+    setRecord(null);
+    setView('complete');
+
+    let debrief;
+    if (isAiMode && replies.length > 0) {
+      setDebriefing(true);
+      try {
+        debrief = await debriefConversation(geminiApiKey, scenario, difficulty, all.map(m => ({ role: m.role, text: m.text })));
+      } catch (err) {
+        debrief = {
+          source: 'ai' as const,
+          summary: `Couldn't get a debrief from Gemini (${err instanceof Error ? err.message : 'unknown error'}).`,
+          strengths: [],
+          corrections: [],
+          phrases: all.filter(m => m.role === 'npc').slice(0, 6).map(m => ({ french: m.text, english: '' })),
+        };
+      } finally {
+        setDebriefing(false);
+      }
+    } else {
+      debrief = scriptedDebrief(scenario, replies.map(r => ({ text: r.text, correct: r.correct })), success);
+    }
+
+    const rec: ConversationRecord = {
+      id: `conversation-${Date.now()}`,
+      scenarioId: scenario.id,
+      date: todayString(),
+      missionComplete: success,
+      exchanges: replies.length,
+      debrief,
+    };
+    if (replies.length > 0) addRecord(rec);
+    setRecord(rec);
+  }
+
+  function openRecord(rec: ConversationRecord) {
+    const scenario = SCENARIOS.find(s => s.id === rec.scenarioId);
+    if (!scenario) return;
+    setActiveScenario(scenario);
+    setMissionSuccess(rec.missionComplete);
+    setRecord(rec);
+    setView('complete');
+  }
+
   function pushNpc(text: string, translation?: string, feedback?: string) {
     setMessages(prev => [...prev, { role: 'npc', text, translation, feedback }]);
     if (autoSpeakReplies) speak(text);
@@ -114,8 +172,7 @@ export function Conversation() {
     setShowHint(false);
 
     if (turn.missionComplete) {
-      setMissionSuccess(true);
-      setView('complete');
+      endConversation(true, [{ role: 'player', text: playerText, correct: isCorrect }]);
       return;
     }
 
@@ -161,8 +218,7 @@ export function Conversation() {
       ]);
       pushNpc(result.npcResponse, undefined, result.playerFeedback);
       if (result.missionComplete) {
-        setMissionSuccess(true);
-        setView('complete');
+        endConversation(true, [{ role: 'player', text }, { role: 'npc', text: result.npcResponse }]);
       }
     } catch (err) {
       setAiError(err instanceof Error ? err.message : 'Something went wrong');
@@ -357,6 +413,32 @@ export function Conversation() {
               </motion.div>
             )}
           </div>
+
+          {history.length > 0 && (
+            <section className="mt-6">
+              <p className="section-label">Recent debriefs</p>
+              <div className="inset-group">
+                {[...history].reverse().slice(0, 5).map((rec, i) => {
+                  const scenario = SCENARIOS.find(s => s.id === rec.scenarioId);
+                  if (!scenario) return null;
+                  return (
+                    <button
+                      key={rec.id}
+                      type="button"
+                      onClick={() => openRecord(rec)}
+                      className="inset-row w-full justify-between gap-3 cursor-pointer text-left"
+                      style={{ background: 'transparent', border: 'none', borderTop: i > 0 ? '0.5px solid var(--hairline)' : 'none' }}
+                    >
+                      <span className="text-sm text-primary truncate">{scenario.emoji} {scenario.title}</span>
+                      <span className="text-xs text-muted flex-shrink-0">
+                        {rec.date} · {rec.missionComplete ? 'mission done' : `${rec.exchanges} exchanges`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     );
@@ -364,33 +446,104 @@ export function Conversation() {
 
   // ─── Complete view ───────────────────────────────────────────────────────────
   if (view === 'complete') {
-    const exchangeCount = messages.filter(m => m.role === 'player').length;
     return (
-      <div className="max-w-lg mx-auto px-4 py-12 text-center">
-        <motion.div
-          initial={{ scale: 0.6 }}
-          animate={{ scale: 1 }}
-          transition={REWARD_SPRING}
-          className="text-6xl mb-5"
-        >
-          {missionSuccess ? '🎉' : '💪'}
-        </motion.div>
-        <div>
+      <div className="max-w-lg mx-auto px-4 py-10">
+        <div className="text-center">
+          <motion.div
+            initial={{ scale: 0.6 }}
+            animate={{ scale: 1 }}
+            transition={REWARD_SPRING}
+            className="text-6xl mb-5"
+          >
+            {missionSuccess ? '🎉' : '💪'}
+          </motion.div>
           <h2 className="text-3xl font-bold text-primary mb-1 font-display">
             {missionSuccess ? 'Mission accomplie !' : 'Bonne tentative !'}
           </h2>
-          <p className="text-secondary">
-            You had {exchangeCount} exchange{exchangeCount !== 1 ? 's' : ''} with {activeScenario?.npcName}.
-          </p>
+          {record && (
+            <p className="text-secondary">
+              You had {record.exchanges} exchange{record.exchanges !== 1 ? 's' : ''} with {activeScenario?.npcName}.
+            </p>
+          )}
         </div>
 
-        <div
-          className="flex gap-3 justify-center flex-wrap mt-8"
-        >
-          <Button variant="secondary" onClick={() => startScenario(activeScenario!)}>
+        <div className="mt-8 space-y-4 text-left">
+          {debriefing && (
+            <div className="card p-6 text-center space-y-2">
+              <Sparkles size={20} className="mx-auto" style={{ color: 'var(--accent)' }} />
+              <p className="text-sm text-secondary">Putting your debrief together…</p>
+            </div>
+          )}
+
+          {record && (
+            <motion.div {...REVEAL} className="space-y-4">
+              {record.debrief.summary && (
+                <div className="card p-4 space-y-2">
+                  <p className="text-sm font-semibold text-primary">Debrief</p>
+                  <p className="text-sm text-secondary">{record.debrief.summary}</p>
+                  {record.debrief.strengths.length > 0 && (
+                    <ul className="space-y-1 list-none p-0 m-0">
+                      {record.debrief.strengths.map(s => (
+                        <li key={s} className="text-sm text-primary flex items-start gap-2">
+                          <CheckCircle2 size={15} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--success)' }} /> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              {record.debrief.corrections.length > 0 && (
+                <div className="card p-4 space-y-3">
+                  <p className="text-sm font-semibold text-primary">
+                    {record.debrief.source === 'scripted' ? 'A more natural reply' : 'Corrections'}
+                  </p>
+                  {record.debrief.corrections.map((c, i) => (
+                    <div key={i} className="text-sm space-y-0.5">
+                      <p lang="fr">
+                        <span style={{ color: 'var(--danger)', textDecoration: 'line-through' }}>{c.original}</span>
+                        {' → '}
+                        <span style={{ color: 'var(--success)' }} className="font-medium">{c.corrected}</span>
+                      </p>
+                      {c.explanation && <p className="text-xs text-muted">{c.explanation}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {record.debrief.phrases.length > 0 && (
+                <div className="card p-4 space-y-2">
+                  <p className="text-sm font-semibold text-primary">Phrases to keep</p>
+                  <ul className="space-y-1.5 list-none p-0 m-0">
+                    {record.debrief.phrases.map((p, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <button
+                          type="button"
+                          onClick={() => speak(p.french)}
+                          aria-label={`Hear “${p.french}”`}
+                          className="w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 cursor-pointer"
+                          style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)', border: 'none' }}
+                        >
+                          <Volume2 size={13} />
+                        </button>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-primary" lang="fr">{p.french}</p>
+                          {p.english && <p className="text-xs text-muted">{p.english}</p>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </div>
+
+        <div className="flex gap-3 justify-center flex-wrap mt-8">
+          <Button variant="secondary" onClick={() => startScenario(activeScenario!)} disabled={debriefing}>
             <RefreshCw size={15} /> Replay
           </Button>
-          <Button variant="primary" onClick={() => setView('picker')}>
+          <Button variant="primary" onClick={() => setView('picker')} disabled={debriefing}>
             New scenario
           </Button>
         </div>
@@ -431,6 +584,18 @@ export function Conversation() {
           </p>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          {messages.some(m => m.role === 'player') && (
+            <button
+              onClick={() => endConversation(false)}
+              disabled={isLoading}
+              aria-label="End and see your debrief"
+              title="End and see your debrief"
+              className="h-8 px-2.5 flex items-center gap-1 rounded-full ios-press cursor-pointer text-xs font-semibold disabled:opacity-40"
+              style={{ color: 'var(--accent)', background: 'var(--accent-tint)', border: 'none' }}
+            >
+              <Flag size={13} /> End
+            </button>
+          )}
           <button
             onClick={() => setAutoSpeakReplies(!autoSpeakReplies)}
             aria-label={autoSpeakReplies ? 'Stop reading replies aloud' : 'Read replies aloud'}
