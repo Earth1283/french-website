@@ -7,7 +7,6 @@ import type { WritingTask } from '../../types/exam';
 // one good way to do the task, not the only one.
 
 export const WRITING_TASKS: WritingTask[] = [
-  // ─── A1 ───────────────────────────────────────────────────────────────────
   {
     id: 'a1-invitation-diner',
     level: 'a1',
@@ -84,7 +83,6 @@ export const WRITING_TASKS: WritingTask[] = [
       'À bientôt !\nLucas',
   },
 
-  // ─── A2 ───────────────────────────────────────────────────────────────────
   {
     id: 'a2-festival',
     level: 'a2',
@@ -169,7 +167,6 @@ export const WRITING_TASKS: WritingTask[] = [
       'Karim',
   },
 
-  // ─── B1 ───────────────────────────────────────────────────────────────────
   {
     id: 'b1-telephones-ecole',
     level: 'b1',
@@ -295,7 +292,6 @@ export const WRITING_TASKS: WritingTask[] = [
       'Julie',
   },
 
-  // ─── B2 ───────────────────────────────────────────────────────────────────
   {
     id: 'b2-semaine-quatre-jours',
     level: 'b2',

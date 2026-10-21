@@ -2,7 +2,6 @@
 
 @layer base {
   :root {
-    /* ── Palette (Bonjour Survival cream / red) ── */
     --bg: #FAF7F0;
     --bg-card: #FFFFFF;
     --bg-card-hover: #F5F2EB;
@@ -18,7 +17,6 @@
     --success-light: #d0f0ec;
     --danger: #E03131;
 
-    /* ── Materials ── */
     --border: #E8E4DB;
     --hairline: rgba(26, 31, 58, 0.10);
     --glass: rgba(250, 247, 240, 0.78);
@@ -26,14 +24,12 @@
     --glass-border: rgba(255, 255, 255, 0.60);
     --glass-highlight: rgba(255, 255, 255, 0.85);
 
-    /* ── Elevation ── */
     --shadow-1: 0 1px 2px rgba(26, 31, 58, 0.04), 0 2px 8px rgba(26, 31, 58, 0.05);
     --shadow-2: 0 2px 6px rgba(26, 31, 58, 0.05), 0 8px 24px rgba(26, 31, 58, 0.08);
     --shadow-3: 0 4px 12px rgba(26, 31, 58, 0.08), 0 16px 48px rgba(26, 31, 58, 0.14);
     --shadow: var(--shadow-1);
     --shadow-hover: var(--shadow-2);
 
-    /* ── Geometry (continuous-corner feel) ── */
     --radius-sm: 12px;
     --radius: 18px;
     --radius-lg: 26px;
@@ -44,17 +40,14 @@
     --dur-fast: 160ms;
     --dur-base: 220ms;
 
-    /* ── Type ── */
     --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
                'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
     --font-display: 'Playfair Display', Georgia, serif;
 
-    /* ── Dynamic accent tints (iOS-style fills derived from --accent) ── */
     --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
     --accent-tint-strong: color-mix(in srgb, var(--accent) 18%, transparent);
     --accent-soft-bg: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
 
-    /* ── Grammatical roles (interactive lessons) ── */
     --role-subject: #2563EB;
     --role-verb: #059669;
     --role-object: #9333EA;
@@ -157,7 +150,6 @@
     letter-spacing: 0;
   }
 
-  /* ── Surfaces ─────────────────────────────────────────── */
   .card {
     background: var(--bg-card);
     border: 1px solid var(--hairline);
@@ -197,7 +189,6 @@
     opacity: 0.85;
   }
 
-  /* ── Grouped inset lists (Settings-style) ─────────────── */
   .inset-group {
     background: var(--bg-card);
     border: 1px solid var(--hairline);
@@ -227,7 +218,6 @@
     border-top: 0.5px solid var(--hairline);
   }
 
-  /* ── Text ─────────────────────────────────────────────── */
   .text-primary { color: var(--text-primary); }
   .text-secondary { color: var(--text-secondary); }
   .text-muted { color: var(--text-muted); }
@@ -249,7 +239,6 @@
     margin-bottom: 0.45rem;
   }
 
-  /* ── Buttons (iOS: filled / tinted / bordered / plain) ── */
   .btn-primary {
     display: inline-flex;
     align-items: center;
@@ -309,7 +298,6 @@
   .btn-secondary:hover { background: var(--bg-card-hover); }
   .btn-secondary:active { transform: scale(0.97); }
 
-  /* ── Badges & chips ───────────────────────────────────── */
   .xp-badge {
     display: inline-flex;
     align-items: center;
@@ -351,7 +339,6 @@
     color: var(--text-secondary);
   }
 
-  /* ── Inputs ───────────────────────────────────────────── */
   :where(.ios-input) {
     width: 100%;
     border: 1px solid var(--hairline);
@@ -370,7 +357,6 @@
   }
   .ios-input::placeholder { color: var(--text-muted); }
 
-  /* ── Segmented control ────────────────────────────────── */
   .seg-control {
     display: flex;
     background: var(--bg-inset);
@@ -395,7 +381,6 @@
   .seg-item[aria-pressed="true"] { color: var(--text-primary); }
 }
 
-/* ── Flip card (lesson flashcards) ── */
 .flip-card-inner {
   transform-style: preserve-3d;
   transition: transform 0.45s var(--ease-in-out);
@@ -433,7 +418,6 @@
   border-radius: 99px;
 }
 
-/* ── Apple-ify — true iOS system palette + materials + type (structure is iOS for everyone already) ── */
 .apple-mode {
   --bg: #F2F2F7;
   --bg-card: #FFFFFF;
@@ -543,8 +527,7 @@
   }
 }
 
-/* ── Deep-lesson reader (long-form article typography) ──────────────────
-   Distinct from the app's card/chip chrome on purpose: this is the one
+/* The lesson reader is distinct from the app's card/chip chrome on purpose: it's the one
    place people read continuous prose instead of tapping through discrete
    steps, so it earns its own editorial treatment — serif headline, a
    generous measure, a drop cap on the lesson's opening paragraph. Every

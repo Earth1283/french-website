@@ -85,9 +85,6 @@ Respond ONLY with valid JSON:
   return { npcResponse, playerFeedback: asString(r.playerFeedback, 300), missionComplete: r.missionComplete === true };
 }
 
-// ─── Writing evaluation (DELF production écrite) ────────────────────────────
-
-
 export interface WritingPrompt {
   level: DelfLevel;
   consigne: string;

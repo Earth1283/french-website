@@ -229,7 +229,6 @@ export function Conversation() {
     else handleScriptedSubmit();
   }
 
-  // ─── Picker view ────────────────────────────────────────────────────────────
   if (view === 'picker') {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -441,7 +440,6 @@ export function Conversation() {
     );
   }
 
-  // ─── Complete view ───────────────────────────────────────────────────────────
   if (view === 'complete') {
     return (
       <div className="max-w-lg mx-auto px-4 py-10">
@@ -548,7 +546,6 @@ export function Conversation() {
     );
   }
 
-  // ─── Chat view ───────────────────────────────────────────────────────────────
   const showOptions = !isAiMode && difficulty === 1;
   const showTextInput = isAiMode || difficulty >= 2;
   const canShowHint = difficulty <= 2;

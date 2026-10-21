@@ -73,7 +73,6 @@ export function Settings() {
         <p className="text-secondary text-sm font-display italic">Personnalisez votre expérience.</p>
       </div>
 
-      {/* ── Appearance ── */}
       <section>
         <GroupLabel icon={<Palette size={12} />} title="Appearance" />
         <div className="inset-group">
@@ -131,7 +130,6 @@ export function Settings() {
         </div>
       </section>
 
-      {/* ── Learning ── */}
       <section>
         <GroupLabel icon={<BookOpen size={12} />} title="Learning" />
         <div className="inset-group p-4">
@@ -185,7 +183,6 @@ export function Settings() {
         </div>
       </section>
 
-      {/* ── Conversation AI ── */}
       <section>
         <GroupLabel icon={<MessageSquare size={12} />} title="Conversation AI" />
         <div className="inset-group">
@@ -301,7 +298,6 @@ export function Settings() {
         </div>
       </section>
 
-      {/* ── Data & Privacy ── */}
       <section>
         <GroupLabel icon={<Database size={12} />} title="Data & Privacy" />
         <div className="inset-group">
@@ -346,7 +342,6 @@ export function Settings() {
         </div>
       </section>
 
-      {/* ── Danger Zone ── */}
       <section
         className="overflow-hidden"
         style={{
@@ -517,5 +512,3 @@ export function Settings() {
     </div>
   );
 }
-
-// ── Internal helpers ──────────────────────────────────────────────────────────
