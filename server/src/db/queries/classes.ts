@@ -90,6 +90,18 @@ export function enrollStudent(studentId: string, classId: string): void {
   ).run(studentId, classId);
 }
 
+export function unenrollStudent(studentId: string, classId: string): void {
+  prepare('DELETE FROM enrollments WHERE student_id = ? AND class_id = ?').run(studentId, classId);
+  prepare(
+    `DELETE FROM attempts WHERE student_id = ?
+     AND assignment_id IN (SELECT id FROM assignments WHERE class_id = ?)`
+  ).run(studentId, classId);
+  prepare(
+    `DELETE FROM flags WHERE student_id = ?
+     AND assignment_id IN (SELECT id FROM assignments WHERE class_id = ?)`
+  ).run(studentId, classId);
+}
+
 export interface RosterEntry {
   id: string;
   name: string;
@@ -98,6 +110,8 @@ export interface RosterEntry {
   completedAssignments: number;
   totalAssignments: number;
   averageScore: number;
+  lastActiveAt: string | null;
+  awaitingReview: number;
 }
 
 export function getRoster(classId: string): RosterEntry[] {
@@ -108,11 +122,13 @@ export function getRoster(classId: string): RosterEntry[] {
   const students = prepare(
     `SELECT s.id, s.name, s.email, e.joined_at AS joinedAt,
             COUNT(done.id) AS completedAssignments,
-            AVG(done.score) AS averageScore
+            AVG(done.score) AS averageScore,
+            MAX(done.completed_at) AS lastActiveAt,
+            SUM(CASE WHEN done.score IS NULL AND done.submission_text IS NOT NULL THEN 1 ELSE 0 END) AS awaitingReview
      FROM enrollments e
      JOIN students s ON s.id = e.student_id
      LEFT JOIN (
-       SELECT att.id, att.student_id, att.score
+       SELECT att.id, att.student_id, att.score, att.completed_at, att.submission_text
        FROM attempts att
        JOIN assignments asg ON asg.id = att.assignment_id
        WHERE asg.class_id = @classId AND att.completed_at IS NOT NULL
@@ -120,7 +136,37 @@ export function getRoster(classId: string): RosterEntry[] {
      WHERE e.class_id = @classId
      GROUP BY s.id
      ORDER BY s.name COLLATE NOCASE`
-  ).all({ classId }) as Array<Omit<RosterEntry, 'totalAssignments' | 'averageScore'> & { averageScore: number | null }>;
+  ).all({ classId }) as Array<
+    Omit<RosterEntry, 'totalAssignments' | 'averageScore' | 'awaitingReview'> & {
+      averageScore: number | null;
+      awaitingReview: number | null;
+    }
+  >;
 
-  return students.map((s) => ({ ...s, totalAssignments, averageScore: s.averageScore ?? 0 }));
+  return students.map((s) => ({
+    ...s,
+    totalAssignments,
+    averageScore: s.averageScore ?? 0,
+    awaitingReview: s.awaitingReview ?? 0,
+  }));
+}
+
+export interface GradebookCell {
+  studentId: string;
+  assignmentId: string;
+  completed: boolean;
+  score: number | null;
+}
+
+export function getGradebookCells(classId: string): GradebookCell[] {
+  const rows = prepare(
+    `SELECT att.student_id AS studentId, att.assignment_id AS assignmentId,
+            CASE WHEN att.completed_at IS NOT NULL THEN 1 ELSE 0 END AS completed,
+            att.score AS score
+     FROM attempts att
+     JOIN assignments asg ON asg.id = att.assignment_id
+     JOIN enrollments e ON e.student_id = att.student_id AND e.class_id = asg.class_id
+     WHERE asg.class_id = ?`
+  ).all(classId) as Array<Omit<GradebookCell, 'completed'> & { completed: number }>;
+  return rows.map((r) => ({ ...r, completed: !!r.completed }));
 }

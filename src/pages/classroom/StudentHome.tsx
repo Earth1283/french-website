@@ -1,15 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion, KeyRound } from 'lucide-react';
+import { LogOut, UserPlus, CheckCircle2, Circle, ChevronRight, ShieldQuestion, KeyRound, DoorOpen } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
-import type { AssignmentInfo, ClassInfo } from '../../types/classroom';
+import { AnnouncementFeed } from '../../components/classroom/AnnouncementFeed';
+import { describeDue, isOverdue } from '../../utils/classroomDates';
+import type { AnnouncementInfo, AssignmentInfo, ClassInfo } from '../../types/classroom';
 
 interface ClassWithAssignments extends ClassInfo {
   assignments: AssignmentInfo[];
+  announcements: AnnouncementInfo[];
+}
+
+function sortByDeadline(assignments: AssignmentInfo[]): AssignmentInfo[] {
+  const pendingFirst = (a: AssignmentInfo) => (a.completed ? 1 : 0);
+  const dueTime = (a: AssignmentInfo) => (a.due_at ? new Date(a.due_at).getTime() : Infinity);
+  return [...assignments].sort((a, b) => pendingFirst(a) - pendingFirst(b) || dueTime(a) - dueTime(b));
 }
 
 export function StudentHome() {
@@ -24,11 +33,21 @@ export function StudentHome() {
     const res = await classroomApi.get<{ classes: ClassInfo[] }>('/api/student/classes');
     const withAssignments = await Promise.all(
       res.classes.map(async (c) => {
-        const a = await classroomApi.get<{ assignments: AssignmentInfo[] }>(`/api/student/classes/${c.id}/assignments`);
-        return { ...c, assignments: a.assignments };
+        const [assignmentsRes, announcementsRes] = await Promise.all([
+          classroomApi.get<{ assignments: AssignmentInfo[] }>(`/api/student/classes/${c.id}/assignments`),
+          classroomApi.get<{ announcements: AnnouncementInfo[] }>(`/api/student/classes/${c.id}/announcements`),
+        ]);
+        return { ...c, assignments: sortByDeadline(assignmentsRes.assignments), announcements: announcementsRes.announcements };
       })
     );
     setClasses(withAssignments);
+  }
+
+  async function leaveClass(cls: ClassInfo) {
+    const confirmed = window.confirm(`Leave ${cls.name}? Your results in this class will be deleted.`);
+    if (!confirmed) return;
+    await classroomApi.del(`/api/student/classes/${cls.id}`);
+    await load();
   }
 
   useEffect(() => {
@@ -110,7 +129,8 @@ export function StudentHome() {
       {classes?.map(cls => (
         <section key={cls.id}>
           <div className="section-label">{cls.name}</div>
-          <div className="inset-group">
+          <AnnouncementFeed announcements={cls.announcements} />
+          <div className="inset-group" style={{ marginTop: cls.announcements.length ? '0.75rem' : undefined }}>
             {cls.assignments.length === 0 && <p className="p-4 text-sm text-muted">Nothing assigned yet.</p>}
             {cls.assignments.map((a) => (
               <Link
@@ -133,6 +153,11 @@ export function StudentHome() {
                           ? ` · ${a.score}%`
                           : a.kind === 'writing' ? ' · awaiting review' : ' · done'
                         : ''}
+                      {!a.completed && a.due_at && (
+                        <span style={{ color: isOverdue(a.due_at) ? 'var(--danger)' : undefined }}>
+                          {` · ${describeDue(a.due_at)}`}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -140,6 +165,13 @@ export function StudentHome() {
               </Link>
             ))}
           </div>
+          <button
+            onClick={() => leaveClass(cls)}
+            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1 mt-2"
+            style={{ background: 'transparent', border: 'none' }}
+          >
+            <DoorOpen size={11} /> Leave this class
+          </button>
         </section>
       ))}
     </div>

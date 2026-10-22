@@ -1,6 +1,13 @@
 import { Router } from 'express';
 import { requireStudent } from '../auth/middleware.js';
-import { enrollStudent, getClassByJoinCode, isEnrolled, listClassesForStudent } from '../db/queries/classes.js';
+import {
+  enrollStudent,
+  getClassByJoinCode,
+  isEnrolled,
+  listClassesForStudent,
+  unenrollStudent,
+} from '../db/queries/classes.js';
+import { listAnnouncementsByClass } from '../db/queries/announcements.js';
 import { getAssignmentById, listAssignmentsForStudent } from '../db/queries/assignments.js';
 import { getContentById, hydrateContentBody } from '../db/queries/content.js';
 import { getAttemptForStudentAssignment, listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
@@ -31,6 +38,23 @@ studentRouter.get('/classes', (req, res) => {
   res.json({ classes: listClassesForStudent(req.studentId!) });
 });
 
+studentRouter.delete('/classes/:classId', (req, res) => {
+  if (!isEnrolled(req.studentId!, req.params.classId)) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  unenrollStudent(req.studentId!, req.params.classId);
+  res.status(204).end();
+});
+
+studentRouter.get('/classes/:classId/announcements', (req, res) => {
+  if (!isEnrolled(req.studentId!, req.params.classId)) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  res.json({ announcements: listAnnouncementsByClass(req.params.classId) });
+});
+
 studentRouter.get('/classes/:classId/assignments', (req, res) => {
   if (!isEnrolled(req.studentId!, req.params.classId)) {
     res.status(404).json({ error: 'Class not found' });
@@ -41,7 +65,7 @@ studentRouter.get('/classes/:classId/assignments', (req, res) => {
 
 studentRouter.get('/assignments/:assignmentId', (req, res) => {
   const assignment = getAssignmentById(req.params.assignmentId);
-  if (!assignment || !isEnrolled(req.studentId!, assignment.class_id)) {
+  if (!assignment || !assignment.visible || !isEnrolled(req.studentId!, assignment.class_id)) {
     res.status(404).json({ error: 'Assignment not found' });
     return;
   }
@@ -86,7 +110,7 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
 
 studentRouter.post('/assignments/:assignmentId/attempts', (req, res) => {
   const assignment = getAssignmentById(req.params.assignmentId);
-  if (!assignment || !isEnrolled(req.studentId!, assignment.class_id)) {
+  if (!assignment || !assignment.visible || !isEnrolled(req.studentId!, assignment.class_id)) {
     res.status(404).json({ error: 'Assignment not found' });
     return;
   }
