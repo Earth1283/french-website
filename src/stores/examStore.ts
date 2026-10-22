@@ -1,22 +1,32 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { DelfLevel, ListeningResult, WritingEvaluation, WritingSubmission } from '../types/exam';
+import type {
+  DelfLevel, ListeningResult, MockExamResult, SpeakingAttempt, SpeakingEvaluation, WritingEvaluation, WritingSubmission,
+} from '../types/exam';
 
 // Keeps the list bounded: a submission stores the full essay text.
 const MAX_WRITING_SUBMISSIONS = 100;
 const MAX_LISTENING_RESULTS = 300;
+const MAX_SPEAKING_ATTEMPTS = 100;
+const MAX_MOCK_RESULTS = 50;
 
 interface ExamStore {
   level: DelfLevel | null;
   listeningResults: ListeningResult[];
   writingSubmissions: WritingSubmission[];
   drafts: Record<string, string>;
+  speakingAttempts: SpeakingAttempt[];
+  mockResults: MockExamResult[];
   setLevel: (level: DelfLevel) => void;
   addListeningResult: (result: ListeningResult) => void;
   addWritingSubmission: (submission: WritingSubmission) => void;
   setEvaluation: (submissionId: string, evaluation: WritingEvaluation) => void;
   setDraft: (taskId: string, text: string) => void;
   clearDraft: (taskId: string) => void;
+  addSpeakingAttempt: (attempt: SpeakingAttempt) => void;
+  setSpeakingEvaluation: (attemptId: string, evaluation: SpeakingEvaluation) => void;
+  addMockResult: (result: MockExamResult) => void;
+  setMockReading: (resultId: string, reading: number | null) => void;
   clearHistory: () => void;
 }
 
@@ -27,6 +37,8 @@ export const useExamStore = create<ExamStore>()(
       listeningResults: [],
       writingSubmissions: [],
       drafts: {},
+      speakingAttempts: [],
+      mockResults: [],
 
       setLevel: (level) => set({ level }),
 
@@ -49,7 +61,21 @@ export const useExamStore = create<ExamStore>()(
           return { drafts: rest };
         }),
 
-      clearHistory: () => set({ listeningResults: [], writingSubmissions: [], drafts: {} }),
+      addSpeakingAttempt: (attempt) =>
+        set(s => ({ speakingAttempts: [...s.speakingAttempts, attempt].slice(-MAX_SPEAKING_ATTEMPTS) })),
+
+      setSpeakingEvaluation: (attemptId, evaluation) =>
+        set(s => ({
+          speakingAttempts: s.speakingAttempts.map(a => (a.id === attemptId ? { ...a, evaluation } : a)),
+        })),
+
+      addMockResult: (result) => set(s => ({ mockResults: [...s.mockResults, result].slice(-MAX_MOCK_RESULTS) })),
+
+      setMockReading: (resultId, reading) =>
+        set(s => ({ mockResults: s.mockResults.map(r => (r.id === resultId ? { ...r, reading } : r)) })),
+
+      clearHistory: () =>
+        set({ listeningResults: [], writingSubmissions: [], drafts: {}, speakingAttempts: [], mockResults: [] }),
     }),
     { name: 'french-exam-prep' },
   ),

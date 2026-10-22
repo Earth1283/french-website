@@ -169,7 +169,6 @@ export function AdaptiveTest() {
     setCurrentItem(selectNextItem(candidates, est.theta, recentTopicsFrom(newResponses)));
   }
 
-  // ─── Intro view ─────────────────────────────────────────────────────────────
   if (view === 'intro') {
     return (
       <div className="max-w-xl mx-auto px-4 py-10 text-center">
@@ -235,7 +234,6 @@ export function AdaptiveTest() {
     );
   }
 
-  // ─── Testing view ───────────────────────────────────────────────────────────
   if (view === 'testing' && currentItem) {
     const exercise = resolveTestItemExercise(currentItem);
     return (
@@ -278,7 +276,6 @@ export function AdaptiveTest() {
     );
   }
 
-  // ─── Results view ───────────────────────────────────────────────────────────
   const result = completedResult ?? history[history.length - 1];
 
   if (!result) {

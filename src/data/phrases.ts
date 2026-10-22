@@ -172,6 +172,12 @@ export const PHRASES: VocabItem[] = [
     english: 'Patience and time do more than force or rage.',
     pronunciation: 'pah-syons ay lon-guhr duh ton fon ploo kuh fors nee kuh rahzh',
   },
+  {
+    french: 'Soixante-sept.',
+    english: 'Sixty-seven.',
+    pronunciation: 'swah-sont-set',
+    funnyNote: 'Literally “sixty-seven”, no arithmetic required. Save 70 (sixty-ten) for another day.',
+  },
 ];
 
 /** Whole days since the Unix epoch in the viewer's local timezone. */
