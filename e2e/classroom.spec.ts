@@ -82,6 +82,30 @@ test('teacher creates a class, student joins and completes an assignment', async
   await page.getByText('Playwright Class').click();
   await expect(page.getByText('Playwright Student')).toBeVisible();
   await expect(page.getByText('1/1')).toBeVisible();
+  await expect(page.getByText('Active today')).toBeVisible();
+
+  await page.getByRole('button', { name: 'New announcement' }).click();
+  await page.getByPlaceholder('Title, e.g. Quiz on Friday').fill('Bring your dictionary');
+  await page.getByRole('button', { name: 'Post' }).click();
+  await expect(page.getByText('Bring your dictionary')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Set due date' }).click();
+  await page.getByLabel('Due date').fill('2030-01-15');
+  await expect(page.getByText(/Due Jan 15/)).toBeVisible();
+
+  await studentPage.reload();
+  await expect(studentPage.getByText('Bring your dictionary')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Hide from students' }).click();
+  await expect(page.getByText('hidden from students')).toBeVisible();
+  await studentPage.reload();
+  await expect(studentPage.getByText('Playwright Class')).toBeVisible();
+  await expect(studentPage.getByText('Greetings')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Rename class' }).click();
+  await page.getByLabel('Class name').fill('Renamed Class');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading', { name: 'Renamed Class' })).toBeVisible();
 
   await studentContext.close();
 });

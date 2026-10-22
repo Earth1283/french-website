@@ -4,12 +4,21 @@ import { requireTeacher } from '../auth/middleware.js';
 import {
   createClass,
   getClassById,
+  getGradebookCells,
   getRoster,
   isEnrolled,
   listClassesByTeacher,
   rotateJoinCode,
+  unenrollStudent,
   updateClass,
 } from '../db/queries/classes.js';
+import {
+  createAnnouncement,
+  deleteAnnouncement,
+  getAnnouncementById,
+  listAnnouncementsByClass,
+  updateAnnouncement,
+} from '../db/queries/announcements.js';
 import {
   createContent,
   deleteContent,
@@ -18,7 +27,13 @@ import {
   listContentByTeacher,
   updateContent,
 } from '../db/queries/content.js';
-import { createAssignment, deleteAssignment, getAssignmentById, listAssignmentsByClass } from '../db/queries/assignments.js';
+import {
+  createAssignment,
+  deleteAssignment,
+  getAssignmentById,
+  listAssignmentsByClass,
+  updateAssignment,
+} from '../db/queries/assignments.js';
 import {
   getAttemptById,
   getQuestionStatsForAssignment,
@@ -30,11 +45,14 @@ import { updateStudentPassword } from '../db/queries/students.js';
 import { hashPassword } from '../auth/hash.js';
 import { bandsToPercent, countWords } from '../lib/rubric.js';
 import {
+  createAnnouncementSchema,
   createAssignmentSchema,
   createClassSchema,
   createContentSchema,
   resetStudentPasswordSchema,
   reviewAttemptSchema,
+  updateAnnouncementSchema,
+  updateAssignmentSchema,
   updateClassSchema,
   updateContentSchema,
 } from '../lib/validation.js';
@@ -126,6 +144,83 @@ teacherRouter.post('/classes/:classId/students/:studentId/reset-password', async
   res.status(204).end();
 });
 
+teacherRouter.delete('/classes/:classId/students/:studentId', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls || !isEnrolled(req.params.studentId, cls.id)) {
+    res.status(404).json({ error: 'Student not found in this class' });
+    return;
+  }
+  unenrollStudent(req.params.studentId, cls.id);
+  res.status(204).end();
+});
+
+teacherRouter.get('/classes/:classId/gradebook', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  res.json({
+    assignments: listAssignmentsByClass(cls.id).map((a) => ({ id: a.id, title: a.title, kind: a.kind, due_at: a.due_at })),
+    roster: getRoster(cls.id),
+    cells: getGradebookCells(cls.id),
+  });
+});
+
+teacherRouter.get('/classes/:classId/announcements', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  res.json({ announcements: listAnnouncementsByClass(cls.id) });
+});
+
+teacherRouter.post('/classes/:classId/announcements', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  const parsed = createAnnouncementSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const { title, body, pinned } = parsed.data;
+  res.status(201).json({ announcement: createAnnouncement(cls.id, title, body, pinned) });
+});
+
+function ownedAnnouncement(req: Request, announcementId: string) {
+  const announcement = getAnnouncementById(announcementId);
+  if (!announcement || !ownedClass(req, announcement.class_id)) return null;
+  return announcement;
+}
+
+teacherRouter.patch('/announcements/:announcementId', (req, res) => {
+  const announcement = ownedAnnouncement(req, req.params.announcementId);
+  if (!announcement) {
+    res.status(404).json({ error: 'Announcement not found' });
+    return;
+  }
+  const parsed = updateAnnouncementSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.json({ announcement: updateAnnouncement(announcement.id, parsed.data) });
+});
+
+teacherRouter.delete('/announcements/:announcementId', (req, res) => {
+  const announcement = ownedAnnouncement(req, req.params.announcementId);
+  if (!announcement) {
+    res.status(404).json({ error: 'Announcement not found' });
+    return;
+  }
+  deleteAnnouncement(announcement.id);
+  res.status(204).end();
+});
+
 teacherRouter.get('/classes/:classId/assignments', (req, res) => {
   const cls = ownedClass(req, req.params.classId);
   if (!cls) {
@@ -213,6 +308,20 @@ teacherRouter.post('/classes/:classId/assignments', (req, res) => {
   }
   const assignment = createAssignment(cls.id, content.id, parsed.data.dueAt ?? null);
   res.status(201).json({ assignment });
+});
+
+teacherRouter.patch('/assignments/:assignmentId', (req, res) => {
+  const assignment = getAssignmentById(req.params.assignmentId);
+  if (!assignment || !ownedClass(req, assignment.class_id)) {
+    res.status(404).json({ error: 'Assignment not found' });
+    return;
+  }
+  const parsed = updateAssignmentSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.json({ assignment: updateAssignment(assignment.id, parsed.data) });
 });
 
 teacherRouter.delete('/assignments/:assignmentId', (req, res) => {

@@ -163,6 +163,23 @@ export interface RosterStudent {
   completedAssignments: number;
   totalAssignments: number;
   averageScore: number;
+  lastActiveAt: string | null;
+  awaitingReview: number;
+}
+
+export interface AnnouncementInfo {
+  id: string;
+  class_id: string;
+  title: string;
+  body: string;
+  pinned: number;
+  created_at: string;
+}
+
+export interface GradebookResponse {
+  assignments: { id: string; title: string; kind: ClassroomContentKind; due_at: string | null }[];
+  roster: RosterStudent[];
+  cells: { studentId: string; assignmentId: string; completed: boolean; score: number | null }[];
 }
 
 export interface ClassroomProfile {

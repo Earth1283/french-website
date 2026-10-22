@@ -38,6 +38,19 @@ export function getAssignmentById(id: string): AssignmentRow | undefined {
   return prepare('SELECT * FROM assignments WHERE id = ?').get(id) as AssignmentRow | undefined;
 }
 
+export function updateAssignment(
+  id: string,
+  fields: { dueAt?: string | null; visible?: boolean }
+): AssignmentRow | undefined {
+  if (fields.dueAt !== undefined) {
+    prepare('UPDATE assignments SET due_at = ? WHERE id = ?').run(fields.dueAt, id);
+  }
+  if (fields.visible !== undefined) {
+    prepare('UPDATE assignments SET visible = ? WHERE id = ?').run(fields.visible ? 1 : 0, id);
+  }
+  return getAssignmentById(id);
+}
+
 export function deleteAssignment(id: string): void {
   prepare('DELETE FROM assignments WHERE id = ?').run(id);
 }

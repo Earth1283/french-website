@@ -138,6 +138,21 @@ export const createAssignmentSchema = z.object({
   dueAt: z.string().datetime().nullable().optional(),
 });
 
+export const updateAssignmentSchema = z.object({
+  dueAt: z.string().datetime().nullable().optional(),
+  visible: z.boolean().optional(),
+});
+
+export const createAnnouncementSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  body: z.string().trim().max(5000).default(''),
+  pinned: z.boolean().default(false),
+});
+
+export const updateAnnouncementSchema = z.object({
+  pinned: z.boolean().optional(),
+});
+
 export const enrollSchema = z.object({
   joinCode: z.string().trim().min(1),
 });

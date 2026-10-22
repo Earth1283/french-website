@@ -1,9 +1,41 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft, Copy, Check, RefreshCw, Plus, Trash2, BookOpen, BarChart3, Flag, Archive, ArchiveRestore, KeyRound } from 'lucide-react';
+import {
+  ChevronLeft,
+  Copy,
+  Check,
+  RefreshCw,
+  Plus,
+  Archive,
+  ArchiveRestore,
+  KeyRound,
+  Pencil,
+  UserMinus,
+  Download,
+} from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
-import type { AssignmentInfo, ClassInfo, ClassroomContent, RosterStudent } from '../../types/classroom';
+import { AnnouncementsManager } from '../../components/classroom/AnnouncementsManager';
+import { ClassOverview } from '../../components/classroom/ClassOverview';
+import { TeacherAssignmentRow } from '../../components/classroom/TeacherAssignmentRow';
+import { ATTENTION_LABEL, attentionReason, describeLastActive, dueDateInputToIso } from '../../utils/classroomDates';
+import { buildGradebookCsv } from '../../utils/gradebookCsv';
+import type {
+  AssignmentInfo,
+  ClassInfo,
+  ClassroomContent,
+  GradebookResponse,
+  RosterStudent,
+} from '../../types/classroom';
+
+function downloadTextFile(filename: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
 
 export function ClassDetail() {
   const { classId } = useParams<{ classId: string }>();
@@ -18,6 +50,10 @@ export function ClassDetail() {
   const [newPasswordDraft, setNewPasswordDraft] = useState('');
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [resetSuccessFor, setResetSuccessFor] = useState<string | null>(null);
+  const [removeStudentFor, setRemoveStudentFor] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [pendingDueDate, setPendingDueDate] = useState('');
 
   async function load() {
     if (!classId) return;
@@ -53,14 +89,44 @@ export function ClassDetail() {
 
   async function assignContent(contentId: string) {
     if (!classId) return;
-    await classroomApi.post(`/api/teacher/classes/${classId}/assignments`, { contentId });
+    await classroomApi.post(`/api/teacher/classes/${classId}/assignments`, {
+      contentId,
+      dueAt: dueDateInputToIso(pendingDueDate),
+    });
     setPickerOpen(false);
+    setPendingDueDate('');
+    await load();
+  }
+
+  async function updateAssignment(assignmentId: string, fields: { dueAt?: string | null; visible?: boolean }) {
+    await classroomApi.patch(`/api/teacher/assignments/${assignmentId}`, fields);
     await load();
   }
 
   async function removeAssignment(assignmentId: string) {
     await classroomApi.del(`/api/teacher/assignments/${assignmentId}`);
     await load();
+  }
+
+  async function removeStudent(studentId: string) {
+    if (!classId) return;
+    await classroomApi.del(`/api/teacher/classes/${classId}/students/${studentId}`);
+    setRemoveStudentFor(null);
+    await load();
+  }
+
+  async function saveClassName() {
+    if (!classId || !nameDraft.trim()) return;
+    await classroomApi.patch(`/api/teacher/classes/${classId}`, { name: nameDraft.trim() });
+    setRenaming(false);
+    await load();
+  }
+
+  async function exportGradebook() {
+    if (!classId || !cls) return;
+    const gradebook = await classroomApi.get<GradebookResponse>(`/api/teacher/classes/${classId}/gradebook`);
+    const filenameStem = cls.name.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'class';
+    downloadTextFile(`${filenameStem}-gradebook.csv`, buildGradebookCsv(gradebook));
   }
 
   async function resetStudentPassword(studentId: string) {
@@ -103,8 +169,48 @@ export function ClassDetail() {
         >
           <ChevronLeft size={18} strokeWidth={2.4} className="-ml-1.5" /> Classes
         </Link>
-        <h1 className="text-3xl font-bold text-primary">{cls.name}</h1>
+        {renaming ? (
+          <div className="flex gap-2">
+            <input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveClassName();
+                if (e.key === 'Escape') setRenaming(false);
+              }}
+              aria-label="Class name"
+              maxLength={120}
+              autoFocus
+              className="ios-input py-2 text-lg font-bold flex-1"
+            />
+            <Button size="sm" onClick={saveClassName} disabled={!nameDraft.trim()}>
+              Save
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setRenaming(false)}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-primary">{cls.name}</h1>
+            <button
+              onClick={() => {
+                setNameDraft(cls.name);
+                setRenaming(true);
+              }}
+              aria-label="Rename class"
+              className="p-1.5 rounded-full cursor-pointer"
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+            >
+              <Pencil size={14} />
+            </button>
+          </div>
+        )}
       </div>
+
+      <ClassOverview roster={roster ?? []} assignmentCount={assignments?.length ?? 0} />
+
+      {classId && <AnnouncementsManager classId={classId} />}
 
       {cls.archived_at && (
         <div
@@ -153,41 +259,13 @@ export function ClassDetail() {
             <p className="p-4 text-sm text-muted">Nothing assigned yet.</p>
           )}
           {assignments?.map((a) => (
-            <div key={a.id} className="inset-row justify-between">
-              <Link to={`/classes/${classId}/assignments/${a.id}/results`} className="flex items-center gap-2.5 no-underline">
-                <BookOpen size={14} style={{ color: 'var(--text-muted)' }} />
-                <div>
-                  <p className="text-sm font-semibold text-primary">{a.title}</p>
-                  <p className="text-xs text-muted capitalize">{a.kind}</p>
-                </div>
-                {!!a.unresolvedFlagCount && (
-                  <span
-                    className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-                    style={{ backgroundColor: 'color-mix(in srgb, var(--danger) 12%, transparent)', color: 'var(--danger)' }}
-                  >
-                    <Flag size={10} /> {a.unresolvedFlagCount}
-                  </span>
-                )}
-              </Link>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Link
-                  to={`/classes/${classId}/assignments/${a.id}/results`}
-                  aria-label="View results"
-                  className="p-1.5 rounded-full"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  <BarChart3 size={14} />
-                </Link>
-                <button
-                  onClick={() => removeAssignment(a.id)}
-                  aria-label="Remove assignment"
-                  className="p-1.5 rounded-full cursor-pointer"
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
+            <TeacherAssignmentRow
+              key={a.id}
+              classId={cls.id}
+              assignment={a}
+              onChange={(fields) => updateAssignment(a.id, fields)}
+              onRemove={() => removeAssignment(a.id)}
+            />
           ))}
           <div className="p-4 inset-divider space-y-3">
             {!pickerOpen ? (
@@ -204,6 +282,15 @@ export function ClassDetail() {
               </p>
             ) : (
               <div className="space-y-1.5">
+                <label className="flex items-center gap-2 text-xs text-secondary">
+                  Due date (optional)
+                  <input
+                    type="date"
+                    value={pendingDueDate}
+                    onChange={(e) => setPendingDueDate(e.target.value)}
+                    className="ios-input py-1 text-sm"
+                  />
+                </label>
                 {availableToAssign.map((c) => (
                   <button
                     key={c.id}
@@ -221,15 +308,37 @@ export function ClassDetail() {
       </section>
 
       <section>
-        <div className="section-label">Roster</div>
+        <div className="flex items-end justify-between">
+          <div className="section-label">Roster</div>
+          {!!roster?.length && !!assignments?.length && (
+            <button
+              onClick={exportGradebook}
+              className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1 mb-1"
+              style={{ background: 'transparent', border: 'none' }}
+            >
+              <Download size={11} /> Export gradebook (CSV)
+            </button>
+          )}
+        </div>
         <div className="inset-group">
           {roster?.length === 0 && <p className="p-4 text-sm text-muted">No students enrolled yet.</p>}
           {roster?.map((s) => (
             <div key={s.id} className="inset-divider">
               <div className="inset-row justify-between" style={{ borderTop: 'none' }}>
                 <div>
-                  <p className="text-sm font-semibold text-primary">{s.name}</p>
+                  <p className="text-sm font-semibold text-primary">
+                    {s.name}
+                    {attentionReason(s) && (
+                      <span className="ml-2 text-xs font-medium" style={{ color: 'var(--danger)' }}>
+                        {ATTENTION_LABEL[attentionReason(s)!]}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-muted">{s.email}</p>
+                  <p className="text-xs text-muted">
+                    {describeLastActive(s.lastActiveAt)}
+                    {s.awaitingReview > 0 && ` · ${s.awaitingReview} to review`}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-primary">
@@ -239,7 +348,36 @@ export function ClassDetail() {
                 </div>
               </div>
 
-              <div className="px-4 pb-3 -mt-1.5">
+              <div className="px-4 pb-3 -mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                {removeStudentFor === s.id ? (
+                  <div className="flex items-center gap-2 w-full">
+                    <p className="text-xs text-primary flex-1">
+                      Remove {s.name.split(' ')[0]} and delete their results in this class?
+                    </p>
+                    <button
+                      onClick={() => removeStudent(s.id)}
+                      className="chip cursor-pointer flex-shrink-0"
+                      style={{ border: 'none', color: 'var(--danger)' }}
+                    >
+                      Remove
+                    </button>
+                    <button
+                      onClick={() => setRemoveStudentFor(null)}
+                      className="text-xs text-muted hover:underline cursor-pointer flex-shrink-0"
+                      style={{ background: 'transparent', border: 'none' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setRemoveStudentFor(s.id)}
+                    className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
+                    style={{ background: 'transparent', border: 'none' }}
+                  >
+                    <UserMinus size={11} /> Remove from class
+                  </button>
+                )}
                 {resetSuccessFor === s.id ? (
                   <p className="text-xs flex items-center gap-1" style={{ color: 'var(--success)' }}>
                     <Check size={11} /> Password reset — let {s.name.split(' ')[0]} know their new password.
