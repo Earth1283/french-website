@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { BankQuestionList } from '../../components/classroom/BankQuestionList';
 import { tagsFromInput } from '../../utils/classroomAttention';
 import type { ExerciseType } from '../../types';
-import type { BankQuestion } from '../../types/classroom';
+import type { BankQuestion, ClassroomContent } from '../../types/classroom';
 
 const TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'multiple-choice', label: 'Multiple Choice' },
@@ -21,9 +21,11 @@ interface Draft {
   optionsCsv: string;
   hint: string;
   tagsCsv: string;
+  readingId: string;
+  page: string;
 }
 
-const blankDraft: Draft = { type: 'multiple-choice', prompt: '', answer: '', optionsCsv: '', hint: '', tagsCsv: '' };
+const blankDraft: Draft = { type: 'multiple-choice', prompt: '', answer: '', optionsCsv: '', hint: '', tagsCsv: '', readingId: '', page: '' };
 
 function draftFromQuestion(q: BankQuestion): Draft {
   return {
@@ -33,6 +35,8 @@ function draftFromQuestion(q: BankQuestion): Draft {
     optionsCsv: (q.options ?? []).join(', '),
     hint: q.hint ?? '',
     tagsCsv: q.tags.join(', '),
+    readingId: q.readingId ?? '',
+    page: q.page ? String(q.page) : '',
   };
 }
 
@@ -41,6 +45,8 @@ export function QuestionBank() {
   const [questions, setQuestions] = useState<BankQuestion[] | null>(null);
   const [search, setSearch] = useState('');
   const [tag, setTag] = useState<string | null>(null);
+  const [article, setArticle] = useState<string | null>(null);
+  const [readings, setReadings] = useState<ClassroomContent[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -48,8 +54,12 @@ export function QuestionBank() {
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    const res = await classroomApi.get<{ questions: BankQuestion[] }>('/api/teacher/bank');
-    setQuestions(res.questions);
+    const [bankRes, contentRes] = await Promise.all([
+      classroomApi.get<{ questions: BankQuestion[] }>('/api/teacher/bank'),
+      classroomApi.get<{ content: ClassroomContent[] }>('/api/teacher/content'),
+    ]);
+    setQuestions(bankRes.questions);
+    setReadings(contentRes.content.filter((c) => c.kind === 'reading'));
   }
 
   useEffect(() => {
@@ -74,6 +84,8 @@ export function QuestionBank() {
       options: draft.type === 'multiple-choice' ? draft.optionsCsv.split(',').map((o) => o.trim()).filter(Boolean) : undefined,
       hint: draft.hint.trim() || undefined,
       tags: tagsFromInput(draft.tagsCsv),
+      readingId: draft.readingId || null,
+      page: draft.readingId && draft.page.trim() ? Number(draft.page) : null,
     };
     try {
       if (editingId) await classroomApi.put(`/api/teacher/bank/${editingId}`, payload);
@@ -111,7 +123,8 @@ export function QuestionBank() {
           </Link>
           <h1 className="text-3xl font-bold text-primary">Question Bank</h1>
           <p className="text-sm text-secondary mt-1">
-            Questions you reuse. Adding one to a quiz copies it, so editing a quiz never changes the bank.
+            Questions you reuse. Adding one to a quiz or article copies it, so editing those never changes the bank. Tie a
+            question to the article it was written for to find it again from that article's editor.
           </p>
         </div>
         <Button
@@ -151,6 +164,32 @@ export function QuestionBank() {
           )}
           <input value={draft.hint} onChange={(e) => setDraft({ ...draft, hint: e.target.value })} placeholder="Hint (optional)" className="ios-input py-1.5 text-sm" />
           <input value={draft.tagsCsv} onChange={(e) => setDraft({ ...draft, tagsCsv: e.target.value })} placeholder="Tags, comma-separated (e.g. verbs, food)" className="ios-input py-1.5 text-sm" />
+          <div className="flex items-center gap-2">
+            <select
+              value={draft.readingId}
+              onChange={(e) => setDraft({ ...draft, readingId: e.target.value })}
+              aria-label="Based on article"
+              className="ios-input py-1.5 text-sm flex-1"
+            >
+              <option value="">Not tied to an article</option>
+              {readings.map((r) => (
+                <option key={r.id} value={r.id}>
+                  Based on “{r.title}”
+                </option>
+              ))}
+            </select>
+            {draft.readingId && (
+              <input
+                type="number"
+                min={1}
+                value={draft.page}
+                onChange={(e) => setDraft({ ...draft, page: e.target.value })}
+                placeholder="Page"
+                aria-label="Page"
+                className="ios-input py-1.5 text-sm w-20"
+              />
+            )}
+          </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={save} disabled={!draft.prompt.trim() || !draft.answer.trim()}>
               Save
@@ -177,6 +216,8 @@ export function QuestionBank() {
           onSearchChange={setSearch}
           tag={tag}
           onTagChange={setTag}
+          article={article}
+          onArticleChange={setArticle}
           selected={selected}
           onToggle={toggle}
           renderActions={(q) => (

@@ -28,7 +28,7 @@ Everything lives in `server/data/` (git-ignored): the SQLite DB (WAL mode), `sec
 
 ## Migrations
 
-These are numbered SQL files in `src/db/migrations/` (`001_init.sql` … `009_attempt_controls_and_bank.sql`), applied in order by `src/db/migrate.ts`. Add `010_…sql` and never edit a shipped one. `npm run build` copies the `.sql` files into `dist/` with a shell `cp`, so a migration that only exists in `src/` won't ship if someone builds differently.
+These are numbered SQL files in `src/db/migrations/` (`001_init.sql` … `010_reading_questions_bank_link.sql`), applied in order by `src/db/migrate.ts`. Add `011_…sql` and never edit a shipped one. `npm run build` copies the `.sql` files into `dist/` with a shell `cp`, so a migration that only exists in `src/` won't ship if someone builds differently.
 
 ## Mirrored code
 
@@ -56,3 +56,4 @@ The server validates with zod schemas in `server/src/lib/validation.ts`. The cli
 - A retake overwrites the single `attempts` row (see `recordAttempt`); `attempt_count` is what an assignment's `max_attempts` is checked against. Per-student extensions live in `assignment_overrides` (personal due date, extra attempts). `lib/attemptPolicy.ts` is the one place that decides whether an assignment is open, and the student routes call it.
 - `lib/classInsights.ts` builds the per-student reports (overdue, not started, inactive, struggling) behind `/classes/:id/attention` and `/classes/:id/students/:studentId`. The client has no copy of these rules.
 - The teacher's question bank (`bank_questions`) is copy-on-use: adding a question to a quiz copies it, there is no link back.
+- A reading can carry comprehension questions (`questions` in its body, stored in the `body_json` manifest, page text still on disk). With none, finishing credits the article as before; with some, `gradeAttempt` marks them like a quiz, and a non-gradable article records answers without a score or XP. Bank questions can point at an article (`reading_id`, `page`); that link is only for finding them, the article holds its own copies.

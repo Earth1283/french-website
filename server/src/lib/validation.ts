@@ -64,9 +64,17 @@ const quizBodySchema = z.object({
 // Page bodies are markdown text; the array is a validation-time payload
 // only — createContent/updateContent strip it out to files on disk and
 // never persist it into body_json (see server/src/lib/contentFiles.ts).
+const readingQuestionSchema = exerciseSchema.extend({
+  // The page the answer can be found on, shown to the student with the question.
+  page: z.number().int().min(1).max(50).optional(),
+});
+
 const readingBodySchema = z.object({
   kind: z.literal('reading'),
   pages: z.array(z.string().trim().min(1).max(20_000)).min(1).max(50),
+  // Comprehension questions answered after the last page. Copies, not links
+  // to the question bank, and graded like a quiz.
+  questions: z.array(readingQuestionSchema).max(40).default([]),
   xpReward: z.number().int().nonnegative().default(10),
   // Whether finishing this counts toward XP/grades, or is just tracked as
   // read. A teacher chooses this per lesson.
@@ -116,13 +124,20 @@ const writingBodySchema = z.object({
   xpReward: z.number().int().nonnegative().default(10),
 });
 
-export const contentBodySchema = z.discriminatedUnion('kind', [
-  lessonBodySchema,
-  quizBodySchema,
-  readingBodySchema,
-  listeningBodySchema,
-  writingBodySchema,
-]);
+export const contentBodySchema = z
+  .discriminatedUnion('kind', [lessonBodySchema, quizBodySchema, readingBodySchema, listeningBodySchema, writingBodySchema])
+  .superRefine((body, ctx) => {
+    if (body.kind !== 'reading') return;
+    body.questions.forEach((q, i) => {
+      if (q.page !== undefined && q.page > body.pages.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['questions', i, 'page'],
+          message: `Question ${i + 1} points at page ${q.page}, but the article has ${body.pages.length}`,
+        });
+      }
+    });
+  });
 export type ContentBody = z.infer<typeof contentBodySchema>;
 
 export const createContentSchema = z.object({
@@ -176,6 +191,8 @@ export const bankQuestionSchema = exerciseSchema
     hint: z.string().trim().max(500).optional(),
     options: z.array(z.string().trim().min(1).max(300)).min(2).max(8).optional(),
     tags: z.array(bankTag).max(10).default([]).transform((tags) => [...new Set(tags)]),
+    readingId: z.string().min(1).nullable().optional(),
+    page: z.number().int().min(1).max(50).nullable().optional(),
   })
   .refine((q) => q.type !== 'multiple-choice' || (q.options?.includes(q.answer) ?? false), {
     message: 'A multiple-choice answer must be one of its options',

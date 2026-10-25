@@ -122,6 +122,12 @@ export function Assignment() {
   }
 
   async function finishReading() {
+    if (exercises.length > 0) {
+      setResponses([]);
+      setExerciseIndex(0);
+      setPhase('exercises');
+      return;
+    }
     setSubmitting(true);
     try {
       await classroomApi.post(`/api/student/assignments/${assignmentId}/attempts`, { responses: [] });
@@ -156,6 +162,7 @@ export function Assignment() {
     }
   };
 
+  const readingQuestionPage = content.body.kind === 'reading' ? content.body.questions[exerciseIndex]?.page : undefined;
   const totalSteps = vocab.length + exercises.length;
   const currentStep = phase === 'flashcards' ? cardIndex : phase === 'exercises' ? vocab.length + exerciseIndex : phase === 'complete' ? totalSteps : 0;
 
@@ -172,6 +179,7 @@ export function Assignment() {
           </div>
           <div className="flex items-center justify-center gap-2 flex-wrap">
             {isReading && <span className="chip">📄 {readingPages.length} pages</span>}
+            {isReading && exercises.length > 0 && <span className="chip">✏️ {exercises.length} questions after</span>}
             {listeningBody && <span className="chip">🎧 {listeningBody.questions.length} questions · {listeningBody.plays === 1 ? 'heard once' : `heard ${listeningBody.plays}×`}</span>}
             {writingBody && <span className="chip">✍️ {writingBody.minWords}+ mots{writingBody.timeMinutes ? ` · ${writingBody.timeMinutes} min` : ''}</span>}
             {(content.body.kind === 'lesson' || content.body.kind === 'quiz') && vocab.length > 0 && <span className="chip">📖 {vocab.length} vocab items</span>}
@@ -283,7 +291,7 @@ export function Assignment() {
           <DeepLessonReader
             pages={readingPages}
             onComplete={finishReading}
-            completeLabel={readingGradable ? 'Finish for XP' : 'Mark as Read'}
+            completeLabel={exercises.length > 0 ? 'Continue to the questions' : readingGradable ? 'Finish for XP' : 'Mark as Read'}
           />
         )}
       </div>
@@ -383,11 +391,13 @@ export function Assignment() {
         <p className="text-secondary">
           {writingBody
             ? `Handed in · +${content.body.xpReward} XP. Your teacher will mark it with the DELF grid.`
-            : isReading
+            : isReading && exercises.length === 0
               ? readingGradable
                 ? `Lesson complete · +${content.body.xpReward} XP`
                 : 'Marked as read'
-              : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
+              : isReading && !readingGradable
+                ? `${correct}/${responses.length} correct · practice only, not graded`
+                : `${correct}/${responses.length} correct · ${score}% · +${content.body.xpReward} XP`}
         </p>
         {writingBody?.modelAnswer && (
           <div className="card p-4 text-left">
@@ -445,6 +455,9 @@ export function Assignment() {
             <p className="text-xs text-center text-muted font-semibold uppercase tracking-wider">
               {exerciseIndex + 1} of {exercises.length}
             </p>
+            {readingQuestionPage !== undefined && (
+              <p className="text-xs text-center text-muted">The answer is on page {readingQuestionPage}</p>
+            )}
             {(() => {
               const ex = exercises[exerciseIndex];
               const onCorrect = (answerGiven?: string) => advanceExercise({ index: exerciseIndex, correct: true, answerGiven });

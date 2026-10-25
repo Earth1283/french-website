@@ -32,6 +32,7 @@ interface ExerciseRow {
   answer: string;
   optionsCsv: string;
   hint: string;
+  page: string;
 }
 
 type ContentKind = ClassroomContentKind;
@@ -45,10 +46,17 @@ const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
 ];
 
 function blankExercise(): ExerciseRow {
-  return { type: 'multiple-choice', prompt: '', answer: '', optionsCsv: '', hint: '' };
+  return { type: 'multiple-choice', prompt: '', answer: '', optionsCsv: '', hint: '', page: '' };
 }
 function exerciseFromBank(q: BankQuestion): ExerciseRow {
-  return { type: q.type, prompt: q.prompt, answer: q.answer, optionsCsv: (q.options ?? []).join(', '), hint: q.hint ?? '' };
+  return {
+    type: q.type,
+    prompt: q.prompt,
+    answer: q.answer,
+    optionsCsv: (q.options ?? []).join(', '),
+    hint: q.hint ?? '',
+    page: q.page ? String(q.page) : '',
+  };
 }
 function blankVocab(): VocabRow {
   return { french: '', english: '', pronunciation: '' };
@@ -75,6 +83,7 @@ export function ContentEditor() {
   const [bank, setBank] = useState<BankQuestion[] | null>(null);
   const [bankSearch, setBankSearch] = useState('');
   const [bankTag, setBankTag] = useState<string | null>(null);
+  const [bankArticle, setBankArticle] = useState<string | null>(null);
   const [bankSelected, setBankSelected] = useState<Set<string>>(new Set());
   const [bankNotice, setBankNotice] = useState<string | null>(null);
   const [pages, setPages] = useState<string[]>([blankPage()]);
@@ -104,11 +113,24 @@ export function ContentEditor() {
             answer: e.answer,
             optionsCsv: (e.options ?? []).join(', '),
             hint: e.hint ?? '',
+            page: '',
           }))
         );
       } else if (body.kind === 'reading') {
         setPages(body.pages.length ? body.pages : [blankPage()]);
         setGradable(body.gradable);
+        setExercises(
+          body.questions?.length
+            ? body.questions.map((q) => ({
+                type: q.type,
+                prompt: q.prompt,
+                answer: q.answer,
+                optionsCsv: (q.options ?? []).join(', '),
+                hint: q.hint ?? '',
+                page: q.page ? String(q.page) : '',
+              }))
+            : [blankExercise()]
+        );
       } else if (body.kind === 'listening') {
         setListening(listeningDraftFromBody(body));
       } else if (body.kind === 'writing') {
@@ -121,6 +143,7 @@ export function ContentEditor() {
             answer: e.answer,
             optionsCsv: (e.options ?? []).join(', '),
             hint: e.hint ?? '',
+            page: '',
           }))
         );
       }
@@ -135,11 +158,13 @@ export function ContentEditor() {
       answer: row.answer.trim(),
       options: row.type === 'multiple-choice' ? row.optionsCsv.split(',').map((o) => o.trim()).filter(Boolean) : undefined,
       hint: row.hint.trim() || undefined,
+      ...(kind === 'reading' && row.page.trim() ? { page: Number(row.page) } : {}),
     };
   }
 
   async function openBankPicker() {
     setBankSelected(new Set());
+    setBankArticle(kind === 'reading' ? (contentId ?? null) : null);
     setPickerOpen(true);
     const res = await classroomApi.get<{ questions: BankQuestion[] }>('/api/teacher/bank');
     setBank(res.questions);
@@ -159,12 +184,17 @@ export function ContentEditor() {
     if (complete.length === 0) return;
     setBankNotice(null);
     try {
-      const res = await classroomApi.post<{ created: unknown[]; skipped: number }>('/api/teacher/bank/import', {
-        questions: complete.map((q) => ({ ...q, tags: [] })),
+      const res = await classroomApi.post<{ created: unknown[]; skipped: number; linked: number }>('/api/teacher/bank/import', {
+        questions: complete.map((q) => ({
+          ...q,
+          tags: [],
+          ...(kind === 'reading' && contentId ? { readingId: contentId } : {}),
+        })),
       });
-      setBankNotice(
-        `Saved ${res.created.length} to the bank${res.skipped ? `, ${res.skipped} already there` : ''}.`
-      );
+      const parts = [`Saved ${res.created.length} to the bank`];
+      if (res.linked) parts.push(`${res.linked} linked to this article`);
+      if (res.skipped) parts.push(`${res.skipped} already there`);
+      setBankNotice(`${parts.join(', ')}.${kind === 'reading' && !contentId ? ' Save the article first to link them to it.' : ''}`);
     } catch (e) {
       setBankNotice(e instanceof ClassroomApiError ? `Could not save to the bank: ${e.message}` : 'Could not save to the bank.');
     }
@@ -190,7 +220,13 @@ export function ContentEditor() {
         setSaving(false);
         return;
       }
-      body = { kind: 'reading', pages: cleanPages, xpReward, gradable };
+      body = {
+        kind: 'reading',
+        pages: cleanPages,
+        questions: exercises.filter((e) => e.prompt.trim() && e.answer.trim()).map(toExercise),
+        xpReward,
+        gradable,
+      };
     } else {
       const cleanExercises = exercises.filter((e) => e.prompt.trim() && e.answer.trim()).map(toExercise);
       if (!title.trim() || cleanExercises.length === 0) {
@@ -222,6 +258,102 @@ export function ContentEditor() {
       setSaving(false);
     }
   }
+
+  const exercisesSection = (
+      <section>
+        <div className="section-label">{kind === 'lesson' ? 'Exercises' : kind === 'reading' ? 'Comprehension questions' : 'Questions'}</div>
+        <div className="inset-group">
+          {exercises.map((ex, i) => (
+            <div key={i} className="p-4 inset-divider space-y-2">
+              <div className="flex items-center gap-2">
+                <select
+                  value={ex.type}
+                  onChange={(e) =>
+                    setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, type: e.target.value as ExerciseType } : r)))
+                  }
+                  className="ios-input py-1.5 text-sm flex-1"
+                >
+                  {EXERCISE_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => saveToBank([ex])}
+                  aria-label="Save question to the bank"
+                  title="Save to question bank"
+                  className="p-1.5 cursor-pointer flex-shrink-0"
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                >
+                  <BookmarkPlus size={14} />
+                </button>
+                <button
+                  onClick={() => setExercises((rows) => rows.filter((_, j) => j !== i))}
+                  aria-label="Remove exercise"
+                  className="p-1.5 cursor-pointer flex-shrink-0"
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <input
+                value={ex.prompt}
+                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, prompt: e.target.value } : r)))}
+                placeholder="Prompt"
+                className="ios-input py-1.5 text-sm"
+              />
+              <input
+                value={ex.answer}
+                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, answer: e.target.value } : r)))}
+                placeholder="Correct answer"
+                className="ios-input py-1.5 text-sm"
+              />
+              {ex.type === 'multiple-choice' && (
+                <input
+                  value={ex.optionsCsv}
+                  onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, optionsCsv: e.target.value } : r)))}
+                  placeholder="Options, comma-separated (include the correct answer)"
+                  className="ios-input py-1.5 text-sm"
+                />
+              )}
+              <input
+                value={ex.hint}
+                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, hint: e.target.value } : r)))}
+                placeholder="Hint (optional)"
+                className="ios-input py-1.5 text-sm"
+              />
+              {kind === 'reading' && (
+                <label className="flex items-center gap-2 text-xs text-secondary">
+                  Answer is on page
+                  <input
+                    type="number"
+                    min={1}
+                    max={pages.length}
+                    value={ex.page}
+                    onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, page: e.target.value } : r)))}
+                    placeholder="optional"
+                    className="ios-input py-1 text-sm w-24"
+                  />
+                </label>
+              )}
+            </div>
+          ))}
+          <div className="p-3 flex flex-wrap gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setExercises((rows) => [...rows, blankExercise()])}>
+              <Plus size={14} /> Add {kind === 'lesson' ? 'exercise' : 'question'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={openBankPicker}>
+              <Library size={14} /> Add from bank
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => saveToBank(exercises)}>
+              <BookmarkPlus size={14} /> Save all to bank
+            </Button>
+          </div>
+          {bankNotice && <p className="px-4 pb-3 text-xs text-secondary">{bankNotice}</p>}
+        </div>
+      </section>
+  );
 
   if (!loaded) {
     return <div className="max-w-2xl mx-auto px-4 py-16 text-center text-muted">Loading…</div>;
@@ -333,87 +465,7 @@ export function ContentEditor() {
         </div>
       )}
 
-      {(kind === 'lesson' || kind === 'quiz') && (
-      <section>
-        <div className="section-label">{kind === 'lesson' ? 'Exercises' : 'Questions'}</div>
-        <div className="inset-group">
-          {exercises.map((ex, i) => (
-            <div key={i} className="p-4 inset-divider space-y-2">
-              <div className="flex items-center gap-2">
-                <select
-                  value={ex.type}
-                  onChange={(e) =>
-                    setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, type: e.target.value as ExerciseType } : r)))
-                  }
-                  className="ios-input py-1.5 text-sm flex-1"
-                >
-                  {EXERCISE_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => saveToBank([ex])}
-                  aria-label="Save question to the bank"
-                  title="Save to question bank"
-                  className="p-1.5 cursor-pointer flex-shrink-0"
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-                >
-                  <BookmarkPlus size={14} />
-                </button>
-                <button
-                  onClick={() => setExercises((rows) => rows.filter((_, j) => j !== i))}
-                  aria-label="Remove exercise"
-                  className="p-1.5 cursor-pointer flex-shrink-0"
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-              <input
-                value={ex.prompt}
-                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, prompt: e.target.value } : r)))}
-                placeholder="Prompt"
-                className="ios-input py-1.5 text-sm"
-              />
-              <input
-                value={ex.answer}
-                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, answer: e.target.value } : r)))}
-                placeholder="Correct answer"
-                className="ios-input py-1.5 text-sm"
-              />
-              {ex.type === 'multiple-choice' && (
-                <input
-                  value={ex.optionsCsv}
-                  onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, optionsCsv: e.target.value } : r)))}
-                  placeholder="Options, comma-separated (include the correct answer)"
-                  className="ios-input py-1.5 text-sm"
-                />
-              )}
-              <input
-                value={ex.hint}
-                onChange={(e) => setExercises((rows) => rows.map((r, j) => (j === i ? { ...r, hint: e.target.value } : r)))}
-                placeholder="Hint (optional)"
-                className="ios-input py-1.5 text-sm"
-              />
-            </div>
-          ))}
-          <div className="p-3 flex flex-wrap gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setExercises((rows) => [...rows, blankExercise()])}>
-              <Plus size={14} /> Add {kind === 'lesson' ? 'exercise' : 'question'}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={openBankPicker}>
-              <Library size={14} /> Add from bank
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => saveToBank(exercises)}>
-              <BookmarkPlus size={14} /> Save all to bank
-            </Button>
-          </div>
-          {bankNotice && <p className="px-4 pb-3 text-xs text-secondary">{bankNotice}</p>}
-        </div>
-      </section>
-      )}
+      {(kind === 'lesson' || kind === 'quiz') && exercisesSection}
 
       {kind === 'reading' && (
         <section>
@@ -472,6 +524,16 @@ export function ContentEditor() {
         </section>
       )}
 
+      {kind === 'reading' && (
+        <div className="space-y-2">
+          <p className="text-xs text-muted">
+            Optional. Students answer these after the last page, and the article is marked from their answers. Leave it empty
+            to credit the reading itself. Unticked "counts toward XP and grades" still records answers but gives no score.
+          </p>
+          {exercisesSection}
+        </div>
+      )}
+
       {error && (
         <p className="text-sm" style={{ color: 'var(--danger)' }}>
           {error}
@@ -489,6 +551,8 @@ export function ContentEditor() {
               onSearchChange={setBankSearch}
               tag={bankTag}
               onTagChange={setBankTag}
+              article={bankArticle}
+              onArticleChange={setBankArticle}
               selected={bankSelected}
               onToggle={(id) =>
                 setBankSelected((current) => {

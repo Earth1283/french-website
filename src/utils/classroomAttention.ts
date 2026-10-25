@@ -43,15 +43,17 @@ export function tagsFromInput(input: string): string[] {
   return [...new Set(input.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean))];
 }
 
-export function filterBank<T extends { prompt: string; answer: string; tags: string[] }>(
+export function filterBank<T extends { prompt: string; answer: string; tags: string[]; readingId?: string | null }>(
   questions: T[],
   search: string,
-  tag: string | null
+  tag: string | null,
+  article: string | null = null
 ): T[] {
   const needle = search.trim().toLowerCase();
   return questions.filter(
     (q) =>
       (!tag || q.tags.includes(tag)) &&
+      (!article || q.readingId === article) &&
       (!needle || q.prompt.toLowerCase().includes(needle) || q.answer.toLowerCase().includes(needle))
   );
 }

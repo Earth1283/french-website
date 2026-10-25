@@ -16,12 +16,18 @@ export interface ContentRow {
 }
 
 // Reading content's page text is never written into body_json — only a
-// small manifest (page count, xp, gradability) is. The pages themselves
+// small manifest (page count, xp, gradability, comprehension questions) is. The pages themselves
 // live as files on disk (see contentFiles.ts) and are read back in by
 // hydrateContentBody. Other content kinds store their full body as-is.
 function bodyToStoredJson(body: ContentBody): string {
   if (body.kind === 'reading') {
-    return JSON.stringify({ kind: 'reading', xpReward: body.xpReward, gradable: body.gradable, pageCount: body.pages.length });
+    return JSON.stringify({
+      kind: 'reading',
+      xpReward: body.xpReward,
+      gradable: body.gradable,
+      pageCount: body.pages.length,
+      questions: body.questions,
+    });
   }
   return JSON.stringify(body);
 }
@@ -51,7 +57,7 @@ export function createContent(
 export function hydrateContentBody(row: ContentRow): ContentBody {
   const parsed = JSON.parse(row.body_json) as ContentBody;
   if (parsed.kind === 'reading') {
-    return { ...parsed, pages: readReadingPages(row.id) };
+    return { ...parsed, pages: readReadingPages(row.id), questions: parsed.questions ?? [] };
   }
   return parsed;
 }

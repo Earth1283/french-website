@@ -134,7 +134,10 @@ export type GradeResult =
   | { ok: false; error: string };
 
 export function gradeAttempt(body: ContentBody, submitted: SubmittedResponse[], text?: string): GradeResult {
-  if (body.kind === 'reading') {
+  // A reading with no questions is credited for being read. With questions,
+  // they are marked like a quiz; a non-gradable one still records the
+  // answers but earns no score or XP.
+  if (body.kind === 'reading' && body.questions.length === 0) {
     return {
       ok: true,
       score: body.gradable ? 100 : null,
@@ -154,7 +157,9 @@ export function gradeAttempt(body: ContentBody, submitted: SubmittedResponse[], 
   const checkers: ((answer: string) => boolean)[] =
     body.kind === 'listening'
       ? body.questions.map((q) => (a: string) => isListeningAnswerCorrect(q, a))
-      : (body.kind === 'lesson' ? body.exercises : body.items).map((ex) => (a: string) => isAnswerCorrect(ex, a));
+      : (body.kind === 'lesson' ? body.exercises : body.kind === 'reading' ? body.questions : body.items).map(
+          (ex) => (a: string) => isAnswerCorrect(ex, a)
+        );
   if (submitted.length !== checkers.length) {
     return { ok: false, error: `Expected an answer for each of the ${checkers.length} questions` };
   }
@@ -173,10 +178,11 @@ export function gradeAttempt(body: ContentBody, submitted: SubmittedResponse[], 
 
   const responses = [...graded.values()].sort((a, b) => a.index - b.index);
   const correctCount = responses.filter((r) => r.correct).length;
+  const counts = body.kind !== 'reading' || body.gradable;
   return {
     ok: true,
-    score: Math.round((correctCount / checkers.length) * 100),
-    xpEarned: body.xpReward,
+    score: counts ? Math.round((correctCount / checkers.length) * 100) : null,
+    xpEarned: counts ? body.xpReward : 0,
     responses,
   };
 }

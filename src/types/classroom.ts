@@ -24,10 +24,17 @@ export interface ClassroomQuizBody {
   xpReward: number;
 }
 
+export interface ReadingQuestion extends Exercise {
+  /** Page of the article the answer can be found on. */
+  page?: number;
+}
+
 export interface ClassroomReadingBody {
   kind: 'reading';
   /** Raw markdown per page — first line "# Title" is the page title. */
   pages: string[];
+  /** Comprehension questions answered after the last page. */
+  questions: ReadingQuestion[];
   xpReward: number;
   /** Whether finishing this counts toward XP/grades, or is just tracked as read. */
   gradable: boolean;
@@ -241,11 +248,13 @@ export interface BankQuestion {
   options?: string[];
   hint?: string;
   tags: string[];
+  /** The reading article the question was written for, if any. */
+  readingId: string | null;
+  readingTitle: string | null;
+  page: number | null;
   createdAt: string;
   updatedAt: string;
 }
-
-export type BankQuestionInput = Pick<BankQuestion, 'type' | 'prompt' | 'answer' | 'options' | 'hint' | 'tags'>;
 
 export interface ClassroomProfile {
   id: string;
@@ -254,9 +263,10 @@ export interface ClassroomProfile {
 }
 
 // Lesson/quiz reduce to a flat Exercise[] so the exercise renderers never branch on kind.
-// Reading, listening and writing have their own flows and no Exercise[].
+// Reading's questions follow the pages; listening and writing have their own flows and no Exercise[].
 export function bodyToExercises(body: ClassroomContentBody): Exercise[] {
   if (body.kind === 'lesson') return body.exercises;
+  if (body.kind === 'reading') return body.questions;
   if (body.kind !== 'quiz') return [];
   return body.items.map((item) => ({
     type: item.type,

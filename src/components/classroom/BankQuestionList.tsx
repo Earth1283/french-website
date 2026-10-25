@@ -13,6 +13,8 @@ interface BankQuestionListProps {
   onSearchChange: (search: string) => void;
   tag: string | null;
   onTagChange: (tag: string | null) => void;
+  article?: string | null;
+  onArticleChange?: (article: string | null) => void;
   selected: Set<string>;
   onToggle: (id: string) => void;
   renderActions?: (question: BankQuestion) => React.ReactNode;
@@ -24,12 +26,15 @@ export function BankQuestionList({
   onSearchChange,
   tag,
   onTagChange,
+  article = null,
+  onArticleChange,
   selected,
   onToggle,
   renderActions,
 }: BankQuestionListProps) {
   const allTags = [...new Set(questions.flatMap((q) => q.tags))].sort();
-  const visible = filterBank(questions, search, tag);
+  const articles = new Map(questions.filter((q) => q.readingId && q.readingTitle).map((q) => [q.readingId!, q.readingTitle!]));
+  const visible = filterBank(questions, search, tag, article);
 
   return (
     <div className="space-y-3">
@@ -40,6 +45,21 @@ export function BankQuestionList({
         aria-label="Search the question bank"
         className="ios-input py-2 text-sm"
       />
+      {onArticleChange && articles.size > 0 && (
+        <select
+          value={article ?? ''}
+          onChange={(e) => onArticleChange(e.target.value || null)}
+          aria-label="Filter by article"
+          className="ios-input py-1.5 text-sm"
+        >
+          <option value="">All questions</option>
+          {[...articles].map(([id, title]) => (
+            <option key={id} value={id}>
+              From “{title}”
+            </option>
+          ))}
+        </select>
+      )}
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {allTags.map((t) => (
@@ -81,6 +101,7 @@ export function BankQuestionList({
               </p>
               <p className="text-xs text-muted">
                 {TYPE_LABEL[q.type]}
+                {q.readingTitle && ` · ${q.readingTitle}${q.page ? `, p. ${q.page}` : ''}`}
                 {q.tags.length > 0 && ` · ${q.tags.join(', ')}`}
               </p>
             </div>

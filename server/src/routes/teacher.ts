@@ -101,7 +101,7 @@ function promptsFromBody(bodyJson: string): string[] {
     items?: { prompt: string }[];
     questions?: { prompt: string }[];
   };
-  const list = body.kind === 'lesson' ? body.exercises : body.kind === 'listening' ? body.questions : body.items;
+  const list = body.kind === 'lesson' ? body.exercises : body.kind === 'listening' || body.kind === 'reading' ? body.questions : body.items;
   return (list ?? []).map((item) => item.prompt);
 }
 
@@ -579,6 +579,11 @@ teacherRouter.delete('/content/:contentId', (req, res) => {
   res.status(204).end();
 });
 
+function unownedReadingIds(req: Request, questions: { readingId?: string | null }[]): string[] {
+  const ids = new Set(questions.map((q) => q.readingId).filter((id): id is string => !!id));
+  return [...ids].filter((id) => ownedContent(req, id)?.kind !== 'reading');
+}
+
 teacherRouter.get('/bank', (req, res) => {
   res.json({ questions: listBankQuestions(req.teacherId!) });
 });
@@ -589,6 +594,10 @@ teacherRouter.post('/bank', (req, res) => {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
+  if (unownedReadingIds(req, [parsed.data]).length) {
+    res.status(404).json({ error: 'Reading article not found' });
+    return;
+  }
   res.status(201).json({ question: createBankQuestion(req.teacherId!, parsed.data) });
 });
 
@@ -596,6 +605,10 @@ teacherRouter.post('/bank/import', (req, res) => {
   const parsed = importBankSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  if (unownedReadingIds(req, parsed.data.questions).length) {
+    res.status(404).json({ error: 'Reading article not found' });
     return;
   }
   res.status(201).json(importBankQuestions(req.teacherId!, parsed.data.questions));
@@ -610,6 +623,10 @@ teacherRouter.put('/bank/:questionId', (req, res) => {
   const parsed = bankQuestionSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  if (unownedReadingIds(req, [parsed.data]).length) {
+    res.status(404).json({ error: 'Reading article not found' });
     return;
   }
   res.json({ question: updateBankQuestion(existing.id, parsed.data) });

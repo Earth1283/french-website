@@ -393,3 +393,120 @@ describe('question bank', () => {
     expect(again.body).toMatchObject({ created: [], skipped: 1 });
   });
 });
+
+describe('reading comprehension questions', () => {
+  const article = {
+    kind: 'reading',
+    pages: ['# Un jour\n\nIl pleut.', '# Un autre\n\nIl fait beau.'],
+    xpReward: 20,
+    gradable: true,
+    questions: [
+      { type: 'fill-blank', prompt: 'Il ___ aujourd’hui', answer: 'pleut', page: 1 },
+      { type: 'multiple-choice', prompt: 'Quel temps fait-il ensuite?', answer: 'beau', options: ['beau', 'froid'], page: 2 },
+    ],
+  };
+
+  async function setupReading(overrides: Record<string, unknown> = {}) {
+    const base = await setup();
+    const reading = (
+      await request(app).post('/api/teacher/content').set(auth(base.teacher)).send({ title: 'Météo', body: { ...article, ...overrides } })
+    ).body.content;
+    const assignment = (
+      await request(app).post(`/api/teacher/classes/${base.cls.id}/assignments`).set(auth(base.teacher)).send({ contentId: reading.id })
+    ).body.assignment;
+    return { ...base, reading, readingAssignment: assignment };
+  }
+
+  const answer = (token: string, assignmentId: string, answers: string[]) =>
+    request(app)
+      .post(`/api/student/assignments/${assignmentId}/attempts`)
+      .set(auth(token))
+      .send({ responses: answers.map((answerGiven, index) => ({ index, answerGiven })) });
+
+  it('keeps the questions with the article and hands them to students', async () => {
+    const { teacher, student, reading, readingAssignment } = await setupReading();
+    const fetched = await request(app).get(`/api/teacher/content/${reading.id}`).set(auth(teacher));
+    expect(fetched.body.content.body.questions).toHaveLength(2);
+    const asStudent = await request(app).get(`/api/student/assignments/${readingAssignment.id}`).set(auth(student.token));
+    expect(asStudent.body.content.body.questions[1]).toMatchObject({ prompt: 'Quel temps fait-il ensuite?', page: 2 });
+  });
+
+  it('grades the questions on the server like a quiz', async () => {
+    const { student, readingAssignment } = await setupReading();
+    expect((await answer(student.token, readingAssignment.id, ['pleut', 'froid'])).body.attempt).toMatchObject({ score: 50, xp_earned: 20 });
+    expect((await answer(student.token, readingAssignment.id, ['pleut', 'beau'])).body.attempt.score).toBe(100);
+  });
+
+  it('requires an answer for every question', async () => {
+    const { student, readingAssignment } = await setupReading();
+    const res = await request(app)
+      .post(`/api/student/assignments/${readingAssignment.id}/attempts`)
+      .set(auth(student.token))
+      .send({ responses: [] });
+    expect(res.status).toBe(400);
+  });
+
+  it('records answers for a non-gradable article without scoring it', async () => {
+    const { student, readingAssignment } = await setupReading({ gradable: false });
+    expect((await answer(student.token, readingAssignment.id, ['pleut', 'beau'])).body.attempt).toMatchObject({ score: null, xp_earned: 0 });
+  });
+
+  it('shows question stats in the assignment results', async () => {
+    const { teacher, student, cls, readingAssignment } = await setupReading();
+    await answer(student.token, readingAssignment.id, ['faux', 'beau']);
+    const res = await request(app)
+      .get(`/api/teacher/classes/${cls.id}/assignments/${readingAssignment.id}/results`)
+      .set(auth(teacher));
+    expect(res.body.questions[0]).toMatchObject({ prompt: 'Il ___ aujourd’hui', wrongCount: 1 });
+  });
+
+  it('still treats an article saved without questions as read-for-credit', async () => {
+    const { student, readingAssignment } = await setupReading({ questions: undefined });
+    expect((await answer(student.token, readingAssignment.id, [])).body.attempt.score).toBe(100);
+  });
+
+  it('rejects a question that points past the last page', async () => {
+    const teacher = await registerTeacher();
+    const res = await request(app)
+      .post('/api/teacher/content')
+      .set(auth(teacher))
+      .send({ title: 'x', body: { ...article, questions: [{ type: 'fill-blank', prompt: 'p', answer: 'a', page: 3 }] } });
+    expect(res.status).toBe(400);
+  });
+
+  it('links bank questions to an article and keeps them when the article is deleted', async () => {
+    const { teacher, reading } = await setupReading();
+    const fill = { type: 'fill-blank', prompt: 'Il ___ aujourd’hui', answer: 'pleut' };
+
+    await request(app).post('/api/teacher/bank').set(auth(teacher)).send(fill);
+    const linked = await request(app)
+      .post('/api/teacher/bank/import')
+      .set(auth(teacher))
+      .send({ questions: [{ ...fill, readingId: reading.id, page: 1 }] });
+    expect(linked.body).toMatchObject({ created: [], skipped: 0, linked: 1 });
+
+    const list = await request(app).get('/api/teacher/bank').set(auth(teacher));
+    expect(list.body.questions[0]).toMatchObject({ readingId: reading.id, readingTitle: 'Météo', page: 1 });
+
+    await request(app).delete(`/api/teacher/content/${reading.id}`).set(auth(teacher));
+    const after = await request(app).get('/api/teacher/bank').set(auth(teacher));
+    expect(after.body.questions[0]).toMatchObject({ readingId: null, readingTitle: null, page: null });
+  });
+
+  it('only links to the teacher’s own reading articles', async () => {
+    const { reading } = await setupReading();
+    const other = await registerTeacher('other@example.com');
+    const res = await request(app)
+      .post('/api/teacher/bank')
+      .set(auth(other))
+      .send({ type: 'fill-blank', prompt: 'p', answer: 'a', readingId: reading.id });
+    expect(res.status).toBe(404);
+
+    const quiz = (await request(app).post('/api/teacher/content').set(auth(other)).send({ title: 'q', body: quizBody })).body.content;
+    const notReading = await request(app)
+      .post('/api/teacher/bank')
+      .set(auth(other))
+      .send({ type: 'fill-blank', prompt: 'p', answer: 'a', readingId: quiz.id });
+    expect(notReading.status).toBe(404);
+  });
+});

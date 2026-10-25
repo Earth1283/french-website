@@ -116,4 +116,14 @@ describe('question bank helpers', () => {
     expect(filterBank(bank, 'HELLO', null)).toEqual([bank[0]]);
     expect(filterBank(bank, 'je', 'greetings')).toEqual([]);
   });
+
+  it('filters to the questions written for one article', () => {
+    const bank = [
+      { prompt: 'a', answer: 'a', tags: [], readingId: 'r1' },
+      { prompt: 'b', answer: 'b', tags: [], readingId: 'r2' },
+      { prompt: 'c', answer: 'c', tags: [], readingId: null },
+    ];
+    expect(filterBank(bank, '', null, 'r1')).toEqual([bank[0]]);
+    expect(filterBank(bank, '', null, null)).toHaveLength(3);
+  });
 });
