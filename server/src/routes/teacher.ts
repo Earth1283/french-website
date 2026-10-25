@@ -30,10 +30,25 @@ import {
 import {
   createAssignment,
   deleteAssignment,
+  deleteOverride,
   getAssignmentById,
+  getOverride,
+  isContentAssignedToClass,
   listAssignmentsByClass,
   updateAssignment,
+  upsertOverride,
 } from '../db/queries/assignments.js';
+import {
+  createBankQuestion,
+  deleteBankQuestions,
+  getBankQuestion,
+  importBankQuestions,
+  listBankQuestions,
+  updateBankQuestion,
+} from '../db/queries/bank.js';
+import { getClassActivity } from '../db/queries/classActivity.js';
+import { db } from '../db/connection.js';
+import { buildStudentReports } from '../lib/classInsights.js';
 import {
   getAttemptById,
   getQuestionStatsForAssignment,
@@ -45,10 +60,17 @@ import { updateStudentPassword } from '../db/queries/students.js';
 import { hashPassword } from '../auth/hash.js';
 import { bandsToPercent, countWords } from '../lib/rubric.js';
 import {
+  assignmentOverrideSchema,
+  bankQuestionSchema,
+  bulkAssignSchema,
   createAnnouncementSchema,
   createAssignmentSchema,
   createClassSchema,
   createContentSchema,
+  deleteBankSchema,
+  duplicateClassSchema,
+  duplicateContentSchema,
+  importBankSchema,
   resetStudentPasswordSchema,
   reviewAttemptSchema,
   updateAnnouncementSchema,
@@ -306,8 +328,155 @@ teacherRouter.post('/classes/:classId/assignments', (req, res) => {
     res.status(404).json({ error: 'Content not found' });
     return;
   }
-  const assignment = createAssignment(cls.id, content.id, parsed.data.dueAt ?? null);
+  const { dueAt, maxAttempts, acceptLate } = parsed.data;
+  const assignment = createAssignment(cls.id, content.id, { dueAt, maxAttempts, acceptLate });
   res.status(201).json({ assignment });
+});
+
+// Assigns one piece of content to several of the teacher's classes in one go.
+// A class that already has it is skipped rather than given a second copy.
+teacherRouter.post('/assignments/bulk', (req, res) => {
+  const parsed = bulkAssignSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const content = ownedContent(req, parsed.data.contentId);
+  if (!content) {
+    res.status(404).json({ error: 'Content not found' });
+    return;
+  }
+  const classes = [...new Set(parsed.data.classIds)].map((id) => ownedClass(req, id));
+  if (classes.some((c) => !c)) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  const { dueAt, maxAttempts, acceptLate } = parsed.data;
+  const created: string[] = [];
+  const skipped: string[] = [];
+  db.transaction(() => {
+    for (const cls of classes) {
+      if (isContentAssignedToClass(cls!.id, content.id)) {
+        skipped.push(cls!.id);
+        continue;
+      }
+      createAssignment(cls!.id, content.id, { dueAt, maxAttempts, acceptLate });
+      created.push(cls!.id);
+    }
+  })();
+  res.status(201).json({ created, skipped });
+});
+
+// A rollover for a new term: same name pattern, fresh join code, no students.
+// Assignments come across hidden and undated so the teacher sets the new
+// timetable before students see anything.
+teacherRouter.post('/classes/:classId/duplicate', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  const parsed = duplicateClassSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const copy = db.transaction(() => {
+    const created = createClass(req.teacherId!, parsed.data.name);
+    let copiedAssignments = 0;
+    if (parsed.data.copyAssignments) {
+      for (const a of listAssignmentsByClass(cls.id).reverse()) {
+        createAssignment(created.id, a.content_id, {
+          maxAttempts: a.max_attempts,
+          acceptLate: !!a.accept_late,
+          visible: false,
+        });
+        copiedAssignments += 1;
+      }
+    }
+    let copiedAnnouncements = 0;
+    if (parsed.data.copyAnnouncements) {
+      for (const a of listAnnouncementsByClass(cls.id).reverse()) {
+        createAnnouncement(created.id, a.title, a.body, !!a.pinned);
+        copiedAnnouncements += 1;
+      }
+    }
+    return { class: created, copiedAssignments, copiedAnnouncements };
+  })();
+  res.status(201).json(copy);
+});
+
+teacherRouter.get('/classes/:classId/attention', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  if (!cls) {
+    res.status(404).json({ error: 'Class not found' });
+    return;
+  }
+  const students = buildStudentReports(getClassActivity(cls.id)).map(({ assignments: _a, byKind: _k, ...summary }) => summary);
+  res.json({ students });
+});
+
+teacherRouter.get('/classes/:classId/students/:studentId', (req, res) => {
+  const cls = ownedClass(req, req.params.classId);
+  const student = cls ? buildStudentReports(getClassActivity(cls.id)).find((s) => s.id === req.params.studentId) : undefined;
+  if (!student) {
+    res.status(404).json({ error: 'Student not found in this class' });
+    return;
+  }
+  res.json({ student });
+});
+
+function ownedStudentAssignment(req: Request, assignmentId: string, studentId: string) {
+  const assignment = getAssignmentById(assignmentId);
+  const cls = assignment ? ownedClass(req, assignment.class_id) : null;
+  if (!assignment || !cls || !isEnrolled(studentId, cls.id)) return null;
+  return assignment;
+}
+
+// Gives one student one more attempt. If the assignment locks at its due
+// date and that has passed, the student also gets a week to do it.
+teacherRouter.post('/assignments/:assignmentId/students/:studentId/retake', (req, res) => {
+  const assignment = ownedStudentAssignment(req, req.params.assignmentId, req.params.studentId);
+  if (!assignment) {
+    res.status(404).json({ error: 'Student not found on this assignment' });
+    return;
+  }
+  if (assignment.max_attempts === null) {
+    res.status(400).json({ error: 'This assignment has unlimited attempts already' });
+    return;
+  }
+  const current = getOverride(assignment.id, req.params.studentId);
+  const effectiveDue = current?.due_at ?? assignment.due_at;
+  const lockedByDate = !assignment.accept_late && !!effectiveDue && new Date(effectiveDue).getTime() < Date.now();
+  const override = upsertOverride(assignment.id, req.params.studentId, {
+    extraAttempts: (current?.extra_attempts ?? 0) + 1,
+    ...(lockedByDate ? { dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() } : {}),
+  });
+  res.json({ override });
+});
+
+teacherRouter.put('/assignments/:assignmentId/students/:studentId/override', (req, res) => {
+  const assignment = ownedStudentAssignment(req, req.params.assignmentId, req.params.studentId);
+  if (!assignment) {
+    res.status(404).json({ error: 'Student not found on this assignment' });
+    return;
+  }
+  const parsed = assignmentOverrideSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.json({ override: upsertOverride(assignment.id, req.params.studentId, { dueAt: parsed.data.dueAt }) });
+});
+
+teacherRouter.delete('/assignments/:assignmentId/students/:studentId/override', (req, res) => {
+  const assignment = ownedStudentAssignment(req, req.params.assignmentId, req.params.studentId);
+  if (!assignment) {
+    res.status(404).json({ error: 'Student not found on this assignment' });
+    return;
+  }
+  deleteOverride(assignment.id, req.params.studentId);
+  res.status(204).end();
 });
 
 teacherRouter.patch('/assignments/:assignmentId', (req, res) => {
@@ -385,6 +554,21 @@ teacherRouter.put('/content/:contentId', (req, res) => {
   res.json({ content: updateContent(content.id, parsed.data) });
 });
 
+teacherRouter.post('/content/:contentId/duplicate', (req, res) => {
+  const content = ownedContent(req, req.params.contentId);
+  if (!content) {
+    res.status(404).json({ error: 'Content not found' });
+    return;
+  }
+  const parsed = duplicateContentSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const title = parsed.data.title ?? `${content.title.slice(0, 190)} (copy)`;
+  res.status(201).json({ content: createContent(req.teacherId!, title, content.subtitle, hydrateContentBody(content)) });
+});
+
 teacherRouter.delete('/content/:contentId', (req, res) => {
   const content = ownedContent(req, req.params.contentId);
   if (!content) {
@@ -393,4 +577,49 @@ teacherRouter.delete('/content/:contentId', (req, res) => {
   }
   deleteContent(content.id);
   res.status(204).end();
+});
+
+teacherRouter.get('/bank', (req, res) => {
+  res.json({ questions: listBankQuestions(req.teacherId!) });
+});
+
+teacherRouter.post('/bank', (req, res) => {
+  const parsed = bankQuestionSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.status(201).json({ question: createBankQuestion(req.teacherId!, parsed.data) });
+});
+
+teacherRouter.post('/bank/import', (req, res) => {
+  const parsed = importBankSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.status(201).json(importBankQuestions(req.teacherId!, parsed.data.questions));
+});
+
+teacherRouter.put('/bank/:questionId', (req, res) => {
+  const existing = getBankQuestion(req.params.questionId);
+  if (!existing || existing.teacherId !== req.teacherId) {
+    res.status(404).json({ error: 'Question not found' });
+    return;
+  }
+  const parsed = bankQuestionSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.json({ question: updateBankQuestion(existing.id, parsed.data) });
+});
+
+teacherRouter.post('/bank/delete', (req, res) => {
+  const parsed = deleteBankSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.json({ removed: deleteBankQuestions(req.teacherId!, parsed.data.ids) });
 });

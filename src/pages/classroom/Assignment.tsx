@@ -19,6 +19,7 @@ import { useExamStore } from '../../stores/examStore';
 import { ProgressBar } from '../../components/layout/ProgressBar';
 import { Button } from '../../components/ui/Button';
 import { bodyToExercises } from '../../types/classroom';
+import { describeAttemptsLeft } from '../../utils/classroomAttention';
 import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { AssignmentDetailResponse, AttemptResponseEntry } from '../../types/classroom';
 
@@ -224,8 +225,23 @@ export function Assignment() {
               <p className="text-xs text-muted text-center">Submitting again replaces your text and clears the mark.</p>
             </div>
           )}
+          {data.policy.attemptsAllowed !== null && (
+            <p className="text-xs text-muted">
+              {data.policy.attemptsAllowed === 1 ? 'One attempt only' : `${data.policy.attemptsAllowed} attempts allowed`} ·{' '}
+              {describeAttemptsLeft(data.policy.attemptsLeft)}
+              {data.previousAttempt && ' — your latest attempt counts.'}
+            </p>
+          )}
+          {data.policy.closed && (
+            <p className="text-sm font-medium" style={{ color: 'var(--danger)' }}>
+              {data.policy.closed === 'attempts'
+                ? 'You have used all your attempts. Ask your teacher if you need another.'
+                : 'This assignment closed on its due date. Ask your teacher if you need more time.'}
+            </p>
+          )}
           <Button
             size="lg"
+            disabled={!!data.policy.closed}
             onClick={() =>
               setPhase(
                 isReading ? 'reading'

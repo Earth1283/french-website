@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { COLLAPSE } from '../../utils/motion';
-import { Plus, Users, LogOut, ChevronRight, ChevronDown, BookOpen, Archive, KeyRound } from 'lucide-react';
+import { Plus, Users, LogOut, ChevronRight, ChevronDown, BookOpen, Archive, KeyRound, Library } from 'lucide-react';
 import { useClassroomStore } from '../../stores/classroomStore';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
@@ -78,6 +78,9 @@ export function TeacherDashboard() {
             className="text-xs text-muted hover:underline flex items-center gap-1 no-underline"
           >
             <BookOpen size={12} /> Content library
+          </Link>
+          <Link to="/classes/bank" className="text-xs text-muted hover:underline flex items-center gap-1 no-underline">
+            <Library size={12} /> Question bank
           </Link>
           <Link to="/classes/account" className="text-xs text-muted hover:underline flex items-center gap-1 no-underline">
             <KeyRound size={12} /> Account

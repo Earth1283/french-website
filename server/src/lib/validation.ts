@@ -133,14 +133,60 @@ export const createContentSchema = z.object({
 
 export const updateContentSchema = createContentSchema.partial();
 
+const maxAttempts = z.number().int().min(1).max(20).nullable();
+
 export const createAssignmentSchema = z.object({
   contentId: z.string().min(1),
   dueAt: z.string().datetime().nullable().optional(),
+  maxAttempts: maxAttempts.optional(),
+  acceptLate: z.boolean().optional(),
+});
+
+export const bulkAssignSchema = createAssignmentSchema.extend({
+  classIds: z.array(z.string().min(1)).min(1).max(50),
 });
 
 export const updateAssignmentSchema = z.object({
   dueAt: z.string().datetime().nullable().optional(),
   visible: z.boolean().optional(),
+  maxAttempts: maxAttempts.optional(),
+  acceptLate: z.boolean().optional(),
+});
+
+export const assignmentOverrideSchema = z.object({
+  dueAt: z.string().datetime().nullable(),
+});
+
+export const duplicateClassSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  copyAssignments: z.boolean().default(true),
+  copyAnnouncements: z.boolean().default(false),
+});
+
+export const duplicateContentSchema = z.object({
+  title: z.string().trim().min(1).max(200).optional(),
+});
+
+const bankTag = z.string().trim().toLowerCase().min(1).max(40);
+
+export const bankQuestionSchema = exerciseSchema
+  .extend({
+    prompt: z.string().trim().min(1).max(1000),
+    answer: z.string().trim().min(1).max(500),
+    hint: z.string().trim().max(500).optional(),
+    options: z.array(z.string().trim().min(1).max(300)).min(2).max(8).optional(),
+    tags: z.array(bankTag).max(10).default([]).transform((tags) => [...new Set(tags)]),
+  })
+  .refine((q) => q.type !== 'multiple-choice' || (q.options?.includes(q.answer) ?? false), {
+    message: 'A multiple-choice answer must be one of its options',
+  });
+
+export const importBankSchema = z.object({
+  questions: z.array(bankQuestionSchema).min(1).max(200),
+});
+
+export const deleteBankSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(500),
 });
 
 export const createAnnouncementSchema = z.object({

@@ -28,7 +28,7 @@ Everything lives in `server/data/` (git-ignored): the SQLite DB (WAL mode), `sec
 
 ## Migrations
 
-These are numbered SQL files in `src/db/migrations/` (`001_init.sql` … `007_listening_writing.sql`), applied in order by `src/db/migrate.ts`. Add `008_…sql` and never edit a shipped one. `npm run build` copies the `.sql` files into `dist/` with a shell `cp`, so a migration that only exists in `src/` won't ship if someone builds differently.
+These are numbered SQL files in `src/db/migrations/` (`001_init.sql` … `009_attempt_controls_and_bank.sql`), applied in order by `src/db/migrate.ts`. Add `010_…sql` and never edit a shipped one. `npm run build` copies the `.sql` files into `dist/` with a shell `cp`, so a migration that only exists in `src/` won't ship if someone builds differently.
 
 ## Mirrored code
 
@@ -50,3 +50,9 @@ The server validates with zod schemas in `server/src/lib/validation.ts`. The cli
 - `server/test/setup.ts` sets `process.env` and **then dynamically imports** `src/app.js`, because `config.ts` reads env at import time. Static imports of app modules in a test file will read the wrong config.
 - `fileParallelism: false`: all files share process env and run serially, which takes about 45 s (bcrypt).
 - Imports use `.js` extensions on `.ts` files (NodeNext-style ESM). Keep that.
+
+## Attempt limits, overrides and insights
+
+- A retake overwrites the single `attempts` row (see `recordAttempt`); `attempt_count` is what an assignment's `max_attempts` is checked against. Per-student extensions live in `assignment_overrides` (personal due date, extra attempts). `lib/attemptPolicy.ts` is the one place that decides whether an assignment is open, and the student routes call it.
+- `lib/classInsights.ts` builds the per-student reports (overdue, not started, inactive, struggling) behind `/classes/:id/attention` and `/classes/:id/students/:studentId`. The client has no copy of these rules.
+- The teacher's question bank (`bank_questions`) is copy-on-use: adding a question to a quiz copies it, there is no link back.

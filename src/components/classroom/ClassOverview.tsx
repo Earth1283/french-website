@@ -1,6 +1,7 @@
-import { AlertTriangle } from 'lucide-react';
-import { ATTENTION_LABEL, attentionReason } from '../../utils/classroomDates';
-import type { RosterStudent } from '../../types/classroom';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, ChevronRight } from 'lucide-react';
+import { ATTENTION_LABEL } from '../../utils/classroomAttention';
+import type { StudentSummary } from '../../types/classroom';
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -11,19 +12,15 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ClassOverview({ roster, assignmentCount }: { roster: RosterStudent[]; assignmentCount: number }) {
-  if (roster.length === 0 || assignmentCount === 0) return null;
+export function ClassOverview({ classId, students }: { classId: string; students: StudentSummary[] }) {
+  const totalPossible = students.reduce((sum, s) => sum + s.total, 0);
+  if (students.length === 0 || totalPossible === 0) return null;
 
-  const totalPossible = roster.length * assignmentCount;
-  const totalCompleted = roster.reduce((sum, s) => sum + s.completedAssignments, 0);
-  const scoredStudents = roster.filter((s) => s.averageScore > 0);
-  const classAverage = scoredStudents.length
-    ? scoredStudents.reduce((sum, s) => sum + s.averageScore, 0) / scoredStudents.length
-    : null;
-  const awaitingReview = roster.reduce((sum, s) => sum + s.awaitingReview, 0);
-  const needingAttention = roster
-    .map((student) => ({ student, reason: attentionReason(student) }))
-    .filter((entry) => entry.reason !== null);
+  const totalCompleted = students.reduce((sum, s) => sum + s.completed, 0);
+  const scored = students.filter((s) => s.averageScore !== null);
+  const classAverage = scored.length ? scored.reduce((sum, s) => sum + s.averageScore!, 0) / scored.length : null;
+  const awaitingReview = students.reduce((sum, s) => sum + s.awaitingReview, 0);
+  const needingAttention = students.filter((s) => s.reasons.length > 0);
 
   return (
     <section>
@@ -35,15 +32,22 @@ export function ClassOverview({ roster, assignmentCount }: { roster: RosterStude
           <Stat label="To review" value={String(awaitingReview)} />
         </div>
         {needingAttention.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-1.5">
+          <div>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-1.5 mb-1">
               <AlertTriangle size={12} style={{ color: 'var(--danger)' }} /> Needs attention
             </p>
-            {needingAttention.map(({ student, reason }) => (
-              <div key={student.id} className="flex items-center justify-between text-sm">
+            {needingAttention.map((student) => (
+              <Link
+                key={student.id}
+                to={`/classes/${classId}/students/${student.id}`}
+                className="flex items-center justify-between gap-2 py-1.5 text-sm no-underline"
+              >
                 <span className="text-primary">{student.name}</span>
-                <span className="text-xs text-muted">{ATTENTION_LABEL[reason!]}</span>
-              </div>
+                <span className="flex items-center gap-1 text-xs text-muted text-right">
+                  {student.reasons.map((r) => (r === 'overdue' ? `${student.overdue} overdue` : ATTENTION_LABEL[r])).join(' · ')}
+                  <ChevronRight size={13} className="flex-shrink-0" />
+                </span>
+              </Link>
             ))}
           </div>
         )}

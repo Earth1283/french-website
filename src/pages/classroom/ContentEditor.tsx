@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Plus, Trash2, Save, Eye, Pencil } from 'lucide-react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ChevronLeft, Plus, Trash2, Save, Eye, Pencil, Library, BookmarkPlus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { classroomApi, ClassroomApiError } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { BankQuestionList } from '../../components/classroom/BankQuestionList';
 import { MarkdownField } from '../../components/classroom/MarkdownField';
 import { MarkdownFormattingGuide } from '../../components/classroom/MarkdownFormattingGuide';
 import {
@@ -16,7 +18,7 @@ import {
 import { WritingEditor, blankWritingDraft, writingBodyFromDraft, writingDraftFromBody } from '../../components/classroom/WritingEditor';
 import { parseMarkdownPage } from '../../utils/markdownPage';
 import type { ExerciseType } from '../../types';
-import type { ClassroomContent, ClassroomContentBody, ClassroomContentKind } from '../../types/classroom';
+import type { BankQuestion, ClassroomContent, ClassroomContentBody, ClassroomContentKind } from '../../types/classroom';
 
 interface VocabRow {
   french: string;
@@ -45,6 +47,9 @@ const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
 function blankExercise(): ExerciseRow {
   return { type: 'multiple-choice', prompt: '', answer: '', optionsCsv: '', hint: '' };
 }
+function exerciseFromBank(q: BankQuestion): ExerciseRow {
+  return { type: q.type, prompt: q.prompt, answer: q.answer, optionsCsv: (q.options ?? []).join(', '), hint: q.hint ?? '' };
+}
 function blankVocab(): VocabRow {
   return { french: '', english: '', pronunciation: '' };
 }
@@ -55,14 +60,23 @@ function blankPage(): string {
 export function ContentEditor() {
   const { contentId } = useParams<{ contentId: string }>();
   const navigate = useNavigate();
+  const fromBank = (useLocation().state as { bankQuestions?: BankQuestion[]; kind?: ContentKind } | null) ?? null;
   const isEditing = !!contentId;
 
-  const [kind, setKind] = useState<ContentKind>('lesson');
+  const [kind, setKind] = useState<ContentKind>(fromBank?.kind ?? 'lesson');
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [xpReward, setXpReward] = useState(10);
   const [vocab, setVocab] = useState<VocabRow[]>([blankVocab()]);
-  const [exercises, setExercises] = useState<ExerciseRow[]>([blankExercise()]);
+  const [exercises, setExercises] = useState<ExerciseRow[]>(
+    fromBank?.bankQuestions?.length ? fromBank.bankQuestions.map(exerciseFromBank) : [blankExercise()]
+  );
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [bank, setBank] = useState<BankQuestion[] | null>(null);
+  const [bankSearch, setBankSearch] = useState('');
+  const [bankTag, setBankTag] = useState<string | null>(null);
+  const [bankSelected, setBankSelected] = useState<Set<string>>(new Set());
+  const [bankNotice, setBankNotice] = useState<string | null>(null);
   const [pages, setPages] = useState<string[]>([blankPage()]);
   const [gradable, setGradable] = useState(true);
   const [listening, setListening] = useState(blankListeningDraft);
@@ -122,6 +136,38 @@ export function ContentEditor() {
       options: row.type === 'multiple-choice' ? row.optionsCsv.split(',').map((o) => o.trim()).filter(Boolean) : undefined,
       hint: row.hint.trim() || undefined,
     };
+  }
+
+  async function openBankPicker() {
+    setBankSelected(new Set());
+    setPickerOpen(true);
+    const res = await classroomApi.get<{ questions: BankQuestion[] }>('/api/teacher/bank');
+    setBank(res.questions);
+  }
+
+  function addFromBank() {
+    const chosen = (bank ?? []).filter((q) => bankSelected.has(q.id)).map(exerciseFromBank);
+    setExercises((rows) => {
+      const filled = rows.filter((r) => r.prompt.trim() || r.answer.trim());
+      return [...filled, ...chosen];
+    });
+    setPickerOpen(false);
+  }
+
+  async function saveToBank(rows: ExerciseRow[]) {
+    const complete = rows.filter((e) => e.prompt.trim() && e.answer.trim()).map(toExercise);
+    if (complete.length === 0) return;
+    setBankNotice(null);
+    try {
+      const res = await classroomApi.post<{ created: unknown[]; skipped: number }>('/api/teacher/bank/import', {
+        questions: complete.map((q) => ({ ...q, tags: [] })),
+      });
+      setBankNotice(
+        `Saved ${res.created.length} to the bank${res.skipped ? `, ${res.skipped} already there` : ''}.`
+      );
+    } catch (e) {
+      setBankNotice(e instanceof ClassroomApiError ? `Could not save to the bank: ${e.message}` : 'Could not save to the bank.');
+    }
   }
 
   async function save() {
@@ -308,6 +354,15 @@ export function ContentEditor() {
                   ))}
                 </select>
                 <button
+                  onClick={() => saveToBank([ex])}
+                  aria-label="Save question to the bank"
+                  title="Save to question bank"
+                  className="p-1.5 cursor-pointer flex-shrink-0"
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)' }}
+                >
+                  <BookmarkPlus size={14} />
+                </button>
+                <button
                   onClick={() => setExercises((rows) => rows.filter((_, j) => j !== i))}
                   aria-label="Remove exercise"
                   className="p-1.5 cursor-pointer flex-shrink-0"
@@ -344,11 +399,18 @@ export function ContentEditor() {
               />
             </div>
           ))}
-          <div className="p-3">
+          <div className="p-3 flex flex-wrap gap-1">
             <Button variant="ghost" size="sm" onClick={() => setExercises((rows) => [...rows, blankExercise()])}>
               <Plus size={14} /> Add {kind === 'lesson' ? 'exercise' : 'question'}
             </Button>
+            <Button variant="ghost" size="sm" onClick={openBankPicker}>
+              <Library size={14} /> Add from bank
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => saveToBank(exercises)}>
+              <BookmarkPlus size={14} /> Save all to bank
+            </Button>
           </div>
+          {bankNotice && <p className="px-4 pb-3 text-xs text-secondary">{bankNotice}</p>}
         </div>
       </section>
       )}
@@ -415,6 +477,33 @@ export function ContentEditor() {
           {error}
         </p>
       )}
+
+      <Modal open={pickerOpen} onClose={() => setPickerOpen(false)} title="Question bank">
+        <div className="space-y-3">
+          {bank === null ? (
+            <p className="text-sm text-muted">Loading…</p>
+          ) : (
+            <BankQuestionList
+              questions={bank}
+              search={bankSearch}
+              onSearchChange={setBankSearch}
+              tag={bankTag}
+              onTagChange={setBankTag}
+              selected={bankSelected}
+              onToggle={(id) =>
+                setBankSelected((current) => {
+                  const next = new Set(current);
+                  if (!next.delete(id)) next.add(id);
+                  return next;
+                })
+              }
+            />
+          )}
+          <Button size="sm" className="w-full" onClick={addFromBank} disabled={bankSelected.size === 0}>
+            Add {bankSelected.size || ''} selected
+          </Button>
+        </div>
+      </Modal>
 
       <Button onClick={save} disabled={saving} className="w-full">
         <Save size={16} /> {saving ? 'Saving…' : 'Save'}

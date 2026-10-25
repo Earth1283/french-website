@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
-  attentionReason,
   describeDue,
   describeLastActive,
   dueDateInputToIso,
   isOverdue,
   isoToDueDateInput,
 } from './classroomDates';
+import { describeAttemptLimit, describeAttemptsLeft, filterBank, tagsFromInput, weakestKind } from './classroomAttention';
 import { buildGradebookCsv, escapeCsvCell } from './gradebookCsv';
 import type { GradebookResponse } from '../types/classroom';
 
@@ -45,21 +45,6 @@ describe('student activity', () => {
     expect(describeLastActive('2026-10-12 08:00:00', now)).toBe('Active 10 days ago');
     expect(describeLastActive(null, now)).toBe('No activity yet');
   });
-
-  it('picks the most pressing reason a student needs attention', () => {
-    const base = { lastActiveAt: '2026-10-21 08:00:00', averageScore: 90, completedAssignments: 2, totalAssignments: 3 };
-    expect(attentionReason(base, now)).toBeNull();
-    expect(attentionReason({ ...base, completedAssignments: 0, lastActiveAt: null, averageScore: 0 }, now)).toBe('not-started');
-    expect(attentionReason({ ...base, lastActiveAt: '2026-10-01 08:00:00' }, now)).toBe('inactive');
-    expect(attentionReason({ ...base, averageScore: 40 }, now)).toBe('struggling');
-  });
-
-  it('does not nag about an empty class or a student who finished everything', () => {
-    expect(attentionReason({ lastActiveAt: null, averageScore: 0, completedAssignments: 0, totalAssignments: 0 }, now)).toBeNull();
-    expect(
-      attentionReason({ lastActiveAt: '2026-09-01 08:00:00', averageScore: 95, completedAssignments: 3, totalAssignments: 3 }, now)
-    ).toBeNull();
-  });
 });
 
 describe('gradebook csv', () => {
@@ -94,5 +79,41 @@ describe('gradebook csv', () => {
       'Alex,alex@example.com,88,Submitted,88',
       'Bo,bo@example.com,,,',
     ]);
+  });
+});
+
+describe('attempt wording', () => {
+  it('describes limits and what is left', () => {
+    expect(describeAttemptLimit(null)).toBe('Unlimited attempts');
+    expect(describeAttemptLimit(1)).toBe('1 attempt');
+    expect(describeAttemptLimit(3)).toBe('3 attempts');
+    expect(describeAttemptsLeft(null)).toBeNull();
+    expect(describeAttemptsLeft(0)).toBe('no attempts left');
+    expect(describeAttemptsLeft(1)).toBe('1 attempt left');
+    expect(describeAttemptsLeft(2)).toBe('2 attempts left');
+  });
+
+  it('names the weakest kind only when there is a real gap', () => {
+    expect(weakestKind([{ kind: 'quiz', averageScore: 90 }])).toBeNull();
+    expect(weakestKind([{ kind: 'quiz', averageScore: 70 }, { kind: 'lesson', averageScore: 70 }])).toBeNull();
+    expect(weakestKind([{ kind: 'quiz', averageScore: 90 }, { kind: 'listening', averageScore: 50 }])).toBe('listening');
+  });
+});
+
+describe('question bank helpers', () => {
+  it('normalises comma-separated tags', () => {
+    expect(tagsFromInput(' Verbs, food ,verbs,, ')).toEqual(['verbs', 'food']);
+    expect(tagsFromInput('')).toEqual([]);
+  });
+
+  it('filters by tag and by text in the prompt or answer', () => {
+    const bank = [
+      { prompt: 'Bonjour means?', answer: 'Hello', tags: ['greetings'] },
+      { prompt: 'Je ___ français', answer: 'parle', tags: ['verbs'] },
+    ];
+    expect(filterBank(bank, '', null)).toHaveLength(2);
+    expect(filterBank(bank, '', 'verbs')).toEqual([bank[1]]);
+    expect(filterBank(bank, 'HELLO', null)).toEqual([bank[0]]);
+    expect(filterBank(bank, 'je', 'greetings')).toEqual([]);
   });
 });

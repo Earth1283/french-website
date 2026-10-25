@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { ClassroomPrivacyNotice } from '../../components/classroom/ClassroomPrivacyNotice';
 import { AnnouncementFeed } from '../../components/classroom/AnnouncementFeed';
+import { describeAttemptsLeft } from '../../utils/classroomAttention';
 import { describeDue, isOverdue } from '../../utils/classroomDates';
 import type { AnnouncementInfo, AssignmentInfo, ClassInfo } from '../../types/classroom';
 
@@ -158,6 +159,9 @@ export function StudentHome() {
                           {` · ${describeDue(a.due_at)}`}
                         </span>
                       )}
+                      {a.closed
+                        ? ' · closed'
+                        : describeAttemptsLeft(a.attemptsLeft) && ` · ${describeAttemptsLeft(a.attemptsLeft)}`}
                     </p>
                   </div>
                 </div>

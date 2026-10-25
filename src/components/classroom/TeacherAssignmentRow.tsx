@@ -1,18 +1,29 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, BookOpen, CalendarClock, Eye, EyeOff, Flag, Trash2 } from 'lucide-react';
+import { BarChart3, BookOpen, CalendarClock, Eye, EyeOff, Flag, Settings2, Trash2 } from 'lucide-react';
 import { describeDue, dueDateInputToIso, isOverdue, isoToDueDateInput } from '../../utils/classroomDates';
+import { describeAttemptLimit } from '../../utils/classroomAttention';
 import type { AssignmentInfo } from '../../types/classroom';
+
+export interface AssignmentFields {
+  dueAt?: string | null;
+  visible?: boolean;
+  maxAttempts?: number | null;
+  acceptLate?: boolean;
+}
+
+const ATTEMPT_CHOICES = [null, 1, 2, 3, 5];
 
 interface TeacherAssignmentRowProps {
   classId: string;
   assignment: AssignmentInfo;
-  onChange: (fields: { dueAt?: string | null; visible?: boolean }) => Promise<void>;
+  onChange: (fields: AssignmentFields) => Promise<void>;
   onRemove: () => Promise<void>;
 }
 
 export function TeacherAssignmentRow({ classId, assignment, onChange, onRemove }: TeacherAssignmentRowProps) {
   const [editingDue, setEditingDue] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const hidden = !assignment.visible;
   const overdue = isOverdue(assignment.due_at);
   const resultsPath = `/classes/${classId}/assignments/${assignment.id}/results`;
@@ -102,6 +113,42 @@ export function TeacherAssignmentRow({ classId, assignment, onChange, onRemove }
             <CalendarClock size={11} />
             {assignment.due_at ? describeDue(assignment.due_at) : 'Set due date'}
           </button>
+        )}
+        <button
+          onClick={() => setSettingsOpen((open) => !open)}
+          aria-expanded={settingsOpen}
+          className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1 mt-1"
+          style={{ background: 'transparent', border: 'none' }}
+        >
+          <Settings2 size={11} />
+          {describeAttemptLimit(assignment.max_attempts)}
+          {!assignment.accept_late && ' · closes at due date'}
+        </button>
+        {settingsOpen && (
+          <div className="mt-2 space-y-2">
+            <label className="flex items-center gap-2 text-xs text-secondary">
+              Attempts
+              <select
+                value={assignment.max_attempts ?? ''}
+                onChange={(e) => onChange({ maxAttempts: e.target.value ? Number(e.target.value) : null })}
+                className="ios-input py-1 text-sm"
+              >
+                {ATTEMPT_CHOICES.map((choice) => (
+                  <option key={choice ?? 'unlimited'} value={choice ?? ''}>
+                    {choice === null ? 'Unlimited' : choice}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-xs text-secondary cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!assignment.accept_late}
+                onChange={(e) => onChange({ acceptLate: !e.target.checked })}
+              />
+              Close submissions at the due date
+            </label>
+          </div>
         )}
       </div>
     </div>

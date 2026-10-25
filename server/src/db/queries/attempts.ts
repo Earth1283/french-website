@@ -13,6 +13,7 @@ export interface AttemptRow {
   submission_text: string | null;
   review_json: string | null;
   reviewed_at: string | null;
+  attempt_count: number;
 }
 
 export interface AttemptResponse {
@@ -24,6 +25,8 @@ export interface AttemptResponse {
 // One attempt per (student, assignment) — a retake replaces the previous
 // attempt in place (enforced by a unique index) rather than adding a second
 // row, so roster counts and per-question stats can't double-count a redo.
+// attempt_count tracks how many times it was submitted, which is what an
+// assignment's attempt limit is checked against.
 // A resubmitted essay clears the old review: the teacher marks the new text.
 export function recordAttempt(
   studentId: string,
@@ -44,7 +47,8 @@ export function recordAttempt(
        responses_json = excluded.responses_json,
        submission_text = excluded.submission_text,
        review_json = NULL,
-       reviewed_at = NULL`
+       reviewed_at = NULL,
+       attempt_count = attempts.attempt_count + 1`
   ).run(id, studentId, assignmentId, score, xpEarned, JSON.stringify(responses), submissionText);
   return getAttemptForStudentAssignment(studentId, assignmentId)!;
 }

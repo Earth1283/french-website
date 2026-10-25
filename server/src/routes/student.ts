@@ -8,16 +8,29 @@ import {
   unenrollStudent,
 } from '../db/queries/classes.js';
 import { listAnnouncementsByClass } from '../db/queries/announcements.js';
-import { getAssignmentById, listAssignmentsForStudent } from '../db/queries/assignments.js';
+import { getAssignmentById, getOverride, listAssignmentsForStudent } from '../db/queries/assignments.js';
+import type { AssignmentRow } from '../db/queries/assignments.js';
 import { getContentById, hydrateContentBody } from '../db/queries/content.js';
 import { getAttemptForStudentAssignment, listAttemptsForStudent, recordAttempt } from '../db/queries/attempts.js';
 import { createFlag } from '../db/queries/flags.js';
 import { enrollLimiter } from './rateLimits.js';
 import { gradeAttempt } from '../lib/grading.js';
+import { closedMessage, evaluateAttemptPolicy } from '../lib/attemptPolicy.js';
 import { createFlagSchema, enrollSchema, submitAttemptSchema } from '../lib/validation.js';
 
 export const studentRouter = Router();
 studentRouter.use(requireStudent);
+
+function policyFor(studentId: string, assignment: AssignmentRow, attemptsUsed: number) {
+  const override = getOverride(assignment.id, studentId);
+  return evaluateAttemptPolicy({
+    dueAt: assignment.due_at,
+    acceptLate: !!assignment.accept_late,
+    maxAttempts: assignment.max_attempts,
+    override: override ? { dueAt: override.due_at, extraAttempts: override.extra_attempts } : null,
+    attemptsUsed,
+  });
+}
 
 studentRouter.post('/enroll', enrollLimiter, (req, res) => {
   const parsed = enrollSchema.safeParse(req.body);
@@ -60,7 +73,17 @@ studentRouter.get('/classes/:classId/assignments', (req, res) => {
     res.status(404).json({ error: 'Class not found' });
     return;
   }
-  res.json({ assignments: listAssignmentsForStudent(req.studentId!, req.params.classId) });
+  const assignments = listAssignmentsForStudent(req.studentId!, req.params.classId).map((a) => {
+    const policy = evaluateAttemptPolicy({
+      dueAt: a.due_at,
+      acceptLate: !!a.accept_late,
+      maxAttempts: a.max_attempts,
+      override: { dueAt: a.override_due_at, extraAttempts: a.override_extra_attempts },
+      attemptsUsed: a.attempt_count,
+    });
+    return { ...a, due_at: policy.effectiveDueAt, attemptsLeft: policy.attemptsLeft, closed: policy.closed };
+  });
+  res.json({ assignments });
 });
 
 studentRouter.get('/assignments/:assignmentId', (req, res) => {
@@ -83,8 +106,10 @@ studentRouter.get('/assignments/:assignmentId', (req, res) => {
     const { modelAnswer: _hidden, ...rest } = body;
     body = rest;
   }
+  const policy = policyFor(req.studentId!, assignment, previousAttempt?.attempt_count ?? 0);
   res.json({
-    assignment,
+    assignment: { ...assignment, due_at: policy.effectiveDueAt },
+    policy,
     content: {
       id: content.id,
       title: content.title,
@@ -117,6 +142,15 @@ studentRouter.post('/assignments/:assignmentId/attempts', (req, res) => {
   const parsed = submitAttemptSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  const policy = policyFor(
+    req.studentId!,
+    assignment,
+    getAttemptForStudentAssignment(req.studentId!, assignment.id)?.attempt_count ?? 0
+  );
+  if (policy.closed) {
+    res.status(403).json({ error: closedMessage(policy), closed: policy.closed });
     return;
   }
   const content = getContentById(assignment.content_id);

@@ -37,6 +37,8 @@ const loadContentLibrary = () => import('./pages/classroom/ContentLibrary');
 const loadAccountSettings = () => import('./pages/classroom/AccountSettings');
 const loadAssignment = () => import('./pages/classroom/Assignment');
 const loadAssignmentResults = () => import('./pages/classroom/AssignmentResults');
+const loadStudentDetail = () => import('./pages/classroom/StudentDetail');
+const loadQuestionBank = () => import('./pages/classroom/QuestionBank');
 
 const Home = lazy(() => loadHome().then(m => ({ default: m.Home })));
 const Focus = lazy(() => loadFocus().then(m => ({ default: m.Focus })));
@@ -62,6 +64,8 @@ const ContentLibrary = lazy(() => loadContentLibrary().then(m => ({ default: m.C
 const AccountSettings = lazy(() => loadAccountSettings().then(m => ({ default: m.AccountSettings })));
 const Assignment = lazy(() => loadAssignment().then(m => ({ default: m.Assignment })));
 const AssignmentResults = lazy(() => loadAssignmentResults().then(m => ({ default: m.AssignmentResults })));
+const StudentDetail = lazy(() => loadStudentDetail().then(m => ({ default: m.StudentDetail })));
+const QuestionBank = lazy(() => loadQuestionBank().then(m => ({ default: m.QuestionBank })));
 
 // Likeliest next destinations first (Home/dashboard is the most common first hop
 // from the landing front door, so warm it early).
@@ -128,6 +132,8 @@ function AnimatedRoutes() {
           <Route path="/classes/content/:contentId/edit" element={<PageTransition keyProp="content-edit"><ContentEditor /></PageTransition>} />
           <Route path="/classes/assignment/:assignmentId" element={<PageTransition keyProp="assignment"><Assignment /></PageTransition>} />
           <Route path="/classes/:classId/assignments/:assignmentId/results" element={<PageTransition keyProp="assignment-results"><AssignmentResults /></PageTransition>} />
+          <Route path="/classes/bank" element={<PageTransition keyProp="question-bank"><QuestionBank /></PageTransition>} />
+          <Route path="/classes/:classId/students/:studentId" element={<PageTransition keyProp="student-detail"><StudentDetail /></PageTransition>} />
           <Route path="/classes/:classId" element={<PageTransition keyProp="class-detail"><ClassDetail /></PageTransition>} />
           <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
           <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />

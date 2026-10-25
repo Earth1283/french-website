@@ -115,6 +115,21 @@ export interface AssignmentInfo {
   completed?: number;
   score?: number | null;
   unresolvedFlagCount?: number;
+  max_attempts?: number | null;
+  accept_late?: number;
+  /** Student view only: attempts remaining (null = unlimited) and why work is closed, if it is. */
+  attemptsLeft?: number | null;
+  closed?: ClosedReason | null;
+}
+
+export type ClosedReason = 'attempts' | 'late';
+
+export interface AttemptPolicyInfo {
+  effectiveDueAt: string | null;
+  attemptsUsed: number;
+  attemptsAllowed: number | null;
+  attemptsLeft: number | null;
+  closed: ClosedReason | null;
 }
 
 export interface QuestionStat {
@@ -127,6 +142,7 @@ export interface QuestionStat {
 
 export interface AssignmentDetailResponse {
   assignment: AssignmentInfo;
+  policy: AttemptPolicyInfo;
   content: { title: string; subtitle: string; kind: string; body: ClassroomContentBody };
   previousAttempt: {
     score: number | null;
@@ -181,6 +197,55 @@ export interface GradebookResponse {
   roster: RosterStudent[];
   cells: { studentId: string; assignmentId: string; completed: boolean; score: number | null }[];
 }
+
+export type AttentionReason = 'overdue' | 'not-started' | 'inactive' | 'struggling';
+export type StudentAssignmentStatus = 'done' | 'awaiting-review' | 'overdue' | 'pending';
+
+export interface StudentAssignmentReport {
+  assignmentId: string;
+  title: string;
+  kind: ClassroomContentKind;
+  status: StudentAssignmentStatus;
+  dueAt: string | null;
+  score: number | null;
+  completedAt: string | null;
+  attemptsUsed: number;
+  attemptsAllowed: number | null;
+  override: { dueAt: string | null; extraAttempts: number } | null;
+}
+
+export interface StudentSummary {
+  id: string;
+  name: string;
+  email: string;
+  joinedAt: string;
+  completed: number;
+  total: number;
+  averageScore: number | null;
+  lastActiveAt: string | null;
+  awaitingReview: number;
+  overdue: number;
+  reasons: AttentionReason[];
+}
+
+export interface StudentReport extends StudentSummary {
+  assignments: StudentAssignmentReport[];
+  byKind: { kind: ClassroomContentKind; averageScore: number; count: number }[];
+}
+
+export interface BankQuestion {
+  id: string;
+  type: ExerciseType;
+  prompt: string;
+  answer: string;
+  options?: string[];
+  hint?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type BankQuestionInput = Pick<BankQuestion, 'type' | 'prompt' | 'answer' | 'options' | 'hint' | 'tags'>;
 
 export interface ClassroomProfile {
   id: string;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ChevronLeft,
   Copy,
@@ -12,13 +12,15 @@ import {
   Pencil,
   UserMinus,
   Download,
+  CopyPlus,
 } from 'lucide-react';
 import { classroomApi } from '../../services/classroom';
 import { Button } from '../../components/ui/Button';
 import { AnnouncementsManager } from '../../components/classroom/AnnouncementsManager';
 import { ClassOverview } from '../../components/classroom/ClassOverview';
-import { TeacherAssignmentRow } from '../../components/classroom/TeacherAssignmentRow';
-import { ATTENTION_LABEL, attentionReason, describeLastActive, dueDateInputToIso } from '../../utils/classroomDates';
+import { TeacherAssignmentRow, type AssignmentFields } from '../../components/classroom/TeacherAssignmentRow';
+import { ATTENTION_LABEL } from '../../utils/classroomAttention';
+import { describeLastActive, dueDateInputToIso } from '../../utils/classroomDates';
 import { buildGradebookCsv } from '../../utils/gradebookCsv';
 import type {
   AssignmentInfo,
@@ -26,6 +28,7 @@ import type {
   ClassroomContent,
   GradebookResponse,
   RosterStudent,
+  StudentSummary,
 } from '../../types/classroom';
 
 function downloadTextFile(filename: string, text: string) {
@@ -39,6 +42,11 @@ function downloadTextFile(filename: string, text: string) {
 
 export function ClassDetail() {
   const { classId } = useParams<{ classId: string }>();
+  const navigate = useNavigate();
+  const [attention, setAttention] = useState<StudentSummary[]>([]);
+  const [duplicating, setDuplicating] = useState(false);
+  const [duplicateName, setDuplicateName] = useState('');
+  const [copyAnnouncements, setCopyAnnouncements] = useState(false);
   const [cls, setCls] = useState<ClassInfo | null>(null);
   const [roster, setRoster] = useState<RosterStudent[] | null>(null);
   const [assignments, setAssignments] = useState<AssignmentInfo[] | null>(null);
@@ -57,12 +65,14 @@ export function ClassDetail() {
 
   async function load() {
     if (!classId) return;
-    const [classesRes, rosterRes, assignmentsRes, contentRes] = await Promise.all([
+    const [classesRes, rosterRes, assignmentsRes, contentRes, attentionRes] = await Promise.all([
       classroomApi.get<{ classes: ClassInfo[] }>('/api/teacher/classes'),
       classroomApi.get<{ roster: RosterStudent[] }>(`/api/teacher/classes/${classId}/roster`),
       classroomApi.get<{ assignments: AssignmentInfo[] }>(`/api/teacher/classes/${classId}/assignments`),
       classroomApi.get<{ content: ClassroomContent[] }>('/api/teacher/content'),
+      classroomApi.get<{ students: StudentSummary[] }>(`/api/teacher/classes/${classId}/attention`),
     ]);
+    setAttention(attentionRes.students);
     setCls(classesRes.classes.find((c) => c.id === classId) ?? null);
     setRoster(rosterRes.roster);
     setAssignments(assignmentsRes.assignments);
@@ -98,7 +108,7 @@ export function ClassDetail() {
     await load();
   }
 
-  async function updateAssignment(assignmentId: string, fields: { dueAt?: string | null; visible?: boolean }) {
+  async function updateAssignment(assignmentId: string, fields: AssignmentFields) {
     await classroomApi.patch(`/api/teacher/assignments/${assignmentId}`, fields);
     await load();
   }
@@ -145,6 +155,17 @@ export function ClassDetail() {
     }
   }
 
+  async function duplicateClass() {
+    if (!classId || !duplicateName.trim()) return;
+    const res = await classroomApi.post<{ class: ClassInfo }>(`/api/teacher/classes/${classId}/duplicate`, {
+      name: duplicateName.trim(),
+      copyAssignments: true,
+      copyAnnouncements,
+    });
+    setDuplicating(false);
+    navigate(`/classes/${res.class.id}`);
+  }
+
   async function setArchived(archived: boolean) {
     if (!classId) return;
     await classroomApi.patch(`/api/teacher/classes/${classId}`, { archived });
@@ -152,6 +173,7 @@ export function ClassDetail() {
     await load();
   }
 
+  const attentionFor = new Map(attention.map((a) => [a.id, a.reasons]));
   const assignedContentIds = new Set(assignments?.map((a) => a.content_id));
   const availableToAssign = content?.filter((c) => !assignedContentIds.has(c.id)) ?? [];
 
@@ -208,7 +230,7 @@ export function ClassDetail() {
         )}
       </div>
 
-      <ClassOverview roster={roster ?? []} assignmentCount={assignments?.length ?? 0} />
+      <ClassOverview classId={cls.id} students={attention} />
 
       {classId && <AnnouncementsManager classId={classId} />}
 
@@ -327,12 +349,14 @@ export function ClassDetail() {
               <div className="inset-row justify-between" style={{ borderTop: 'none' }}>
                 <div>
                   <p className="text-sm font-semibold text-primary">
-                    {s.name}
-                    {attentionReason(s) && (
-                      <span className="ml-2 text-xs font-medium" style={{ color: 'var(--danger)' }}>
-                        {ATTENTION_LABEL[attentionReason(s)!]}
+                    <Link to={`/classes/${cls.id}/students/${s.id}`} className="no-underline" style={{ color: 'inherit' }}>
+                      {s.name}
+                    </Link>
+                    {attentionFor.get(s.id)?.map((reason) => (
+                      <span key={reason} className="ml-2 text-xs font-medium" style={{ color: 'var(--danger)' }}>
+                        {ATTENTION_LABEL[reason]}
                       </span>
-                    )}
+                    ))}
                   </p>
                   <p className="text-xs text-muted">{s.email}</p>
                   <p className="text-xs text-muted">
@@ -419,6 +443,46 @@ export function ClassDetail() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section>
+        {!duplicating ? (
+          <button
+            onClick={() => {
+              setDuplicateName(`${cls.name} (copy)`);
+              setDuplicating(true);
+            }}
+            className="text-xs text-muted hover:underline cursor-pointer flex items-center gap-1"
+            style={{ background: 'transparent', border: 'none' }}
+          >
+            <CopyPlus size={11} /> Duplicate for a new term
+          </button>
+        ) : (
+          <div className="p-3.5 space-y-2.5" style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)' }}>
+            <p className="text-xs text-primary">
+              Makes a new class with a fresh join code and the same assignments, hidden and without due dates. No students are copied.
+            </p>
+            <input
+              value={duplicateName}
+              onChange={(e) => setDuplicateName(e.target.value)}
+              aria-label="New class name"
+              maxLength={120}
+              className="ios-input py-1.5 text-sm"
+            />
+            <label className="flex items-center gap-2 text-xs text-secondary cursor-pointer">
+              <input type="checkbox" checked={copyAnnouncements} onChange={(e) => setCopyAnnouncements(e.target.checked)} />
+              Copy announcements too
+            </label>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setDuplicating(false)}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={duplicateClass} disabled={!duplicateName.trim()}>
+                Duplicate
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
 
       {!cls.archived_at && (
