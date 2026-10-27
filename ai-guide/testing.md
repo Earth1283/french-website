@@ -9,7 +9,7 @@ State as of 2026-10-22:
 | Server | `cd server && npm test` | **102 passed**, about 45 s | **Node 22**, see [classroom-server.md](classroom-server.md#node-version-use-22) |
 | E2E | `npm run e2e` | not run in this audit | both dev servers, so Node 22 for the server |
 
-**CI runs none of these.** The only gate is `npm run build` in the deploy workflow.
+**CI runs the typecheck and both unit suites** (`.github/workflows/deploy.yml`, `test` job, gating the deploy). It does not run Playwright e2e.
 
 ## What the frontend tests cover
 

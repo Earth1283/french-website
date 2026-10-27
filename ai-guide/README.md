@@ -7,7 +7,7 @@ Last verified against commit `48fe62d` (2026-10-22).
 
 ## The ten things most likely to bite you
 
-1. **Pushing to `main` deploys.** `.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every push. No tests run in CI. There is no `npm run deploy`, whatever the README says.
+1. **Pushing to `main` deploys.** `.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every push. A `test` job gates the deploy (typecheck, frontend and server tests), and also runs on PRs. There is no `npm run deploy`, whatever the README says.
 2. **One lesson is spread across 3–5 files, and its saved progress is keyed by array index.** Reordering vocab or exercises scrambles learners' SRS and test history. Vocab and exercises live in TS, reading chapters in Markdown, metadata in a separate map, and interactive walkthroughs in a fourth place. The vitest content tests enforce the shape, so run `npm test` after every content edit. See [content.md](content.md).
 3. **CEFR level is a soup of booleans.** `isPreA1`, `isA1`, `isA1A2`, `isBeyondA1`, `isBridge`, `isB1`, `isB2`, read by at least five files that each interpret them slightly differently. See [content.md](content.md#levels-the-boolean-soup).
 4. **The server needs Node 22.** `better-sqlite3@11` won't compile on Node 26 (this machine's default). **Never run `npm rebuild` under Node 26**: it deletes the working binary and then fails. See [classroom-server.md](classroom-server.md).

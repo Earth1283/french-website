@@ -2,7 +2,7 @@
 
 ## Deploy = push to `main`
 
-`.github/workflows/deploy.yml` runs `npm ci && npm run build` on every push to `main` and force-pushes `dist/` to `gh-pages` (served at `https://earth1283.github.io/french-website/`). **No tests or typecheck gate beyond `tsc -b` inside `build`.** Run `npm test` yourself before pushing. There is no `npm run deploy` script.
+`.github/workflows/deploy.yml` runs `npm ci && npm run build` on every push to `main` and force-pushes `dist/` to `gh-pages` (served at `https://earth1283.github.io/french-website/`). A `test` job (typecheck, frontend tests, server build and tests on Node 22) must pass first, and the same job runs on pull requests without deploying. There is no `npm run deploy` script.
 
 `VITE_UNSPLASH_ACCESS_KEY` comes from a repo secret, and is optional because backdrops fall back to gradients. Any `VITE_*` var is baked into the public bundle, so never put a secret behind that prefix.
 

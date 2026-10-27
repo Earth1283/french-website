@@ -1,20 +1,58 @@
-name: Deploy to GitHub Pages
+name: CI and deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc -b
+
+      - name: Frontend tests
+        run: npm test
+
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+
+      - name: Server typecheck and build
+        run: npm run build
+        working-directory: server
+
+      - name: Server tests
+        run: npm test
+        working-directory: server
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
 
