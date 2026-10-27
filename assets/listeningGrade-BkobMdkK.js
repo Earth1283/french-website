@@ -1,0 +1,1 @@
+import{t as e}from"./fuzzy-D4ibIEg5.js";function t(t,n){return n?t.type===`multiple-choice`?n===t.answer:e(n.trim(),t.answer)!==`wrong`:!1}function n(e,n){return e.map((e,r)=>t(e,n[r]))}export{n as t};
