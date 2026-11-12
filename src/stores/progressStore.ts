@@ -58,7 +58,7 @@ export const useProgressStore = create<ProgressStore>()(
       lastStudiedDate: '',
       earnedBadges: [],
       darkMode: false,
-      unit12Mode: null,
+      unit12Mode: 'full-freedom',
       onboardingDone: false,
       accentColor: '#E63946',
       appleMode: false,
@@ -207,10 +207,13 @@ export const useProgressStore = create<ProgressStore>()(
     }),
     {
       name: 'french-progress',
-      version: 1,
+      version: 2,
       migrate: (persisted, version) => {
-        const state = persisted as ProgressState;
-        return version < 1 ? { ...state, daysPracticed: state.streak ?? 0 } : state;
+        let state = persisted as ProgressState;
+        if (version < 1) state = { ...state, daysPracticed: state.streak ?? 0 };
+        // Unit 12 now defaults to Full Freedom; adopt it for users who never chose a mode.
+        if (version < 2 && state.unit12Mode == null) state = { ...state, unit12Mode: 'full-freedom' };
+        return state;
       },
     }
   )

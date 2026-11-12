@@ -74,7 +74,7 @@ If you're tempted to refactor this into `tier: '…'`, that's a reasonable impro
 
 ## `unit12Mode`
 
-`ProgressState.unit12Mode` and `isUnit12Unlocked()` gate the **slang** unit, which was once unit 12. It's unlocked by finishing 2 non-slang units or choosing `'full-freedom'` in Settings. The name is historical, so don't go looking for a twelfth unit.
+`ProgressState.unit12Mode` and `isUnit12Unlocked()` gate the **slang** unit, which was once unit 12. It defaults to `'full-freedom'` (open from the start); choosing `'earned-reward'` in Settings requires finishing 2 non-slang units instead. The name is historical, so don't go looking for a twelfth unit.
 
 ## Adaptive-test items
 
