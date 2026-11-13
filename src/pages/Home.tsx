@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TAP_TRANSITION, REVEAL, FADE } from '../utils/motion';
-import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown, ArrowRight } from 'lucide-react';
+import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown, ArrowRight, Timer } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { useLearnerStore } from '../stores/learnerStore';
@@ -115,6 +115,23 @@ export function Home() {
           </motion.div>
         </Link>
       )}
+
+      {/* Focus mode — Pomodoro study timer (moved out of the crowded nav) */}
+      <Link to="/focus" className="no-underline block mb-4">
+        <motion.div whileTap={{ scale: 0.98 }} transition={TAP_TRANSITION} className="card p-4 flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: 'var(--accent-tint)', color: 'var(--accent)' }}
+          >
+            <Timer size={18} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-primary">Focus mode</p>
+            <p className="text-xs text-muted">Pomodoro timer with a French word of the moment.</p>
+          </div>
+          <ChevronRight size={16} className="text-muted" />
+        </motion.div>
+      </Link>
 
       {/* Review banner */}
       <AnimatePresence mode="wait">
