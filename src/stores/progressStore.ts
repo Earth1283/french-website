@@ -1,3 +1,4 @@
+import { useNotebookStore } from './notebookStore';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ProgressState, Unit } from '../types';
@@ -144,6 +145,7 @@ export const useProgressStore = create<ProgressStore>()(
       resetOnboarding: () => set({ onboardingDone: false }),
 
       resetProgress: () => {
+        useNotebookStore.getState().reset();
         useLearnerStore.getState().resetExerciseStats();
         set({
           completedLessons: [],
@@ -170,7 +172,7 @@ export const useProgressStore = create<ProgressStore>()(
 
       getDueReviewCount: () => {
         const s = get();
-        return buildReviewSession(s.completedLessons, s.srsData).items.length;
+        return buildReviewSession(s.completedLessons, s.srsData, undefined, useNotebookStore.getState().mistakes).items.length;
       },
 
       getLessonProgress: (unitSlug) => {

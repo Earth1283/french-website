@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TAP_TRANSITION, NO_OVERSHOOT_SPRING, REWARD_SPRING, REVEAL, COLLAPSE } from '../utils/motion';
@@ -488,6 +489,7 @@ export function Conversation() {
                 </div>
               )}
 
+              <Link to="/notebook" className="text-sm font-medium inline-flex items-center gap-1 no-underline" style={{ color: 'var(--accent)' }}>Open mistakes notebook →</Link>
               {record.debrief.corrections.length > 0 && (
                 <div className="card p-4 space-y-3">
                   <p className="text-sm font-semibold text-primary">

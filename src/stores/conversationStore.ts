@@ -1,3 +1,4 @@
+import { captureCorrections } from './notebookStore';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ConversationRecord, Difficulty } from '../types';
@@ -21,7 +22,10 @@ export const useConversationStore = create<ConversationStore>()(
       history: [],
       setApiKey: (key) => set({ geminiApiKey: key }),
       setDifficulty: (d) => set({ difficulty: d }),
-      addRecord: (record) => set(s => ({ history: [...s.history, record].slice(-MAX_HISTORY) })),
+      addRecord: (record) => {
+        captureCorrections('conversation', record.scenarioId, record.debrief.corrections);
+        set(s => ({ history: [...s.history, record].slice(-MAX_HISTORY) }));
+      },
     }),
     { name: 'french-conversation' }
   )

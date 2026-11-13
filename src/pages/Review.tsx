@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TAP_TRANSITION, FILL_TRANSITION, REVEAL, STEP_FORWARD } from '../utils/motion';
 import { ChevronLeft, Volume2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react';
 import { UNITS } from '../data/units';
+import { useNotebookStore } from '../stores/notebookStore';
 import { useProgressStore } from '../stores/progressStore';
 import { buildReviewSession } from '../utils/reviewQueue';
 import { speak } from '../utils/speech';
@@ -16,6 +17,8 @@ import type { VocabItem } from '../types';
 
 interface ReviewCard extends VocabItem {
   key: string;
+  mistakeId?: string;
+  context?: string;
   lessonTitle: string;
   unitEmoji: string;
   /** A second look at a card missed earlier this session; it doesn't change the schedule. */
@@ -60,13 +63,12 @@ export function Review() {
   // Built once at mount: srsData changes as we review, but the deck shouldn't shift mid-session.
   const [{ deck, deferred }] = useState(() => {
     const { srsData } = useProgressStore.getState();
-    const { items, deferred } = buildReviewSession(completedLessons, srsData);
-    const deck: ReviewCard[] = shuffle(items).map(({ key, unit, lesson, vocab }) => ({
+    const { items, deferred } = buildReviewSession(completedLessons, srsData, undefined, useNotebookStore.getState().mistakes);
+    const deck: ReviewCard[] = shuffle(items).map(({ key, lessonTitle, unitEmoji, vocab, mistakeId, produce, context }) => ({
       ...vocab,
       key,
-      lessonTitle: lesson.title,
-      unitEmoji: unit.emoji,
-      produce: (srsData[key]?.reps ?? 0) >= PRODUCE_AFTER_REPS,
+      lessonTitle, unitEmoji, mistakeId, context,
+      produce: produce || (srsData[key]?.reps ?? 0) >= PRODUCE_AFTER_REPS,
     }));
     return { deck, deferred };
   });
@@ -100,6 +102,7 @@ export function Review() {
     if (!card) return;
     if (!card.retry) {
       updateSRS(card.key, correct);
+      if (card.mistakeId) useNotebookStore.getState().recordPractice(card.mistakeId, correct);
       setTally(t => correct ? { ...t, correct: t.correct + 1 } : { ...t, wrong: t.wrong + 1 });
       if (correct) {
         addXP(2);
@@ -262,6 +265,7 @@ export function Review() {
         </div>
       </div>
 
+      {card.context && showing === 'front' && <div className="card p-5 mb-4 text-sm text-primary whitespace-pre-wrap leading-relaxed" lang="fr">{card.context}</div>}
       <AnimatePresence mode="popLayout">
         {showing === 'front' ? (
           <motion.div
@@ -282,7 +286,7 @@ export function Review() {
               {card.produce ? (
                 <>
                   <p className="text-2xl font-bold text-primary">{card.english}</p>
-                  <p className="text-sm text-muted">How do you say it in French? Out loud counts.</p>
+                  <p className="text-sm text-muted">{card.mistakeId ? 'Recall the expected answer, then reveal it to check.' : 'How do you say it in French? Out loud counts.'}</p>
                   {mic.available && (
                     <span onClick={e => e.stopPropagation()} className="flex flex-col items-center gap-2 mt-1">
                       <MicButton listening={mic.listening} onClick={mic.toggle} idleLabel="Say it in French" />

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TAP_TRANSITION, REVEAL, FADE } from '../utils/motion';
-import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown } from 'lucide-react';
+import { Bookmark, RotateCcw, ChevronRight, Sparkles, Search, TrendingDown, ArrowRight } from 'lucide-react';
 import { UNITS, getTotalLessons } from '../data/units';
 import { useProgressStore } from '../stores/progressStore';
 import { useLearnerStore } from '../stores/learnerStore';
@@ -93,18 +93,23 @@ export function Home() {
         </div>
       )}
 
+      <Link to="/notebook" className="card p-4 flex items-center justify-between gap-3 no-underline mb-5">
+        <div><p className="text-sm font-semibold text-primary">Mistakes notebook</p><p className="text-xs text-muted">Revisit corrections, practice again, and save them to review.</p></div>
+        <ArrowRight size={16} style={{ color: 'var(--accent)' }} className="flex-shrink-0" />
+      </Link>
+
       <A1Banner />
 
       {onboardingDone && <PathPanel path={path} />}
 
-      {/* Exam goal — point straight at the listening/writing practice */}
+      {/* Exam goal — point straight at all four skills */}
       {preparingForExam && (
         <Link to="/exam" className="no-underline block mb-4">
           <motion.div whileTap={{ scale: 0.98 }} transition={TAP_TRANSITION} className="card p-4 flex items-center gap-3">
             <span className="text-2xl" aria-hidden>🎓</span>
             <div className="flex-1">
               <p className="text-sm font-semibold text-primary">DELF Prep</p>
-              <p className="text-xs text-muted">Exam-format listening and writing practice, marked with the official grid.</p>
+              <p className="text-xs text-muted">Practice listening, reading, writing and speaking for the DELF.</p>
             </div>
             <ChevronRight size={16} className="text-muted" />
           </motion.div>
@@ -140,7 +145,7 @@ export function Home() {
               </motion.div>
             </Link>
           </motion.div>
-        ) : nextReviewDate && completedLessons.length > 0 ? (
+        ) : nextReviewDate ? (
           <motion.div key="caught-up" {...FADE} className="mb-6">
             <div className="card p-3 flex items-center gap-3 opacity-70">
               <RotateCcw size={14} className="text-muted flex-shrink-0" />

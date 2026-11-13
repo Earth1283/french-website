@@ -35,6 +35,11 @@ export function Profile() {
         <p className="text-secondary text-sm mt-1 font-display italic">C'est magnifique!</p>
       </div>
 
+      <Link to="/notebook" className="card p-4 flex items-center justify-between gap-3 no-underline mb-5">
+        <div><p className="text-sm font-semibold text-primary">Mistakes notebook</p><p className="text-xs text-muted">Revisit corrections, practice again, and save them to review.</p></div>
+        <ArrowRight size={16} style={{ color: 'var(--accent)' }} className="flex-shrink-0" />
+      </Link>
+
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
         {[

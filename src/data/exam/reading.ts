@@ -1,0 +1,190 @@
+import type { DelfLevel, ReadingDoc, ReadingQuestion } from '../../types/exam';
+
+// Original passages and questions. These are practice materials, not official papers.
+const mc = (prompt: string, options: [string, string, string], correct: number, explanation: string): ReadingQuestion => ({
+  type: 'multiple-choice', prompt, options, answer: options[correct], explanation,
+});
+const short = (prompt: string, answer: string, explanation: string): ReadingQuestion => ({ type: 'short', prompt, answer, explanation });
+const doc = (id: string, level: DelfLevel, title: string, genre: string, timeMinutes: number, passage: string, questions: ReadingQuestion[]): ReadingDoc => ({
+  id, level, title, genre, timeMinutes, passage,
+  situation: 'Lisez le document, puis répondez aux questions.', questions,
+});
+
+export const READING_DOCS: ReadingDoc[] = [
+  doc('a1-ecrit-message', 'a1', 'Un rendez-vous au café', 'Message personnel', 7,
+`Salut Léa !
+Samedi, je vais au marché avec mon frère. Tu veux venir ? On se retrouve à neuf heures et demie devant le Café des Fleurs, à côté de la gare. Attention, ce n'est pas le café près de la poste !
+Après le marché, on peut déjeuner chez moi. Mon frère prépare une salade et j'achète du pain. Tu peux apporter un dessert ?
+S'il pleut, appelle-moi avant de partir : nous irons directement chez moi. Mon nouveau numéro est le 06 24 18 73 50.
+À samedi !
+Nina`, [
+    mc('Quel jour est le rendez-vous ?', ['Vendredi', 'Samedi', 'Dimanche'], 1, 'Nina writes “Samedi” and ends with “À samedi”.'),
+    mc('Où se trouve le Café des Fleurs ?', ['Près de la poste', 'Dans le marché', 'À côté de la gare'], 2, 'The café is beside the station; the one near the post office is explicitly excluded.'),
+    short('À quelle heure est le rendez-vous ? (Écrivez en chiffres : h min.)', '9 h 30', '“Neuf heures et demie” means 9:30.'),
+    mc('Que doit apporter Léa ?', ['Un dessert', 'Du pain', 'Une salade'], 0, 'Nina asks “Tu peux apporter un dessert ?”'),
+    mc("Que doit faire Léa s'il pleut ?", ['Attendre au marché', 'Appeler Nina', 'Aller à la poste'], 1, 'She must call before leaving; they will go directly to Nina’s home.'),
+  ]),
+  doc('a1-ecrit-bibliotheque', 'a1', 'À la bibliothèque', 'Informations pratiques', 7,
+`BIBLIOTHÈQUE DES TILLEULS
+Ouverture : du mardi au vendredi, de 10 h à 18 h ; le samedi, de 9 h à 13 h. Fermée le dimanche et le lundi.
+Pour vous inscrire, apportez une pièce d'identité et un justificatif de domicile. L'inscription est gratuite pour les habitants du quartier.
+Vous pouvez emprunter cinq livres pour trois semaines. Vous devez rendre les DVD après une semaine.
+Samedi 12 avril à 11 h : lecture pour les enfants de 4 à 8 ans. Entrée libre, sans réservation. Les parents restent avec leurs enfants.
+Attention : les ordinateurs sont indisponibles cette semaine.`, [
+    mc('Quel jour la bibliothèque est-elle fermée ?', ['Mardi', 'Samedi', 'Lundi'], 2, 'The notice says it is closed on Sunday and Monday.'),
+    short('Combien de livres peut-on emprunter ? (En chiffres.)', '5', 'Members can borrow five books.'),
+    mc('Pour combien de temps peut-on garder un DVD ?', ['Une semaine', 'Trois semaines', 'Un mois'], 0, 'DVDs must be returned after one week, unlike books.'),
+    mc('Faut-il réserver pour la lecture du samedi ?', ['Oui, par téléphone', 'Non', 'Oui, sur place'], 1, 'The event is “sans réservation”.'),
+    mc("Qu'est-ce qui ne fonctionne pas cette semaine ?", ['Les ordinateurs', "L'inscription", 'Le prêt de livres'], 0, 'The computers are unavailable this week.'),
+  ]),
+  doc('a1-ecrit-annonce', 'a1', 'Une chambre à louer', 'Petite annonce', 7,
+`CHAMBRE À LOUER — NANTES
+Dans un appartement partagé avec deux étudiants, chambre de 12 m² avec un lit, un bureau et une armoire. La cuisine et la salle de bains sont communes.
+Loyer : 420 euros par mois, eau et chauffage compris. Internet : 15 euros en plus.
+L'appartement est au troisième étage, sans ascenseur. L'arrêt de tramway est à deux minutes à pied. L'université est à quinze minutes en tramway.
+Chambre disponible le 1er septembre. Visites possibles le mercredi après-midi uniquement.
+Contact : écrivez à Camille à chambre.nantes@example.com. Merci de ne pas téléphoner.`, [
+    mc('Avec qui partage-t-on cet appartement ?', ['Une famille', 'Deux étudiants', 'Camille et ses enfants'], 1, 'The room is in an apartment shared with two students.'),
+    short('Quel est le loyer mensuel sans Internet ? (En euros.)', '420', 'The rent is 420 euros; Internet costs an additional 15 euros.'),
+    mc('Que trouve-t-on dans la chambre ?', ['Une salle de bains privée', 'Une cuisine', 'Un bureau'], 2, 'The room includes a bed, desk and wardrobe; the kitchen and bathroom are shared.'),
+    mc('Quand peut-on visiter ?', ['Le mercredi après-midi', 'Tous les soirs', 'Le samedi matin'], 0, 'Visits are possible only on Wednesday afternoons.'),
+    mc('Comment faut-il contacter Camille ?', ['Par téléphone', 'Par courrier électronique', 'À l’université'], 1, 'The advert asks readers to email and not telephone.'),
+  ]),
+  doc('a1-ecrit-consignes', 'a1', 'Votre cours de cuisine', 'Consignes', 7,
+`ATELIER : LA SOUPE DU MARCHÉ
+Bienvenue ! Le cours commence à 18 h et se termine à 20 h. Rendez-vous à l'accueil dix minutes avant le début.
+Nous fournissons les légumes et les ustensiles. Apportez un tablier et une boîte pour emporter votre soupe. Portez des chaussures fermées.
+Avant de cuisiner, lavez-vous les mains. Il est interdit de manger dans la cuisine pendant la préparation. À la fin, nous goûtons les plats ensemble dans la salle à manger.
+Vous êtes allergique à un aliment ? Prévenez notre équipe avant le cours.
+Prix : 25 euros, à payer à l'accueil.`, [
+    mc("À quelle heure faut-il être à l'accueil ?", ['À 18 h', 'À 17 h 50', 'À 18 h 10'], 1, 'You must arrive ten minutes before the 18:00 start.'),
+    mc('Que doit-on apporter ?', ['Des légumes', 'Des ustensiles', 'Un tablier et une boîte'], 2, 'Ingredients and utensils are provided; participants bring an apron and a container.'),
+    mc('Où goûte-t-on les plats ?', ['Dans la salle à manger', 'À l’accueil', 'Dans la cuisine pendant la préparation'], 0, 'The group tastes the dishes together in the dining room at the end.'),
+    short('Combien coûte le cours ? (En euros.)', '25', 'The price is 25 euros, payable at reception.'),
+  ]),
+  doc('a2-ecrit-association', 'a2', 'Un samedi au jardin', 'Courriel associatif', 7,
+`Bonjour à toutes et à tous,
+Notre association organise une journée au jardin partagé samedi prochain. Nous avons besoin de bénévoles pour planter des tomates et réparer les petites barrières. Aucune expérience n'est nécessaire : les membres de l'association expliqueront les tâches.
+La journée commence à 10 h, mais vous pouvez nous rejoindre jusqu'à midi. Apportez des gants et un chapeau. Les outils seront disponibles sur place. Nous partagerons un pique-nique à 12 h 30 : chacun apporte un plat, et l'association offre les boissons.
+Les enfants de plus de six ans sont les bienvenus, accompagnés d'un adulte. Pour organiser les équipes, merci de confirmer votre présence par courriel avant jeudi soir.
+En cas de forte pluie, la journée sera reportée au samedi suivant. Nous vous préviendrons vendredi par courriel.
+À bientôt,
+L'équipe du Jardin des Voisins`, [
+    mc('Faut-il savoir jardiner pour participer ?', ['Oui, depuis un an', 'Non, les membres expliquent les tâches', 'Seulement pour planter'], 1, 'The email explicitly says no experience is necessary.'),
+    mc("Qu'est-ce que l'association fournit ?", ['Les outils et les boissons', 'Les gants et les chapeaux', 'Tout le pique-nique'], 0, 'Tools are on site, and the association offers drinks.'),
+    mc('Quelle est la date limite pour confirmer ?', ['Vendredi matin', 'Samedi à midi', 'Jeudi soir'], 2, 'Participants must confirm before Thursday evening.'),
+    mc('Un enfant de huit ans peut-il venir seul ?', ['Oui', 'Non, il doit être accompagné', 'Seulement à midi'], 1, 'Children over six are welcome with an adult.'),
+    mc('Que se passe-t-il en cas de forte pluie ?', ['La journée a lieu à l’intérieur', 'La journée est reportée d’une semaine', 'La journée est définitivement annulée'], 1, 'The event will move to the following Saturday.'),
+  ]),
+  doc('a2-ecrit-transport', 'a2', 'Des travaux sur la ligne 3', 'Avis aux voyageurs', 7,
+`INFORMATION VOYAGEURS — LIGNE 3
+Du lundi 5 au vendredi 16 mai, des travaux ont lieu entre les stations République et Université. Pendant cette période, les tramways circulent normalement avant 20 h. Après 20 h, des bus de remplacement assurent le trajet entre ces deux stations toutes les vingt minutes, jusqu'à minuit.
+Les arrêts de bus sont situés devant les stations de tramway, sauf à République : l'arrêt se trouve rue des Écoles, à 150 mètres de la station. Vos titres de transport habituels restent valables. Aucun supplément n'est demandé.
+Prévoyez environ quinze minutes de plus pour votre déplacement. Les vélos ne sont pas acceptés dans les bus de remplacement. Les poussettes peuvent y entrer si elles sont pliées.
+Le week-end, la ligne fonctionne normalement toute la journée. Pour connaître les horaires détaillés, consultez notre site ou demandez un dépliant aux agents en station.`, [
+    mc('Quand faut-il prendre un bus de remplacement ?', ['Tous les jours avant 20 h', 'En semaine après 20 h pendant les travaux', 'Uniquement le week-end'], 1, 'The replacement service operates after 20:00 on the weekdays affected by works.'),
+    mc("Où est l'arrêt de remplacement à République ?", ['Devant la station', 'Devant l’université', 'Rue des Écoles'], 2, 'République is the exception: the stop is on rue des Écoles, 150 metres away.'),
+    mc('Faut-il acheter un billet spécial ?', ['Non, les titres habituels sont valables', 'Oui, avec un supplément', 'Oui, après minuit'], 0, 'Usual tickets remain valid without a surcharge.'),
+    short('Combien de minutes supplémentaires faut-il prévoir ? (En chiffres.)', '15', 'Passengers should allow about fifteen extra minutes.'),
+    mc('Que peut-on emporter dans le bus ?', ['Un vélo', 'Une poussette pliée', 'Une poussette ouverte uniquement'], 1, 'Bicycles are excluded; folded pushchairs are accepted.'),
+  ]),
+  doc('a2-ecrit-emploi', 'a2', 'Un emploi pour l’été', 'Offre d’emploi', 8,
+`LA MAISON DU LAC RECRUTE
+Notre petit hôtel familial cherche une personne pour accueillir les clients en juillet et en août. Le travail consiste à répondre au téléphone, préparer les arrivées et donner des informations sur les activités de la région. Le nettoyage des chambres est assuré par une autre équipe.
+Vous travaillerez cinq jours par semaine, de 14 h à 21 h, avec deux jours de repos consécutifs. Une bonne connaissance du français et de l'anglais est indispensable. Une expérience à l'hôtel est appréciée, mais nous acceptons aussi les débutants motivés et proposons une formation de trois jours.
+Nous offrons une chambre individuelle gratuite dans le bâtiment voisin. Les repas restent à votre charge. L'hôtel est situé à six kilomètres du centre-ville ; il est préférable d'avoir un vélo ou une voiture.
+Envoyez votre CV et quelques lignes sur votre motivation avant le 30 avril. Les entretiens auront lieu en visioconférence la première semaine de mai.`, [
+    mc('Quelle tâche fait partie du travail ?', ['Nettoyer les chambres', 'Accueillir les clients', 'Préparer les repas'], 1, 'The role covers reception, calls and local information; another team cleans the rooms.'),
+    mc('Quelle condition est obligatoire ?', ['Une expérience hôtelière', 'Une voiture', 'Parler français et anglais'], 2, 'Both languages are indispensable; experience is only appreciated and a car is not required.'),
+    mc("Qu'est-ce qui est gratuit ?", ['Le logement', 'Les repas', 'La voiture'], 0, 'An individual room is offered free; meals are at the employee’s expense.'),
+    mc('Comment se passent les entretiens ?', ['À l’hôtel', 'Par visioconférence', 'Par courrier'], 1, 'Interviews take place by video call during the first week of May.'),
+    mc('Quand travaille-t-on ?', ['De 7 h à 14 h', 'Tous les jours sans repos', 'De 14 h à 21 h, cinq jours par semaine'], 2, 'The advert specifies five days weekly, from 14:00 to 21:00.'),
+  ]),
+  doc('a2-ecrit-sortie', 'a2', 'Choisir une sortie', 'Programme culturel', 8,
+`CE WEEK-END À BELLEVILLE
+A — Balade historique : samedi, départ à 9 h devant la mairie. Deux heures de marche avec une guide. Tarif : 8 euros. Réservation obligatoire. Déconseillé aux enfants de moins de dix ans.
+B — Cinéma en plein air : samedi à 21 h dans le parc municipal. Film d'aventure, accessible à tous dès six ans. Entrée gratuite, sans réservation. Apportez une couverture. En cas de pluie, séance dans la salle des fêtes.
+C — Atelier céramique : dimanche de 14 h à 17 h. À partir de seize ans. 35 euros, matériel compris. Six places seulement : inscrivez-vous avant vendredi.
+D — Concert de jazz : dimanche à 18 h au théâtre. 12 euros, gratuit pour les moins de douze ans. Billets sur place à partir de 17 h. Durée : une heure.`, [
+    mc('Une famille avec un enfant de sept ans veut sortir gratuitement samedi. Quelle activité convient ?', ['La balade historique', 'Le cinéma en plein air', 'L’atelier céramique'], 1, 'The film is free, on Saturday, and suitable from age six.'),
+    mc('Quelle activité exige une inscription avant vendredi ?', ['Le concert', 'Le cinéma', 'L’atelier céramique'], 2, 'The pottery workshop has six places and a Friday signup deadline.'),
+    mc('Quelle activité dure deux heures ?', ['La balade historique', 'Le concert', 'L’atelier céramique'], 0, 'The historical walk lasts two hours; the concert lasts one and pottery three.'),
+    mc('Où a lieu le film si le temps est mauvais ?', ['Au théâtre', 'Dans la salle des fêtes', 'À la mairie'], 1, 'The alternative venue in case of rain is the salle des fêtes.'),
+  ]),
+  doc('b1-ecrit-reparation', 'b1', 'Réparer plutôt que jeter', 'Article de société', 13,
+`Tous les premiers samedis du mois, une salle municipale de Rennes se transforme en atelier de réparation. Cafetières en panne, pantalons déchirés et lampes défectueuses arrivent dans les sacs des habitants. Pourtant, ici, on ne dépose pas son objet avant de repartir : on reste auprès du bénévole et on participe, même sans expérience.
+« Notre objectif n'est pas de faire concurrence aux artisans », explique Salomé, qui coordonne l'atelier. « Nous voulons surtout que chacun comprenne ce qu'il possède et ose essayer. Quand une réparation demande un équipement particulier, nous conseillons un professionnel. » La participation est gratuite ; une boîte permet cependant de contribuer aux achats de petites pièces.
+Au début, les organisateurs pensaient attirer principalement des retraités. Or les familles et les étudiants représentent désormais près de la moitié des visiteurs. Pour certains, la motivation est économique. D'autres viennent surtout pour réduire leurs déchets ou rencontrer leurs voisins. Un étudiant raconte qu'il est revenu trois fois avec le même grille-pain : les deux premières tentatives avaient échoué, mais il avait apprécié les échanges.
+Tous les objets ne repartent pas en état de marche. L'atelier manque parfois de pièces, et certains appareils récents sont difficiles à ouvrir sans les abîmer. Les bénévoles notent ces obstacles afin de sensibiliser le public aux choix de fabrication.
+Face à l'affluence, la mairie propose une salle plus grande. Salomé hésite : elle craint qu'un atelier trop vaste fasse disparaître l'accompagnement individuel. L'équipe préfère, pour le moment, aider d'autres quartiers à lancer leurs propres rencontres.`, [
+    mc("Que doit faire le propriétaire d'un objet pendant la réparation ?", ['Le laisser et revenir plus tard', 'Participer avec le bénévole', 'Payer un artisan'], 1, 'The opening paragraph says visitors stay and participate, even without experience.'),
+    mc("Quel est l'objectif principal de Salomé ?", ['Remplacer les artisans', 'Vendre des appareils', 'Rendre les habitants plus autonomes'], 2, 'She wants people to understand their possessions and dare to try; complex repairs go to professionals.'),
+    mc('Pourquoi le passage sur le grille-pain est-il donné en exemple ?', ['Pour montrer que la rencontre peut compter autant que la réparation', 'Pour critiquer les étudiants', 'Pour garantir que tous les appareils sont réparés'], 0, 'The student returned despite failed repairs because he enjoyed the exchanges.'),
+    mc('Quelle difficulté liée aux appareils récents est mentionnée ?', ['Ils sont toujours trop lourds', 'Ils sont parfois difficiles à ouvrir', 'Ils coûtent moins cher à réparer'], 1, 'Some recent devices cannot easily be opened without damage.'),
+    mc('Pourquoi Salomé hésite-t-elle à accepter une salle plus grande ?', ['Elle refuse toute aide publique', 'Elle souhaite fermer l’atelier', 'Elle veut préserver le suivi individuel'], 2, 'She fears a larger workshop would lose its individual support.'),
+    mc('Quelle solution l’équipe privilégie-t-elle ?', ['Créer des rencontres dans d’autres quartiers', 'Faire payer les réparations', 'Réserver l’atelier aux retraités'], 0, 'They prefer helping other neighbourhoods start their own meetings.'),
+  ]),
+  doc('b1-ecrit-voyage', 'b1', 'Trouver un séjour adapté', 'Comparaison d’offres', 12,
+`Vous cherchez un séjour de deux nuits pour un groupe de six amis. Votre budget est de 180 euros par personne, transport compris. Vous souhaitez partir sans voiture, cuisiner au moins un repas ensemble et faire une activité de plein air. Une amie ne peut pas marcher longtemps.
+OFFRE A — WEEK-END AU VERT
+Deux nuits en gîte collectif, 125 euros par personne. Cuisine équipée à partager. Gare à cinq kilomètres ; navette gratuite sur réservation. Location de vélos électriques sur place : 20 euros. Le billet de train aller-retour coûte environ 30 euros. Parcours accessibles à différents niveaux.
+OFFRE B — SOMMETS ET SENTIERS
+Deux nuits en refuge, 90 euros par personne, repas compris. Accès uniquement à pied : trois heures de montée depuis le parking. Pas de cuisine à disposition. Un car relie la ville au parking : 25 euros aller-retour. Randonnées guidées incluses.
+OFFRE C — BORD DE MER
+Deux nuits en appartement, 150 euros par personne. Cuisine privée. Gare à dix minutes à pied. Sortie en bateau proposée à 25 euros ; billet de train : 40 euros aller-retour. Plage surveillée à proximité.
+OFFRE D — MAISON DES VIGNES
+Deux nuits en chambre d'hôtes, 130 euros par personne. Prêt de vélos gratuit et promenades faciles. Pas de transports publics à moins de vingt kilomètres. Le propriétaire ne propose pas de transfert. Les clients n'ont pas accès à la cuisine.`, [
+    mc('Quelle offre répond à tous les critères ?', ['L’offre A', 'L’offre B', 'L’offre C'], 0, 'A has a kitchen, a free station shuttle, accessible outdoor cycling and a total of 175 euros including train and bike rental.'),
+    short('Avec l’offre A, combien coûte le séjour avec le train et le vélo ? (En euros.)', '175', '125 + 30 + 20 = 175 euros per person.'),
+    mc("Pourquoi l'offre B ne convient-elle pas à l'amie ?", ['Elle dépasse le budget', 'Il faut marcher trois heures pour arriver', 'Il n’y a aucune activité dehors'], 1, 'The refuge requires a three-hour uphill walk just to reach it.'),
+    mc('Quel problème présente l’offre C, même sans la sortie en bateau ?', ['Il n’y a pas de cuisine', 'La gare est trop loin', 'Le prix avec le train dépasse le budget'], 2, '150 + 40 = 190 euros, already above the 180-euro budget.'),
+    mc('Que faut-il réserver pour profiter de l’offre A sans voiture ?', ['La navette depuis la gare', 'Une place de parking', 'Un repas au restaurant'], 0, 'The free shuttle requires a reservation.'),
+  ]),
+  doc('b1-ecrit-teletravail', 'b1', 'Travailler près de chez soi', 'Article professionnel', 13,
+`À vingt minutes de la ville, l'ancienne poste de Montval accueille désormais un espace de travail partagé. La commune espère ainsi éviter à certains habitants de longs trajets quotidiens. Le lieu compte douze bureaux, une salle de réunion et une petite cuisine. Il est ouvert aussi bien aux salariés autorisés à télétravailler qu'aux indépendants.
+Pour Luc, graphiste, l'intérêt n'est pas seulement pratique. « Chez moi, je finissais par ne plus distinguer mes heures de travail de mes soirées. Ici, quand je ferme mon ordinateur et que je pars, ma journée est terminée. » Il apprécie aussi de pouvoir demander un conseil technique à d'autres utilisateurs, sans devoir organiser une réunion.
+Cependant, les débuts ont été moins simples que prévu. Certains visiteurs prenaient leurs appels dans la salle commune, ce qui gênait ceux qui avaient besoin de silence. Après un mois d'essai, les usagers ont proposé des règles : les appels longs se font dans une cabine, et une table est réservée aux échanges. La mairie a financé quelques travaux pour améliorer l'isolation sonore.
+Le tarif, quinze euros par jour, reste un obstacle pour plusieurs habitants. Un abonnement moins cher est proposé aux personnes qui viennent au moins huit jours par mois. La commune cherche maintenant des entreprises prêtes à prendre en charge une partie de ce coût pour leurs salariés.
+Les élus restent prudents : le lieu n'a pas vocation à remplacer tous les bureaux de la ville. Ils veulent d'abord vérifier qu'il répond à un besoin durable. Un bilan sera réalisé après un an, à partir du nombre d'utilisateurs mais aussi de leurs retours sur la qualité de travail.`, [
+    mc('Pourquoi la commune a-t-elle créé cet espace ?', ['Pour réduire certains déplacements quotidiens', 'Pour fermer toutes les entreprises', 'Pour héberger les touristes'], 0, 'The municipality wants residents to avoid long daily commutes.'),
+    mc('Quel avantage Luc souligne-t-il ?', ['Il travaille désormais toutes les soirées', 'Il sépare mieux travail et vie privée', 'Il n’a plus besoin d’ordinateur'], 1, 'Leaving the shared office marks the end of his working day.'),
+    mc('Comment les problèmes de bruit ont-ils été traités ?', ['En interdisant tous les échanges', 'En supprimant la salle commune', 'Avec des règles proposées par les usagers et des travaux'], 2, 'Users proposed call rules and the municipality improved sound insulation.'),
+    mc('À qui s’adresse l’abonnement réduit ?', ['Aux usagers présents au moins huit jours par mois', 'Uniquement aux graphistes', 'À tous les touristes'], 0, 'The discount applies to people using the space at least eight days monthly.'),
+    mc('Comment le projet sera-t-il évalué ?', ['Uniquement sur les bénéfices', 'Sur la fréquentation et les retours des usagers', 'Sur le nombre de bureaux en ville'], 1, 'The annual review will consider both user numbers and feedback on working quality.'),
+  ]),
+  doc('b2-ecrit-gratuite', 'b2', 'La gratuité suffit-elle à ouvrir les musées ?', 'Article d’opinion', 22,
+`Rendre les musées gratuits paraît une manière évidente de les ouvrir à tous. L'annonce se prête aux slogans : une barrière tombe, la culture devient accessible. Encore faut-il s'entendre sur ce que signifie « accessible ». Franchir une porte sans payer n'implique ni de se sentir légitime à entrer, ni de disposer du temps nécessaire pour s'y rendre.
+Dans une ville qui expérimente la gratuité depuis un an, la fréquentation a nettement progressé. Les responsables s'en félicitent, à juste titre. Une enquête auprès des visiteurs révèle toutefois que la plupart fréquentaient déjà d'autres établissements culturels. Le public habituel revient plus souvent ; ceux qui ne venaient jamais restent minoritaires. Le résultat ne condamne pas la mesure, mais il invite à ne pas confondre multiplication des visites et diversification des visiteurs.
+Pour une mère qui travaille le samedi, le prix d'entrée n'est peut-être pas le premier obstacle. Les horaires, le coût du transport, la possibilité de venir avec ses enfants et l'impression que le lieu ne s'adresse pas à elle peuvent peser davantage. Dans plusieurs quartiers, des associations organisent donc des visites collectives, préparées avec les habitants. L'une d'elles commence par demander aux participants quels objets de leur quotidien mériteraient, selon eux, d'être exposés. Cette démarche établit un lien avant même la rencontre avec les collections.
+On objectera que ces actions coûtent cher, alors que la disparition des billets réduit les recettes. L'objection est sérieuse. Les équipes d'accueil et de médiation ne peuvent pas accompagner davantage de visiteurs sans moyens supplémentaires. Afficher la gratuité tout en réduisant leurs effectifs risquerait de dégrader précisément l'expérience des personnes que l'on souhaite accueillir.
+Faut-il, dès lors, revenir au billet payant ? Ce serait tirer une conclusion excessive. La gratuité peut faciliter une première visite et permettre des retours courts, sans obligation de « rentabiliser » son entrée. Elle devient particulièrement utile lorsqu'elle s'inscrit dans une politique plus large : horaires adaptés, partenariats locaux, informations compréhensibles et financement stable.
+L'enjeu n'est donc pas de choisir entre tarif et accompagnement. Il est de juger une politique culturelle à partir de ses effets réels. Compter les entrées fournit un indicateur commode ; écouter les absents oblige à poser des questions plus difficiles. Une ville qui veut ouvrir ses musées devrait accepter de faire les deux, et de publier les résultats même lorsqu'ils nuancent le succès annoncé.`, [
+    mc('Quelle est la thèse principale de l’auteur ?', ['La gratuité doit être abandonnée', 'La gratuité est utile mais doit être accompagnée d’autres mesures', 'Le nombre d’entrées prouve à lui seul la démocratisation'], 1, 'The author supports free entry as part of a broader policy addressing practical and social barriers.'),
+    mc('Que montre l’enquête mentionnée ?', ['Le public s’est entièrement renouvelé', 'Les musées ont perdu leurs visiteurs', 'La hausse vient surtout de personnes déjà familières des lieux culturels'], 2, 'More visits mostly come from existing cultural audiences; diversification is limited.'),
+    mc('À quoi sert l’exemple de la mère qui travaille le samedi ?', ['À montrer que certains obstacles ne sont pas financiers', 'À affirmer que les parents refusent la culture', 'À justifier une hausse du prix des billets'], 0, 'Hours, transport, childcare and feeling unwelcome may matter more than the ticket price.'),
+    mc('Pourquoi l’auteur reconnaît-il que l’objection budgétaire est sérieuse ?', ['Parce que les collections doivent être vendues', 'Parce que l’accueil de nouveaux publics exige des moyens', 'Parce que les associations remplacent tous les employés'], 1, 'The staff need resources to support more visitors; staffing cuts could damage the intended experience.'),
+    mc('Que signifie ici « rentabiliser son entrée » ?', ['Revendre son billet', 'Obtenir une réduction pour revenir', 'Rester assez longtemps pour justifier le prix payé'], 2, 'Free entry allows brief visits without feeling obliged to get the full value of a paid ticket.'),
+    mc('Quelle évaluation l’auteur préconise-t-il ?', ['Associer les chiffres de fréquentation à une enquête sur les non-visiteurs', 'Ne publier que les chiffres favorables', 'Mesurer uniquement les recettes'], 0, 'The conclusion calls for counting entries and listening to people who still do not visit.'),
+  ]),
+  doc('b2-ecrit-reemploi', 'b2', 'Consigner les emballages : une évidence à organiser', 'Article argumentatif', 22,
+`Le retour de la consigne bénéficie d'une image rassurante : celle d'une bouteille que l'on rapporte, que l'on lave et que l'on remplit à nouveau. Face aux montagnes d'emballages jetables, le geste semble relever du bon sens. Pourtant, entre l'adhésion au principe et son efficacité à grande échelle, il existe une chaîne logistique dont le consommateur ne voit qu'un maillon.
+Dans une région où plusieurs commerces testent des contenants réutilisables, les premiers retours sont encourageants. Les clients apprécient de voir concrètement ce qu'ils évitent de jeter. Les commerçants soulignent néanmoins que le dispositif exige de la place pour stocker les retours, du personnel pour les trier et une collecte suffisamment régulière. Pour une petite épicerie, ces contraintes ne se résument pas à un détail d'organisation.
+L'intérêt environnemental dépend lui aussi des conditions d'usage. Un contenant doit être réemployé suffisamment souvent pour compenser les ressources nécessaires à sa fabrication et à son lavage. S'il parcourt de longues distances entre chaque utilisation, une partie du bénéfice attendu peut disparaître. Il serait donc trompeur de considérer tous les systèmes de consigne comme équivalents, indépendamment du nombre de rotations et des trajets effectués.
+Certains professionnels proposent de standardiser les formats. Une même bouteille pourrait circuler entre plusieurs producteurs, ce qui faciliterait le tri et rapprocherait les lieux de lavage. D'autres craignent d'y perdre un élément de leur identité commerciale. Ce désaccord révèle une tension plus large : optimiser un système collectif suppose parfois de renoncer à une liberté individuelle de présentation. Une période de transition et des aides ciblées pourraient rendre ce compromis acceptable aux plus petites entreprises.
+Du côté des usagers, la simplicité demeure décisive. Si chaque enseigne impose son propre point de retour, le client doit multiplier les déplacements. Un réseau commun, où un récipient peut être rendu ailleurs qu'au lieu d'achat, limiterait cet effort. Encore faut-il que les acteurs se mettent d'accord sur la répartition des coûts et sur le suivi des contenants.
+Il serait injuste de conclure que les difficultés rendent la consigne inutile. Elles indiquent plutôt où doit porter l'action publique : soutenir les infrastructures partagées, fixer des règles lisibles et exiger des bilans comparables. À défaut, le risque serait de célébrer le seul nombre de contenants mis en circulation, sans savoir combien reviennent réellement. Le succès ne se mesure pas au caractère séduisant du geste initial, mais à la solidité du circuit qui lui permet de se répéter.`, [
+    mc('Quelle idée le texte défend-il ?', ['La consigne fonctionne automatiquement', 'La consigne est inutile pour les petits commerces', 'La consigne doit être organisée et évaluée pour tenir ses promesses'], 2, 'The author supports reuse but argues that logistics and measurable outcomes determine its effectiveness.'),
+    mc('Quelle difficulté concrète les épiceries rencontrent-elles ?', ['Le stockage et le tri des retours', 'L’interdiction de vendre des boissons', 'Le manque de clients intéressés'], 0, 'The second paragraph describes storage space, sorting staff and regular collection.'),
+    mc('De quoi dépend notamment le bénéfice environnemental ?', ['Uniquement de la couleur du contenant', 'Du nombre de réutilisations et des distances parcourues', 'Seulement du montant de la consigne'], 1, 'The text explicitly links the benefit to rotations, production, washing and transport.'),
+    mc('Pourquoi certains producteurs s’opposent-ils aux formats standardisés ?', ['Ils refusent le lavage', 'Ils veulent interdire les aides', 'Ils craignent de perdre une identité commerciale'], 2, 'They view distinctive packaging as part of their commercial identity.'),
+    mc('Quel avantage offrirait un réseau commun de retour ?', ['Il réduirait les déplacements imposés aux clients', 'Il supprimerait tous les coûts', 'Il garantirait qu’aucun contenant ne soit perdu'], 0, 'Returning a container at a different shop avoids separate trips to each original retailer.'),
+    mc('Quel indicateur serait insuffisant selon l’auteur ?', ['Le nombre de contenants effectivement rendus', 'Le nombre de contenants mis en circulation', 'Les distances entre les lieux de lavage'], 1, 'Counting containers issued says nothing about how many actually return and are reused.'),
+  ]),
+];
+
+export function getReadingDoc(id: string): ReadingDoc | undefined {
+  return READING_DOCS.find(d => d.id === id);
+}
+
+// Section durations from FEI's DELF tout public level descriptions.
+export const READING_MINUTES: Record<DelfLevel, number> = { a1: 30, a2: 30, b1: 45, b2: 60 };

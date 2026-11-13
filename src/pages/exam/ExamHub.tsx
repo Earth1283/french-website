@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight, Headphones, PenLine, Mic, ClipboardCheck, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, BookOpen, Headphones, PenLine, Mic, ClipboardCheck, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { READING_DOCS, READING_MINUTES } from '../../data/exam/reading';
 import { LISTENING_DOCS } from '../../data/exam/listening';
 import { WRITING_TASKS } from '../../data/exam/writing';
 import { SPEAKING_TASKS } from '../../data/exam/speaking';
@@ -39,6 +40,7 @@ const LEVEL_FACTS: Record<DelfLevel, { listening: string; writing: string; speak
 export function ExamHub() {
   const storedLevel = useExamStore(s => s.level);
   const setLevel = useExamStore(s => s.setLevel);
+  const readingResults = useExamStore(s => s.readingResults);
   const listeningResults = useExamStore(s => s.listeningResults);
   const writingSubmissions = useExamStore(s => s.writingSubmissions);
   const speakingAttempts = useExamStore(s => s.speakingAttempts);
@@ -46,6 +48,7 @@ export function ExamHub() {
   const lastPlacement = useTestStore(s => s.history[s.history.length - 1]);
   const level = storedLevel ?? delfLevelFromPlacement(lastPlacement?.cefrLevel);
 
+  const readingDocs = READING_DOCS.filter(d => d.level === level);
   const docs = LISTENING_DOCS.filter(d => d.level === level);
   const tasks = WRITING_TASKS.filter(t => t.level === level);
   const speakingTasks = SPEAKING_TASKS.filter(t => t.level === level);
@@ -70,7 +73,7 @@ export function ExamHub() {
       <div>
         <h1 className="text-3xl font-bold text-primary">DELF Prep</h1>
         <p className="text-secondary mt-1 text-sm">
-          Listening, writing and speaking practice in the format of the DELF tout public papers, and full mock exams.
+          Listening, reading, writing and speaking practice in the format of the DELF tout public papers, and full mock exams.
           Everything here is original material written to the official task types.
         </p>
       </div>
@@ -95,7 +98,7 @@ export function ExamHub() {
           <p className="text-xs text-muted">
             {lastMock
               ? `Last: ${mockVerdict(lastMock).total}/${lastMock.reading === null ? 75 : 100} on ${lastMock.date}`
-              : 'Listening, writing and speaking back to back, scored like the real thing'}
+              : 'Four skills back to back, scored out of 100'}
           </p>
         </div>
         <ChevronRight size={16} className="text-muted" />
@@ -129,6 +132,16 @@ export function ExamHub() {
             );
           })}
         </div>
+      </section>
+
+      <section>
+        <div className="section-label flex items-center gap-1.5"><BookOpen size={13} /> Compréhension des écrits</div>
+        <p className="text-xs text-muted mb-2 px-1">{READING_MINUTES[level]} min for the full section · individual documents below</p>
+        <div className="inset-group">{readingDocs.map(doc => {
+          const attempts = readingResults.filter(r => r.docId === doc.id);
+          const best = attempts.reduce<number | null>((score, r) => Math.max(score ?? 0, toOutOf25(r.correct, r.total)), null);
+          return <Link key={doc.id} to={`/exam/reading/${doc.id}`} className="inset-row no-underline justify-between gap-3"><div className="min-w-0"><p className="text-sm font-semibold text-primary truncate">{doc.title}</p><p className="text-xs text-muted">{doc.genre} · {doc.questions.length} questions · {doc.timeMinutes} min</p></div><div className="flex items-center gap-2 flex-shrink-0">{best !== null && <span className="text-xs font-semibold text-secondary">{best}/25</span>}<ChevronRight size={16} className="text-muted" /></div></Link>;
+        })}</div>
       </section>
 
       <section>
@@ -193,7 +206,7 @@ export function ExamHub() {
         <p className="text-sm font-semibold text-primary">Before the real thing</p>
         <p className="text-xs text-secondary">
           The DELF is marked out of 100 — 25 per skill. You need 50 overall and at least 5/25 in each skill. This app covers
-          listening, writing and speaking; reading is tested too. Work through the official sample papers, which come with
+          all four skills with original practice material. Work through the official sample papers, which come with
           real recordings and answer keys:
         </p>
         <a

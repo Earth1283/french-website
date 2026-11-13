@@ -1,3 +1,4 @@
+import { READING_DOCS } from '../src/data/exam/reading';
 import { expect, test, type Page, type Request } from '@playwright/test';
 
 test.use({
@@ -107,7 +108,7 @@ test('with a Gemini key the recordings are sent as WAV, with the key in a header
   expect(atob(audio[0].inline_data.data.slice(0, 8)).startsWith('RIFF')).toBe(true);
 });
 
-test('a full mock exam produces a result out of 75, then 100 with a reading score', async ({ page }) => {
+test('a full mock exam automatically includes reading and produces a result out of 100', async ({ page }) => {
   test.setTimeout(90_000);
   await instantSpeech(page);
   await withGeminiKey(page);
@@ -125,6 +126,15 @@ test('a full mock exam produces a result out of 75, then 100 with a reading scor
     await page.getByRole('button', { name: 'Next recording' }).click();
   }
   await page.getByRole('button', { name: /Finish listening/ }).click();
+  for (const doc of READING_DOCS.filter(d => d.level === 'a1')) {
+    await expect(page.getByRole('heading', { name: doc.title })).toBeVisible();
+    for (let i = 0; i < doc.questions.length; i++) {
+      const q = doc.questions[i];
+      if (q.options) await page.getByRole('radio', { name: `${String.fromCharCode(65 + q.options.indexOf(q.answer))} ${q.answer}`, exact: true }).click();
+      else await page.getByLabel(`Answer to question ${i + 1}`).fill(q.answer);
+    }
+    await page.getByRole('button', { name: /Next document|Finish reading/ }).click();
+  }
 
   await page.getByRole('textbox').fill(Array.from({ length: 45 }, () => 'bonjour').join(' '));
   await page.getByRole('button', { name: /Hand in/ }).click();
@@ -132,11 +142,11 @@ test('a full mock exam produces a result out of 75, then 100 with a reading scor
   for (let part = 0; part < 3; part++) await recordPart(page);
 
   await expect(page.getByText('Résultats · DELF A1')).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText('/ 75')).toBeVisible();
-  await expect(page.getByText(/On track if you score|Not a pass yet/)).toBeVisible();
-
-  await page.getByLabel('Reading score (optional)').fill('20');
   await expect(page.getByText('/ 100')).toBeVisible();
+  await expect(page.getByLabel('Reading score (optional)')).toHaveCount(0);
+  const mock = await page.evaluate(() => JSON.parse(localStorage.getItem('french-exam-prep')!).state.mockResults[0]);
+  expect(mock.reading).toBe(25);
+  expect(mock.readingDocIds).toHaveLength(4);
   await expect(page.getByText(/Admis|Non admis/)).toBeVisible();
 });
 

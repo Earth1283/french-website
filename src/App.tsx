@@ -20,10 +20,12 @@ const loadPhrasebook = () => import('./pages/Phrasebook');
 const loadProfile = () => import('./pages/Profile');
 const loadConversation = () => import('./pages/Conversation');
 const loadSettings = () => import('./pages/Settings');
+const loadNotebook = () => import('./pages/Notebook');
 const loadReview = () => import('./pages/Review');
 const loadFocus = () => import('./pages/Focus');
 const loadAdaptiveTest = () => import('./pages/AdaptiveTest');
 const loadExamHub = () => import('./pages/exam/ExamHub');
+const loadReadingExercise = () => import('./pages/exam/ReadingExercise');
 const loadListeningExercise = () => import('./pages/exam/ListeningExercise');
 const loadWritingExercise = () => import('./pages/exam/WritingExercise');
 const loadSpeakingExercise = () => import('./pages/exam/SpeakingExercise');
@@ -48,9 +50,11 @@ const Phrasebook = lazy(() => loadPhrasebook().then(m => ({ default: m.Phraseboo
 const Profile = lazy(() => loadProfile().then(m => ({ default: m.Profile })));
 const Conversation = lazy(() => loadConversation().then(m => ({ default: m.Conversation })));
 const Settings = lazy(() => loadSettings().then(m => ({ default: m.Settings })));
+const Notebook = lazy(() => loadNotebook().then(m => ({ default: m.Notebook })));
 const Review = lazy(() => loadReview().then(m => ({ default: m.Review })));
 const AdaptiveTest = lazy(() => loadAdaptiveTest().then(m => ({ default: m.AdaptiveTest })));
 const ExamHub = lazy(() => loadExamHub().then(m => ({ default: m.ExamHub })));
+const ReadingExercise = lazy(() => loadReadingExercise().then(m => ({ default: m.ReadingExercise })));
 const ListeningExercise = lazy(() => loadListeningExercise().then(m => ({ default: m.ListeningExercise })));
 const WritingExercise = lazy(() => loadWritingExercise().then(m => ({ default: m.WritingExercise })));
 const SpeakingExercise = lazy(() => loadSpeakingExercise().then(m => ({ default: m.SpeakingExercise })));
@@ -120,6 +124,7 @@ function AnimatedRoutes() {
           <Route path="/converse" element={<PageTransition keyProp="converse"><Conversation /></PageTransition>} />
           <Route path="/test" element={<PageTransition keyProp="test"><AdaptiveTest /></PageTransition>} />
           <Route path="/exam" element={<PageTransition keyProp="exam"><ExamHub /></PageTransition>} />
+          <Route path="/exam/reading/:docId" element={<PageTransition keyProp="exam-reading"><ReadingExercise /></PageTransition>} />
           <Route path="/exam/listening/:docId" element={<PageTransition keyProp="exam-listening"><ListeningExercise /></PageTransition>} />
           <Route path="/exam/writing/:taskId" element={<PageTransition keyProp="exam-writing"><WritingExercise /></PageTransition>} />
           <Route path="/exam/speaking/:taskId" element={<PageTransition keyProp="exam-speaking"><SpeakingExercise /></PageTransition>} />
@@ -138,6 +143,7 @@ function AnimatedRoutes() {
           <Route path="/classes" element={<PageTransition keyProp="classes"><ClassesHome /></PageTransition>} />
           <Route path="/profile" element={<PageTransition keyProp="profile"><Profile /></PageTransition>} />
           <Route path="/settings" element={<PageTransition keyProp="settings"><Settings /></PageTransition>} />
+          <Route path="/notebook" element={<PageTransition keyProp="notebook"><Notebook /></PageTransition>} />
           <Route path="/review" element={<PageTransition keyProp="review"><Review /></PageTransition>} />
         </Routes>
       </Suspense>

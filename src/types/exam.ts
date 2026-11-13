@@ -1,5 +1,4 @@
-// DELF-style exam practice: listening comprehension (compréhension de l'oral)
-// and written production (production écrite). The content is original, written
+// DELF-style exam practice: listening, reading, writing and speaking. The content is original, written
 // to the task formats of the current DELF tout public papers.
 
 export type DelfLevel = 'a1' | 'a2' | 'b1' | 'b2';
@@ -31,6 +30,24 @@ export interface ListeningDoc {
   plays: 1 | 2;
   script: ListeningLine[];
   questions: ListeningQuestion[];
+}
+
+export type ReadingQuestion = ListeningQuestion;
+
+export interface ReadingDoc {
+  id: string;
+  level: DelfLevel;
+  title: string;
+  genre: string;
+  situation: string;
+  passage: string;
+  /** Suggested time for this individual practice document. */
+  timeMinutes: number;
+  questions: ReadingQuestion[];
+}
+
+export interface ReadingResult extends ListeningResult {
+  answers: (string | undefined)[];
 }
 
 export interface WritingTask {
@@ -154,9 +171,10 @@ export interface MockExamResult {
   listening: MockSectionScore;
   writing: MockSectionScore;
   speaking: MockSectionScore;
-  /** Reading isn't in the app; the learner may enter a score from an official sample paper. */
+  /** Out of 25. Legacy mocks may have no reading score. */
   reading: number | null;
   listeningDocIds: string[];
+  readingDocIds?: string[];
   writingTaskIds: string[];
   speakingTaskId: string;
 }

@@ -5,6 +5,9 @@ import { REVEAL } from '../../utils/motion';
 import {
   ChevronLeft, ChevronRight, ChevronDown, Headphones, PenLine, Mic, BookOpen, ClipboardCheck, ExternalLink, Sparkles, Timer,
 } from 'lucide-react';
+import { getReadingDoc } from '../../data/exam/reading';
+import { ReadingDocument } from '../../components/exam/ReadingDocument';
+import { ReadingClock } from '../../components/exam/ReadingClock';
 import { getListeningDoc } from '../../data/exam/listening';
 import { getWritingTask } from '../../data/exam/writing';
 import { getSpeakingTask } from '../../data/exam/speaking';
@@ -21,6 +24,7 @@ import { useConversationStore } from '../../stores/conversationStore';
 import { useTestStore } from '../../stores/testStore';
 import { useProgressStore } from '../../stores/progressStore';
 import { evaluateWriting } from '../../lib/gemini';
+import { gradeReading } from '../../utils/readingGrade';
 import { gradeListening } from '../../utils/listeningGrade';
 import { todayString } from '../../utils/streak';
 import {
@@ -36,6 +40,7 @@ const LEVELS: DelfLevel[] = ['a1', 'a2', 'b1', 'b2'];
 type Stage =
   | { kind: 'intro' }
   | { kind: 'listening'; doc: number }
+  | { kind: 'reading'; doc: number }
   | { kind: 'writing'; task: number }
   | { kind: 'speaking' }
   | { kind: 'collecting' }
@@ -79,6 +84,7 @@ export function MockExam() {
   const [stage, setStage] = useState<Stage>({ kind: 'intro' });
   const [paper, setPaper] = useState<MockPaper | null>(null);
   const [answers, setAnswers] = useState<(string | undefined)[][]>([]);
+  const [readingAnswers, setReadingAnswers] = useState<(string | undefined)[][]>([]);
   const [texts, setTexts] = useState<WrittenText[]>([]);
   const [writingEvals, setWritingEvals] = useState<(WritingEvaluation | null)[]>([]);
   const [selfBands, setSelfBands] = useState(MIDDLE_BANDS);
@@ -99,6 +105,7 @@ export function MockExam() {
   useEffect(() => { window.scrollTo({ top: 0 }); }, [stage]);
 
   const docs = useMemo(() => paper?.listeningDocIds.map(id => getListeningDoc(id)!).filter(Boolean) ?? [], [paper]);
+  const readingDocs = useMemo(() => paper?.readingDocIds.map(id => getReadingDoc(id)!).filter(Boolean) ?? [], [paper]);
   const tasks = useMemo(() => paper?.writingTaskIds.map(id => getWritingTask(id)!).filter(Boolean) ?? [], [paper]);
   const speakingTask = paper ? getSpeakingTask(paper.speakingTaskId) : undefined;
   const result = resultId ? mockResults.find(r => r.id === resultId) ?? null : null;
@@ -107,6 +114,7 @@ export function MockExam() {
     const p = pickMockPaper(level, mockResults.filter(r => r.level === level));
     setPaper(p);
     setAnswers(p.listeningDocIds.map(() => []));
+    setReadingAnswers(p.readingDocIds.map(() => []));
     setTexts([]);
     setWritingEvals([]);
     setRecordings([]);
@@ -164,6 +172,12 @@ export function MockExam() {
       id: `listening-${stamp}-${i}`, docId: d.id, date, mode: 'exam',
       correct: graded[i].filter(Boolean).length, total: d.questions.length,
     }));
+    const readingGraded = readingDocs.map((d, i) => gradeReading(d.questions, readingAnswers[i] ?? []));
+    readingDocs.forEach((d, i) => store.addReadingResult({
+      id: `reading-${stamp}-${i}`, docId: d.id, date, mode: 'exam',
+      correct: readingGraded[i].filter(Boolean).length, total: d.questions.length,
+      answers: readingAnswers[i] ?? [],
+    }));
     const writing = writingEvals.map(e => e!);
     tasks.forEach((t, i) => store.addWritingSubmission({
       id: `writing-${stamp}-${i}`, taskId: t.id, date, text: texts[i].text,
@@ -183,8 +197,9 @@ export function MockExam() {
       listening: { score: listeningScore(correct, total), source: 'auto' },
       writing: { score: writingScore(writing), source: writing.every(e => e.source === 'ai') ? 'ai' : 'self' },
       speaking: { score: toOutOf25(speaking.score, speaking.maxScore), source: speaking.source },
-      reading: null,
+      reading: listeningScore(readingGraded.flat().filter(Boolean).length, readingGraded.flat().length),
       listeningDocIds: paper.listeningDocIds,
+      readingDocIds: paper.readingDocIds,
       writingTaskIds: paper.writingTaskIds,
       speakingTaskId: paper.speakingTaskId,
     };
@@ -206,7 +221,7 @@ export function MockExam() {
           </Link>
           <h1 className="text-2xl font-bold text-primary">Mock exam</h1>
           <p className="text-sm text-secondary mt-1">
-            A full paper in exam conditions, in the order of the real one. No replays, no hints, no feedback until the end.
+            An original practice paper covering all four skills, in the order of the real one. No replays, no hints, no feedback until the end.
           </p>
         </div>
 
@@ -221,11 +236,11 @@ export function MockExam() {
         <div className="inset-group">
           {[
             { icon: Headphones, name: 'Compréhension de l’oral', detail: `${minutes.listening} min · about 4 recordings` },
-            { icon: BookOpen, name: 'Compréhension des écrits', detail: 'Not in the app · add your score from an official sample paper', muted: true },
+            { icon: BookOpen, name: 'Compréhension des écrits', detail: `${minutes.reading} min · passages and comprehension questions` },
             { icon: PenLine, name: 'Production écrite', detail: `${minutes.writing} min${level === 'a2' ? ' · two texts' : ''}` },
             { icon: Mic, name: 'Production orale', detail: 'Preparation, then the whole speaking paper' },
-          ].map(({ icon: Icon, name, detail, muted }, i) => (
-            <div key={name} className="inset-row gap-3" style={{ borderTop: i > 0 ? '0.5px solid var(--hairline)' : 'none', opacity: muted ? 0.6 : 1 }}>
+          ].map(({ icon: Icon, name, detail }, i) => (
+            <div key={name} className="inset-row gap-3" style={{ borderTop: i > 0 ? '0.5px solid var(--hairline)' : 'none' }}>
               <Icon size={16} className="text-muted flex-shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-primary">{name}</p>
@@ -236,7 +251,7 @@ export function MockExam() {
         </div>
 
         <p className="text-xs text-muted px-1">
-          Set aside about {minutes.listening + minutes.writing + (level === 'b2' ? 45 : 25)} minutes somewhere you can speak
+          Set aside about {minutes.listening + minutes.reading + minutes.writing + (level === 'b2' ? 45 : 25)} minutes somewhere you can speak
           out loud. {apiKey
             ? 'Writing and speaking are marked by Gemini at the end.'
             : <>Without a Gemini key you mark the writing and speaking yourself at the end. <Link to="/settings" style={{ color: 'var(--accent)' }}>Add one in Settings</Link>.</>}
@@ -254,7 +269,7 @@ export function MockExam() {
                   <button
                     key={r.id}
                     type="button"
-                    onClick={() => { setResultId(r.id); setPaper({ level: r.level, listeningDocIds: r.listeningDocIds, writingTaskIds: r.writingTaskIds, speakingTaskId: r.speakingTaskId }); setStage({ kind: 'results' }); }}
+                    onClick={() => { setResultId(r.id); setPaper({ level: r.level, listeningDocIds: r.listeningDocIds, readingDocIds: r.readingDocIds ?? [], writingTaskIds: r.writingTaskIds, speakingTaskId: r.speakingTaskId }); setStage({ kind: 'results' }); }}
                     className="inset-row w-full justify-between cursor-pointer text-left"
                     style={{ background: 'transparent', border: 'none', borderTop: i > 0 ? '0.5px solid var(--hairline)' : 'none' }}
                   >
@@ -304,13 +319,31 @@ export function MockExam() {
               }))}
             />
             <Button
-              onClick={() => setStage(isLast ? { kind: 'writing', task: 0 } : { kind: 'listening', doc: stage.doc + 1 })}
+              onClick={() => setStage(isLast ? { kind: 'reading', doc: 0 } : { kind: 'listening', doc: stage.doc + 1 })}
               className="w-full"
             >
-              {isLast ? 'Finish listening — on to writing' : 'Next recording'} <ChevronRight size={15} />
+              {isLast ? 'Finish listening — on to reading' : 'Next recording'} <ChevronRight size={15} />
             </Button>
           </div>
         );
+      })()}
+
+      {stage.kind === 'reading' && (() => {
+        const doc = readingDocs[stage.doc];
+        const last = stage.doc === readingDocs.length - 1;
+        return <div className="space-y-4">
+          <ReadingClock key="mock-reading" minutes={MOCK_MINUTES[paper.level].reading} label={`Compréhension des écrits · ${stage.doc + 1}/${readingDocs.length}`} onExpire={() => setStage({ kind: 'writing', task: 0 })} />
+          <div><h1 className="text-xl font-bold text-primary">{doc.title}</h1><p className="text-sm text-secondary mt-1" lang="fr">{doc.situation}</p></div>
+          <ReadingDocument doc={doc} answers={readingAnswers[stage.doc] ?? []} onAnswer={(q, value) => setReadingAnswers(prev => prev.map((answers, i) => {
+            if (i !== stage.doc) return answers;
+            const next = [...answers]; next[q] = value; return next;
+          }))} />
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="secondary" disabled={stage.doc === 0} onClick={() => setStage({ kind: 'reading', doc: stage.doc - 1 })}><ChevronLeft size={15} /> Previous document</Button>
+            <Button className="flex-1" onClick={() => setStage(last ? { kind: 'writing', task: 0 } : { kind: 'reading', doc: stage.doc + 1 })}>{last ? 'Finish reading — on to writing' : 'Next document'} <ChevronRight size={15} /></Button>
+          </div>
+          <p className="text-xs text-muted px-1">You can revisit documents until you finish the section. Unanswered questions score zero.</p>
+        </div>;
       })()}
 
       {stage.kind === 'writing' && (() => {
@@ -386,6 +419,8 @@ export function MockExam() {
           result={result}
           fresh={result.id === justFinishedId}
           docs={docs}
+          readingDocs={readingDocs}
+          readingAnswers={readingAnswers}
           answers={answers}
           tasks={tasks}
           texts={texts}
@@ -404,6 +439,8 @@ interface MockResultsProps {
   /** Just sat, so answers, texts and recordings are still in memory to review. */
   fresh: boolean;
   docs: NonNullable<ReturnType<typeof getListeningDoc>>[];
+  readingDocs: NonNullable<ReturnType<typeof getReadingDoc>>[];
+  readingAnswers: (string | undefined)[][];
   answers: (string | undefined)[][];
   tasks: NonNullable<ReturnType<typeof getWritingTask>>[];
   texts: WrittenText[];
@@ -432,7 +469,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function MockResults({ result, fresh, docs, answers, tasks, texts, writingEvals, speakingEval, recordings, onDone }: MockResultsProps) {
+function MockResults({ result, fresh, docs, answers, readingDocs, readingAnswers, tasks, texts, writingEvals, speakingEval, recordings, onDone }: MockResultsProps) {
   const setMockReading = useExamStore(s => s.setMockReading);
   const [readingDraft, setReadingDraft] = useState(result.reading === null ? '' : String(result.reading));
   const verdict = mockVerdict(result);
@@ -498,7 +535,7 @@ function MockResults({ result, fresh, docs, answers, tasks, texts, writingEvals,
         </p>
       </div>
 
-      <div className="card p-4 space-y-2">
+      {!result.readingDocIds?.length && <div className="card p-4 space-y-2">
         <label htmlFor="reading-score" className="text-sm font-semibold text-primary">Reading score (optional)</label>
         <p className="text-xs text-secondary">
           Do the reading section of an official sample paper, mark it with its answer key, and enter your score to see a full result.
@@ -524,7 +561,7 @@ function MockResults({ result, fresh, docs, answers, tasks, texts, writingEvals,
             Sample papers <ExternalLink size={12} />
           </a>
         </div>
-      </div>
+      </div>}
 
       {fresh && (
         <>
@@ -540,6 +577,10 @@ function MockResults({ result, fresh, docs, answers, tasks, texts, writingEvals,
                 />
               </div>
             ))}
+          </Section>
+
+          <Section title="Review · compréhension des écrits">
+            {readingDocs.map((doc, i) => <div key={doc.id} className="space-y-3"><p className="text-sm font-semibold text-primary">{doc.title}</p><ReadingDocument doc={doc} answers={readingAnswers[i] ?? []} results={gradeReading(doc.questions, readingAnswers[i] ?? [])} onAnswer={() => {}} /></div>)}
           </Section>
 
           <Section title="Review · production écrite">

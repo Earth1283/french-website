@@ -7,6 +7,7 @@ import { UNITS } from '../data/units';
 import { getDeepLessonPages } from '../content/deepLessons';
 import { hasInteractive } from '../interactive/registry';
 import { useProgressStore } from '../stores/progressStore';
+import { useNotebookStore } from '../stores/notebookStore';
 import { useLearnerStore } from '../stores/learnerStore';
 import { FlashCard } from '../components/lesson/FlashCard';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
@@ -427,9 +428,14 @@ export function Lesson() {
                 advance(false);
               };
 
-              const captureWrong = () => {
+              const captureWrong = (answerGiven?: string) => {
                 if (!isRetry) {
                   recordExercise(lesson.id, exerciseIndex, false);
+                  useNotebookStore.getState().recordMistake({
+                    id: `lesson:${lesson.id}:${exerciseIndex}`, source: 'lesson', sourceTitle: lesson.title,
+                    sourceHref: `/unit/${unit.slug}/lesson/${lesson.id}`, prompt: ex.prompt,
+                    original: answerGiven ?? '', corrected: ex.answer, explanation: ex.explanation ?? '', exercise: ex,
+                  });
                   setMissedExercises(prev => [...prev, { prompt: ex.prompt, answer: ex.answer, explanation: ex.explanation }]);
                 }
                 advance(!isRetry);

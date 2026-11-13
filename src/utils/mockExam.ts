@@ -1,14 +1,15 @@
+import { READING_DOCS, READING_MINUTES } from '../data/exam/reading';
 import { LISTENING_DOCS } from '../data/exam/listening';
 import { WRITING_TASKS } from '../data/exam/writing';
 import { SPEAKING_TASKS } from '../data/exam/speaking';
 import { passesDelf, readingNeededToPass, toOutOf25 } from '../data/exam/rubric';
 import type { DelfLevel, MockExamResult } from '../types/exam';
 
-export const MOCK_MINUTES: Record<DelfLevel, { listening: number; writing: number }> = {
-  a1: { listening: 20, writing: 30 },
-  a2: { listening: 25, writing: 45 },
-  b1: { listening: 25, writing: 45 },
-  b2: { listening: 30, writing: 60 },
+export const MOCK_MINUTES: Record<DelfLevel, { listening: number; reading: number; writing: number }> = {
+  a1: { reading: READING_MINUTES.a1, listening: 20, writing: 30 },
+  a2: { reading: READING_MINUTES.a2, listening: 25, writing: 45 },
+  b1: { reading: READING_MINUTES.b1, listening: 25, writing: 45 },
+  b2: { reading: READING_MINUTES.b2, listening: 30, writing: 60 },
 };
 
 export function delfLevelFromPlacement(cefr: string | undefined): DelfLevel {
@@ -26,6 +27,7 @@ const WRITING_COUNT: Record<DelfLevel, number> = { a1: 1, a2: 2, b1: 1, b2: 1 };
 export interface MockPaper {
   level: DelfLevel;
   listeningDocIds: string[];
+  readingDocIds: string[];
   writingTaskIds: string[];
   speakingTaskId: string;
 }
@@ -39,7 +41,7 @@ function pick<T>(items: T[], n: number, random: () => number): T[] {
 
 /** Prefers items the learner hasn't seen in earlier mocks. */
 export function pickMockPaper(level: DelfLevel, previous: MockExamResult[] = [], random: () => number = Math.random): MockPaper {
-  const seen = new Set(previous.flatMap(r => [...r.listeningDocIds, ...r.writingTaskIds, r.speakingTaskId]));
+  const seen = new Set(previous.flatMap(r => [...r.listeningDocIds, ...(r.readingDocIds ?? []), ...r.writingTaskIds, r.speakingTaskId]));
   const fresh = <T extends { id: string }>(items: T[], n: number) => {
     const unseen = items.filter(i => !seen.has(i.id));
     const chosen = pick(unseen, n, random);
@@ -50,6 +52,7 @@ export function pickMockPaper(level: DelfLevel, previous: MockExamResult[] = [],
   const speaking = fresh(SPEAKING_TASKS.filter(t => t.level === level), 1);
   return {
     level,
+    readingDocIds: READING_DOCS.filter(d => d.level === level).map(d => d.id),
     listeningDocIds: LISTENING_DOCS.filter(d => listening.includes(d)).map(d => d.id),
     writingTaskIds: writing.map(t => t.id),
     speakingTaskId: speaking[0]?.id ?? '',

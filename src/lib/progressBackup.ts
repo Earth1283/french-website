@@ -1,8 +1,20 @@
+import type { ReadingResult } from '../types/exam';
+import { useNotebookStore } from '../stores/notebookStore';
+import { isMistake } from '../utils/notebook';
 import { useProgressStore } from '../stores/progressStore';
 import { useTestStore } from '../stores/testStore';
 import { useLearnerStore } from '../stores/learnerStore';
 import { useExamStore } from '../stores/examStore';
 import { useConversationStore } from '../stores/conversationStore';
+
+function isReadingResult(value: unknown): value is ReadingResult {
+  if (!value || typeof value !== 'object') return false;
+  const r = value as ReadingResult;
+  return [r.id, r.docId, r.date].every(v => typeof v === 'string')
+    && (r.mode === 'exam' || r.mode === 'practice')
+    && Number.isInteger(r.total) && r.total > 0 && Number.isInteger(r.correct) && r.correct >= 0 && r.correct <= r.total
+    && Array.isArray(r.answers) && r.answers.every(a => a == null || typeof a === 'string');
+}
 
 export function exportProgress() {
   const progressState = useProgressStore.getState();
@@ -11,7 +23,8 @@ export function exportProgress() {
   const examState = useExamStore.getState();
 
   const data = {
-    version: 4,
+    version: 5,
+    notebook: { mistakes: useNotebookStore.getState().mistakes, historyImported: useNotebookStore.getState().historyImported },
     completedLessons: progressState.completedLessons,
     xp: progressState.xp,
     streak: progressState.streak,
@@ -28,6 +41,7 @@ export function exportProgress() {
     examPrep: {
       level: examState.level,
       listeningResults: examState.listeningResults,
+      readingResults: examState.readingResults,
       writingSubmissions: examState.writingSubmissions,
       speakingAttempts: examState.speakingAttempts,
       mockResults: examState.mockResults,
@@ -81,10 +95,16 @@ export function importProgress(file: File): Promise<'ok' | 'error'> {
           useLearnerStore.setState({ exerciseStats: data.exerciseStats });
         }
 
+        useNotebookStore.setState({
+          mistakes: Array.isArray(data.notebook?.mistakes) ? data.notebook.mistakes.filter(isMistake) : [],
+          historyImported: data.notebook?.historyImported === true,
+        });
+
         const exam = data.examPrep;
         if (exam && typeof exam === 'object') {
           useExamStore.setState({
             ...(['a1', 'a2', 'b1', 'b2'].includes(exam.level) ? { level: exam.level } : {}),
+            ...(Array.isArray(exam.readingResults) ? { readingResults: exam.readingResults.filter(isReadingResult).map((r: ReadingResult) => ({ ...r, answers: r.answers.map(a => a ?? undefined) })) } : { readingResults: [] }),
             ...(Array.isArray(exam.listeningResults) ? { listeningResults: exam.listeningResults } : {}),
             ...(Array.isArray(exam.writingSubmissions) ? { writingSubmissions: exam.writingSubmissions } : {}),
             ...(Array.isArray(exam.speakingAttempts) ? { speakingAttempts: exam.speakingAttempts } : {}),

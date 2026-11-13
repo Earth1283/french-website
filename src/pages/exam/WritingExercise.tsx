@@ -250,6 +250,7 @@ export function WritingExercise() {
             </>
           )}
 
+          <Link to="/notebook" className="text-sm font-medium inline-flex items-center gap-1 no-underline" style={{ color: 'var(--accent)' }}>Open mistakes notebook →</Link>
           <Disclosure title={`Your text · ${shown.wordCount} mots`} defaultOpen={!shown.evaluation}>
             <p className="text-sm text-primary whitespace-pre-wrap leading-relaxed" lang="fr">{shown.text}</p>
           </Disclosure>

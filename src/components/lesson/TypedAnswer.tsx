@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import type { Exercise } from '../../types';
 import { Button } from '../ui/Button';
 import { speak } from '../../utils/speech';
-import { checkAnswer } from '../../utils/fuzzy';
+import { checkAnswer, type AnswerResult } from '../../utils/fuzzy';
 import { checkSpoken } from '../../utils/spokenAnswer';
 import { listenErrorMessage } from '../../utils/recognition';
 import { useSpeechInput } from '../../hooks/useSpeechInput';
@@ -17,6 +17,7 @@ export interface TypedExerciseProps {
   /** Pause on a miss or a near-miss to show the answer and explanation until the learner continues. */
   teach?: boolean;
   speech?: boolean;
+  gradeAnswer?: (given: string, expected: string) => AnswerResult;
 }
 
 interface TypedAnswerProps extends TypedExerciseProps {
@@ -53,7 +54,7 @@ const STATUS_ICON: Record<Exclude<Status, 'idle'>, React.ReactNode> = {
   wrong: <XCircle size={18} style={{ color: 'var(--danger)' }} />,
 };
 
-export function TypedAnswer({ exercise, onCorrect, onWrong, teach = false, speech = false, label, placeholder, checkLabel, multiline = false }: TypedAnswerProps) {
+export function TypedAnswer({ exercise, onCorrect, onWrong, teach = false, speech = false, gradeAnswer = checkAnswer, label, placeholder, checkLabel, multiline = false }: TypedAnswerProps) {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [almostHeading, setAlmostHeading] = useState('');
@@ -71,7 +72,7 @@ export function TypedAnswer({ exercise, onCorrect, onWrong, teach = false, speec
 
   const check = () => {
     if (!value.trim() || status !== 'idle') return;
-    const result = checkAnswer(value.trim(), exercise.answer);
+    const result = gradeAnswer(value.trim(), exercise.answer);
     setAlmostHeading(`Accepted — watch the ${result === 'accent' ? 'accents' : 'spelling'}`);
     finish(result === 'accent' ? 'typo' : result, value.trim());
   };

@@ -1,3 +1,4 @@
+import { useNotebookStore } from '../stores/notebookStore';
 import { useMemo } from 'react';
 import { UNITS } from '../data/units';
 import { buildReviewSession } from '../utils/reviewQueue';
@@ -13,16 +14,16 @@ export function useHomeInsights({
   srsData: Record<string, SRSCard>;
   bookmarkedLessons: string[];
 }) {
+  const mistakes = useNotebookStore(s => s.mistakes);
   const { dueCount, nextReviewDate } = useMemo(() => {
-    if (completedLessons.length === 0) return { dueCount: 0, nextReviewDate: null };
     const today = todayString();
-    const dueCount = buildReviewSession(completedLessons, srsData, today).items.length;
+    const dueCount = buildReviewSession(completedLessons, srsData, today, mistakes).items.length;
     const upcoming = Object.entries(srsData)
-      .filter(([key, card]) => completedLessons.includes(key.split('::')[0]) && card.nextReview > today)
+      .filter(([key, card]) => (completedLessons.includes(key.split('::')[0]) || mistakes.some(m => m.inReview && !m.resolved && key === `mistake::${m.id}`)) && card.nextReview > today)
       .map(([, card]) => card.nextReview);
     const nextReviewDate = upcoming.length > 0 ? upcoming.reduce((a, b) => (a < b ? a : b)) : null;
     return { dueCount, nextReviewDate };
-  }, [completedLessons, srsData]);
+  }, [completedLessons, srsData, mistakes]);
 
   const bookmarkDetails = useMemo(() => {
     return bookmarkedLessons.flatMap(lessonId => {
