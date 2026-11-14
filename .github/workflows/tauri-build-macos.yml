@@ -1,0 +1,136 @@
+name: Build Desktop App (macOS)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # Finds the draft release for this app version, or creates it. Both desktop
+  # workflows run this under one shared concurrency group, so only one of them
+  # can create the draft; the other waits and then reuses it.
+  release:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: desktop-release-draft
+      cancel-in-progress: false
+    outputs:
+      id: ${{ steps.draft.outputs.id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find or create draft release
+        id: draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BODY: |
+            Desktop build of Bonjour Survival. Download the asset matching your platform:
+
+            - macOS Apple Silicon: `.dmg` (aarch64)
+            - macOS Intel: `.dmg` (x64)
+            - Windows: `.msi` or `-setup.exe`
+            - Linux: `.AppImage`, `.deb`, or `.rpm` (amd64/arm64)
+        run: |
+          VERSION=$(jq -r .version src-tauri/tauri.conf.json)
+          TAG="app-v$VERSION"
+          ID=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            --jq ".[] | select(.draft and .tag_name == \"$TAG\") | .id" | head -n1)
+          if [ -z "$ID" ]; then
+            ID=$(gh api "repos/$GITHUB_REPOSITORY/releases" \
+              -f tag_name="$TAG" \
+              -f target_commitish="$GITHUB_SHA" \
+              -f name="Bonjour Survival v$VERSION" \
+              -f body="$RELEASE_BODY" \
+              -F draft=true -F prerelease=false --jq .id)
+            echo "Created draft release $TAG ($ID)"
+          else
+            echo "Reusing draft release $TAG ($ID)"
+          fi
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-arm64
+            os: macos-latest # Apple Silicon
+            rust-target: aarch64-apple-darwin
+          - name: macos-x64
+            os: macos-15-intel # last GitHub-hosted Intel macOS image
+            rust-target: x86_64-apple-darwin
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      HAS_APPLE_CERT: ${{ secrets.APPLE_CERTIFICATE != '' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.rust-target }}
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Only runs when the APPLE_CERTIFICATE secret is configured — until then,
+      # builds are produced unsigned (see README for how to add signing).
+      - name: Import Apple signing certificate
+        if: runner.os == 'macOS' && env.HAS_APPLE_CERT == 'true'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          rm certificate.p12
+
+      - name: Build and release Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: powers the ambient Landing / Focus backdrops (see deploy.yml).
+          VITE_UNSPLASH_ACCESS_KEY: ${{ secrets.VITE_UNSPLASH_ACCESS_KEY }}
+          # macOS signing + notarization — no-ops unless the secrets above are set.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          releaseId: ${{ needs.release.outputs.id }}
+          args: --target ${{ matrix.rust-target }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonjour-survival-${{ matrix.name }}
+          path: |
+            src-tauri/target/${{ matrix.rust-target }}/release/bundle/**
+          if-no-files-found: error
