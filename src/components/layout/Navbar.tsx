@@ -44,7 +44,12 @@ export function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
         <motion.div whileTap={{ scale: 0.97 }} transition={TAP_TRANSITION} className="shrink-0">
-          <Link to="/learn" className="flex items-center gap-2 no-underline whitespace-nowrap">
+          <Link
+            to="/"
+            aria-label="Bonjour Survival, back to the start screen"
+            title="Back to the start screen"
+            className="flex items-center gap-2 no-underline whitespace-nowrap"
+          >
             <FrenchFlag size={20} className="rounded-[2px]" />
             <span className="font-bold text-[1.05rem] text-primary font-display">
               Bonjour Survival
